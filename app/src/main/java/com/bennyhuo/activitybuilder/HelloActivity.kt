@@ -3,6 +3,7 @@ package com.bennyhuo.activitybuilder
 import android.app.Activity
 import android.os.Bundle
 import com.bennyhuo.annotations.GenerateBuilder
+import com.bennyhuo.annotations.Optional
 import com.bennyhuo.annotations.Required
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -17,6 +18,16 @@ class HelloActivity: Activity() {
 
     @Required("age")
     var age: Int = 0
+
+    @Optional("title")
+    lateinit var title: String
+
+    @Optional("subTitle")
+    lateinit var subTitle: String
+
+    @Optional("details")
+    lateinit var details: String
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

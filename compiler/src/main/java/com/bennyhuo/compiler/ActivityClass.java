@@ -1,7 +1,5 @@
 package com.bennyhuo.compiler;
 
-import com.sun.tools.javac.code.Symbol;
-
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -14,19 +12,34 @@ import javax.lang.model.element.TypeElement;
 
 public class ActivityClass {
     private TypeElement type;
-    TreeSet<ParamBinding> bindings = new TreeSet<>();
+    TreeSet<ParamBinding> optionalBindings = new TreeSet<>();
+    TreeSet<ParamBinding> requiredBindings = new TreeSet<>();
 
     public ActivityClass(TypeElement type) {
         this.type = type;
     }
 
-    public void addSymbol(Symbol.VarSymbol symbol){
-        System.out.println("Add Symbol: " + symbol);
-        bindings.add(new ParamBinding(symbol));
+    public void addSymbol(ParamBinding binding) {
+        if (binding.isRequired()) {
+            requiredBindings.add(binding);
+        } else {
+            optionalBindings.add(binding);
+        }
     }
 
-    public Set<ParamBinding> getBindings(){
-        return bindings;
+    public Set<ParamBinding> getAllBindings(){
+        Set<ParamBinding> set = new TreeSet<>();
+        set.addAll(requiredBindings);
+        set.addAll(optionalBindings);
+        return set;
+    }
+
+    public Set<ParamBinding> getRequiredBindings(){
+        return requiredBindings;
+    }
+
+    public Set<ParamBinding> getOptionalBindings() {
+        return optionalBindings;
     }
 
     public TypeElement getType() {
