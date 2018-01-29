@@ -105,8 +105,8 @@ public class BuilderProcessor extends AbstractProcessor {
                     note(element, "Field：" + element.getClass() + "； 测试");
                     activityClasses.get(element.getEnclosingElement()).addSymbol((Symbol.VarSymbol) element);
                 }
-                for (Symbol symbol : activityClasses.get(element.getEnclosingElement()).getSymbols()) {
-                    note(element, "Symbol：" + symbol);
+                for (ParamBinding binding : activityClasses.get(element.getEnclosingElement()).getBindings()) {
+                    note(element, "Symbol：" + binding);
                 }
             } catch (Exception e) {
                 logParsingError(element, Required.class, e);
@@ -123,10 +123,10 @@ public class BuilderProcessor extends AbstractProcessor {
             methodBuilder.addStatement("$T intent = new $T(context, $T.class)", intentClass, intentClass, activityClass.getType());
             methodBuilder.addStatement("$T<String, Object> params = new $T<>()", HashMap.class, HashMap.class);
 
-            for (Symbol.VarSymbol symbol : activityClass.getSymbols()) {
-                note(symbol, "VarType：" + symbol.type);
-                String name = symbol.getAnnotation(Required.class).value();
-                methodBuilder.addParameter(ClassName.get(symbol.type), name);
+            for (ParamBinding binding : activityClass.getBindings()) {
+                note(binding.getSymbol(), "VarType：" + binding.getSymbol().type);
+                String name = binding.getName();
+                methodBuilder.addParameter(ClassName.get(binding.getSymbol().type), name);
                 methodBuilder.addStatement("params.put($S, $L)", name, name);
             }
 

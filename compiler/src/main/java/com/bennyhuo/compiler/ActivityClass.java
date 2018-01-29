@@ -2,8 +2,8 @@ package com.bennyhuo.compiler;
 
 import com.sun.tools.javac.code.Symbol;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -14,7 +14,7 @@ import javax.lang.model.element.TypeElement;
 
 public class ActivityClass {
     private TypeElement type;
-    HashSet<Symbol.VarSymbol> symbols = new HashSet<>();
+    TreeSet<ParamBinding> bindings = new TreeSet<>();
 
     public ActivityClass(TypeElement type) {
         this.type = type;
@@ -22,11 +22,11 @@ public class ActivityClass {
 
     public void addSymbol(Symbol.VarSymbol symbol){
         System.out.println("Add Symbol: " + symbol);
-        symbols.add(symbol);
+        bindings.add(new ParamBinding(symbol));
     }
 
-    public Set<Symbol.VarSymbol> getSymbols(){
-        return symbols;
+    public Set<ParamBinding> getBindings(){
+        return bindings;
     }
 
     public TypeElement getType() {
