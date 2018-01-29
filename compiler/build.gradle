@@ -11,3 +11,9 @@ dependencies {
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+
+//region jitpack
+apply plugin: 'com.github.dcendents.android-maven'
+group='com.github.enbandari'
+//endregion
