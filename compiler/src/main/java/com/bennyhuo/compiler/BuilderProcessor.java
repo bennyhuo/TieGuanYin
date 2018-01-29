@@ -4,10 +4,12 @@ import com.bennyhuo.annotations.GenerateBuilder;
 import com.bennyhuo.annotations.Required;
 import com.google.auto.common.SuperficialValidation;
 import com.google.auto.service.AutoService;
+import com.sun.tools.javac.code.Symbol;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -18,6 +20,7 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -30,6 +33,8 @@ import javax.tools.Diagnostic;
 @AutoService(Processor.class)
 public class BuilderProcessor extends AbstractProcessor {
     public static final String TAG = "BuilderProcessor";
+
+    public static final String POSIX = "Builder";
 
     private Elements elementUtils;
     private Types typeUtils;
@@ -71,10 +76,14 @@ public class BuilderProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
+        HashMap<Element, ActivityClass> activityClasses = new HashMap<>();
         for (Element element : env.getElementsAnnotatedWith(GenerateBuilder.class)) {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
-                note(element, element.getKind().name());
+                note(element, element.toString());
+                if (element.getKind().isClass()) {
+                    activityClasses.put(element, new ActivityClass((TypeElement) element));
+                }
             } catch (Exception e) {
                 logParsingError(element, GenerateBuilder.class, e);
             }
@@ -83,24 +92,40 @@ public class BuilderProcessor extends AbstractProcessor {
         for (Element element : env.getElementsAnnotatedWith(Required.class)) {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
-                note(element, element.getKind().name());
+                note(element, "class：" + element.getClass() + "； kind: " + element.getKind());
+                if (element.getKind() == ElementKind.FIELD) {
+                    note(element, "Field：" + element.getClass() + "； 测试");
+                    activityClasses.get(element.getEnclosingElement()).addSymbol((Symbol.VarSymbol) element);
+                }
+                for (Symbol symbol : activityClasses.get(element.getEnclosingElement()).getSymbols()) {
+                    note(element, "Symbol：" + symbol);
+                }
             } catch (Exception e) {
                 logParsingError(element, Required.class, e);
             }
         }
 
-//        for (LayoutBinding binding : bindings) {
+        for (ActivityClass activityClass : activityClasses.values()) {
+//            MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("open")
+//                    .addModifiers(Modifier.PUBLIC)
+//                    .returns(TypeName.VOID)
+//                    .addParameter(ClassName.get("android.content", "Context"), "context");
 
-//            JavaFile file = JavaFile.builder(binding.getPackage(), TypeSpec.classBuilder(simpleName(binding.getType().asType()) + ENDIX).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-//                    .addMethod(MethodSpec.methodBuilder("inflateView").addModifiers(Modifier.PUBLIC).returns(ClassName.get("android.view", "View")).addParameter(ClassName.get("android.content", "Context"), "context")
-//                            .addStatement("return $T.from(context).inflate($L, null)", ClassName.get("android.view", "LayoutInflater"), binding.getLayoutId()).build())
-//                    .build()).build();
+            for (Symbol.VarSymbol symbol : activityClass.getSymbols()) {
+                    note(symbol, "VarType：" + symbol.type);
+            }
+
+//            JavaFile file = JavaFile.builder(activityClass.getPackage(),
+//                    TypeSpec.classBuilder(simpleName(activityClass.getType().asType()) + POSIX)
+//                            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+//                            .addMethod(methodBuilder.build())
+//                            .build()).build();
 //            try {
 //                file.writeTo(filer);
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
-//        }
+        }
         return true;
     }
 
