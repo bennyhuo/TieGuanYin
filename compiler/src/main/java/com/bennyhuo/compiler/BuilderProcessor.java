@@ -2,10 +2,17 @@ package com.bennyhuo.compiler;
 
 import com.bennyhuo.annotations.GenerateBuilder;
 import com.bennyhuo.annotations.Required;
+import com.bennyhuo.utils.IntentUtils;
 import com.google.auto.common.SuperficialValidation;
 import com.google.auto.service.AutoService;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import com.sun.tools.javac.code.Symbol;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
@@ -21,6 +28,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -106,25 +114,36 @@ public class BuilderProcessor extends AbstractProcessor {
         }
 
         for (ActivityClass activityClass : activityClasses.values()) {
-//            MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("open")
-//                    .addModifiers(Modifier.PUBLIC)
-//                    .returns(TypeName.VOID)
-//                    .addParameter(ClassName.get("android.content", "Context"), "context");
+            MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("open")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(TypeName.VOID)
+                    .addParameter(ClassName.get("android.content", "Context"), "context");
+
+            ClassName intentClass = ClassName.get("android.content", "Intent");
+            methodBuilder.addStatement("$T intent = new $T(context, $T.class)", intentClass, intentClass, activityClass.getType());
+            methodBuilder.addStatement("$T<String, Object> params = new $T<>()", HashMap.class, HashMap.class);
 
             for (Symbol.VarSymbol symbol : activityClass.getSymbols()) {
-                    note(symbol, "VarType：" + symbol.type);
+                note(symbol, "VarType：" + symbol.type);
+                String name = symbol.getAnnotation(Required.class).value();
+                methodBuilder.addParameter(ClassName.get(symbol.type), name);
+                methodBuilder.addStatement("params.put($S, $L)", name, name);
             }
 
-//            JavaFile file = JavaFile.builder(activityClass.getPackage(),
-//                    TypeSpec.classBuilder(simpleName(activityClass.getType().asType()) + POSIX)
-//                            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-//                            .addMethod(methodBuilder.build())
-//                            .build()).build();
-//            try {
-//                file.writeTo(filer);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            methodBuilder.addStatement("$T.fillIntent(intent, params)", IntentUtils.class);
+
+            methodBuilder.addStatement("context.startActivity(intent)");
+
+            JavaFile file = JavaFile.builder(activityClass.getPackage(),
+                    TypeSpec.classBuilder(simpleName(activityClass.getType().asType()) + POSIX)
+                            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                            .addMethod(methodBuilder.build())
+                            .build()).build();
+            try {
+                file.writeTo(filer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return true;
     }

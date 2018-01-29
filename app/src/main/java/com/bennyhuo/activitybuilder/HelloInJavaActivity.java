@@ -11,7 +11,7 @@ import com.bennyhuo.annotations.Required;
 @GenerateBuilder
 public class HelloInJavaActivity extends Activity {
 
-    @Required(name = "num")
+    @Required("num")
     int num;
 
 }
