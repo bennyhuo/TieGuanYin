@@ -31,9 +31,9 @@ class HelloActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        name = intent.extras["name"] as String
-        age = intent.extras["age"] as Int
-        title = intent.extras["title"] as String? ?: "No Title"
+//        name = intent.extras["name"] as String
+//        age = intent.extras["age"] as Int
+//        title = intent.extras["title"] as String? ?: "No Title"
         setTitle(title)
         clickMe.text = name + age
     }

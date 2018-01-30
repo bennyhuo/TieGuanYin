@@ -10,7 +10,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         clickMe.setOnClickListener {
-            HelloActivityBuilder.openWithTitle(this, 18, "bennyhuo", "kotlin")
+            HelloActivityBuilder.openWithOptionalTitle(this, 18, "bennyhuo", "kotlin")
         }
     }
 }
