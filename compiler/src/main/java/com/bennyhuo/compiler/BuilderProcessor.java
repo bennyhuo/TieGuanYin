@@ -1,26 +1,15 @@
 package com.bennyhuo.compiler;
 
-import com.bennyhuo.activitybuilder.ActivityBuilder;
-import com.bennyhuo.activitybuilder.OnActivityCreateListener;
 import com.bennyhuo.annotations.GenerateBuilder;
 import com.bennyhuo.annotations.Optional;
 import com.bennyhuo.annotations.Required;
-import com.bennyhuo.utils.BundleUtils;
 import com.google.auto.common.SuperficialValidation;
 import com.google.auto.service.AutoService;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 import com.sun.tools.javac.code.Symbol;
-import com.sun.tools.javac.code.Type;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -33,9 +22,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -47,11 +34,10 @@ import javax.tools.Diagnostic;
 public class BuilderProcessor extends AbstractProcessor {
     public static final String TAG = "BuilderProcessor";
 
-    public static final String POSIX = "Builder";
-
     private Elements elementUtils;
     private Types typeUtils;
     private Filer filer;
+    private ProcessingEnvironment processingEnvironment;
 
     @Override
     public synchronized void init(ProcessingEnvironment env) {
@@ -59,6 +45,7 @@ public class BuilderProcessor extends AbstractProcessor {
         elementUtils = env.getElementUtils();
         typeUtils = env.getTypeUtils();
         filer = env.getFiler();
+        processingEnvironment = env;
     }
 
     @Override
@@ -90,12 +77,20 @@ public class BuilderProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
         HashMap<Element, ActivityClass> activityClasses = new HashMap<>();
+        parse(env, activityClasses);
+
+        for (ActivityClass activityClass : activityClasses.values()) {
+            activityClass.brewJava(filer);
+        }
+        return true;
+    }
+
+    private void parse(RoundEnvironment env, HashMap<Element, ActivityClass> activityClasses) {
         for (Element element : env.getElementsAnnotatedWith(GenerateBuilder.class)) {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
-                note(element, element.toString());
                 if (element.getKind().isClass()) {
-                    activityClasses.put(element, new ActivityClass((TypeElement) element));
+                    activityClasses.put(element, new ActivityClass(processingEnv, (TypeElement) element));
                 }
             } catch (Exception e) {
                 logParsingError(element, GenerateBuilder.class, e);
@@ -106,7 +101,12 @@ public class BuilderProcessor extends AbstractProcessor {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
                 if (element.getKind() == ElementKind.FIELD) {
-                    activityClasses.get(element.getEnclosingElement()).addSymbol(new ParamBinding((Symbol.VarSymbol) element, true));
+                    ActivityClass activityClass = activityClasses.get(element.getEnclosingElement());
+                    if (activityClass == null) {
+                        error(element, "Field " + element + " annotated as Required while " + element.getEnclosingElement() + " not annotated.");
+                    } else {
+                        activityClass.addSymbol(new ParamBinding((Symbol.VarSymbol) element, true));
+                    }
                 }
             } catch (Exception e) {
                 logParsingError(element, Required.class, e);
@@ -117,132 +117,17 @@ public class BuilderProcessor extends AbstractProcessor {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
                 if (element.getKind() == ElementKind.FIELD) {
-                    activityClasses.get(element.getEnclosingElement()).addSymbol(new ParamBinding((Symbol.VarSymbol) element, false));
+                    ActivityClass activityClass = activityClasses.get(element.getEnclosingElement());
+                    if (activityClass == null) {
+                        error(element, "Field " + element + " annotated as Optional while " + element.getEnclosingElement() + " not annotated.");
+                    } else {
+                        activityClass.addSymbol(new ParamBinding((Symbol.VarSymbol) element, false));
+                    }
                 }
             } catch (Exception e) {
                 logParsingError(element, Required.class, e);
             }
         }
-
-        for (ActivityClass activityClass : activityClasses.values()) {
-            MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("open")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(TypeName.VOID)
-                    .addParameter(ClassName.get("android.content", "Context"), "context")
-                    .addStatement("$T.INSTANCE.init(context)", ActivityBuilder.class);
-
-            MethodSpec.Builder injectMethodBuilder = MethodSpec.methodBuilder("inject")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(TypeName.VOID);
-
-            MethodSpec.Builder onActivityCreatedMethodBuilder = MethodSpec.methodBuilder("onActivityCreated")
-                    .addAnnotation(Override.class)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(ClassName.get("android.app", "Activity"), "activity")
-                    .addParameter(ClassName.get("android.os", "Bundle"), "savedInstanceState")
-                    .returns(TypeName.VOID)
-                    .beginControlFlow("if(activity instanceof $T)", activityClass.getType())
-                    .addStatement("$T typedActivity = ($T) activity", activityClass.getType(), activityClass.getType())
-                    .addStatement("$T extras = activity.getIntent().getExtras()", ClassName.get("android.os", "Bundle"));
-
-
-            ClassName intentClass = ClassName.get("android.content", "Intent");
-            methodBuilder.addStatement("$T intent = new $T(context, $T.class)", intentClass, intentClass, activityClass.getType());
-
-            for (ParamBinding binding : activityClass.getRequiredBindings()) {
-                note(binding.getSymbol(), "VarType：" + binding.getSymbol().type);
-                String name = binding.getName();
-                methodBuilder.addParameter(ClassName.get(binding.getSymbol().type), name);
-                methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
-
-                Set<Modifier> modifiers = binding.getSymbol().getModifiers();
-                Type type = binding.getSymbol().type;
-                TypeName typeName;
-                note(binding.getSymbol(), type.getClass().toString());
-                if (type.isPrimitive()) {
-                    typeName = Utils.toWrapperType(type);
-                } else {
-                    typeName = TypeName.get(type);
-                }
-                if (modifiers.contains(Modifier.PRIVATE)) {
-                    onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($T.<$T>get(extras, $S))", Utils.capitalize(name), BundleUtils.class, typeName, name);
-                } else {
-                    onActivityCreatedMethodBuilder.addStatement("typedActivity.$L = $T.<$T>get(extras, $S)", name, BundleUtils.class, typeName, name);
-                }
-            }
-
-            MethodSpec overloadBaseMethod = methodBuilder.build();
-
-            for (ParamBinding optionalBinding : activityClass.optionalBindings) {
-                String name = optionalBinding.getName();
-                methodBuilder.addParameter(ClassName.get(optionalBinding.getSymbol().type), name);
-                methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
-
-                Set<Modifier> modifiers = optionalBinding.getSymbol().getModifiers();
-                Type type = optionalBinding.getSymbol().type;
-                TypeName typeName;
-                note(optionalBinding.getSymbol(), type.getClass().toString());
-                if (type.isPrimitive()) {
-                    typeName = Utils.toWrapperType(type);
-                } else {
-                    typeName = TypeName.get(type);
-                }
-                if (modifiers.contains(Modifier.PRIVATE)) {
-                    onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($T.<$T>get(extras, $S))", Utils.capitalize(name), BundleUtils.class, typeName, name);
-                } else {
-                    onActivityCreatedMethodBuilder.addStatement("typedActivity.$L = $T.<$T>get(extras, $S)", name, BundleUtils.class, typeName, name);
-                }
-            }
-
-            methodBuilder.addStatement("context.startActivity(intent)")
-                    .addStatement("inject()");
-
-
-            onActivityCreatedMethodBuilder.addStatement("$T.INSTANCE.removeOnActivityCreateListener(this)", ActivityBuilder.class)
-                    .endControlFlow();
-            TypeSpec onActivityCreateListenerType = TypeSpec.anonymousClassBuilder("")
-                    .addSuperinterface(OnActivityCreateListener.class)
-                    .addMethod(onActivityCreatedMethodBuilder.build())
-                    .build();
-            injectMethodBuilder.addStatement("$T.INSTANCE.addOnActivityCreateListener($L)", ActivityBuilder.class, onActivityCreateListenerType);
-
-
-            TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName(activityClass.getType().asType()) + POSIX)
-                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                    .addMethod(injectMethodBuilder.build())
-                    .addMethod(methodBuilder.build());
-
-            ArrayList<ParamBinding> optionalBindings = new ArrayList<>(activityClass.getOptionalBindings());
-            int size = optionalBindings.size();
-            //选择长度为 i 的参数列表
-            for (int step = 1; step < size; step++) {
-                for (int start = 0; start < size; start++) {
-                    ArrayList<String> names = new ArrayList<>();
-                    MethodSpec.Builder builder = overloadBaseMethod.toBuilder();
-                    for(int index = start; index < step + start; index++){
-                        ParamBinding binding = optionalBindings.get(index % size);
-                        String name = binding.getName();
-                        builder.addParameter(ClassName.get(binding.getSymbol().type), name);
-                        builder.addStatement("intent.putExtra($S, $L)", name, name);
-                        names.add(Utils.capitalize(name));
-                    }
-                    builder.addStatement("context.startActivity(intent)").addStatement("inject()");
-                    typeBuilder.addMethod(Utils.copyMethodWithNewName("openWithOptional" + Utils.joinString(names, "And"), builder.build()).build());
-                }
-            }
-
-            if (size > 0) {
-                typeBuilder.addMethod(overloadBaseMethod.toBuilder().addStatement("context.startActivity(intent)").addStatement("inject()").build());
-            }
-
-            JavaFile file = JavaFile.builder(activityClass.getPackage(), typeBuilder.build()).build();
-            try {
-                file.writeTo(filer);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return true;
     }
 
     private void logParsingError(Element element, Class<? extends Annotation> annotation,
@@ -266,22 +151,5 @@ public class BuilderProcessor extends AbstractProcessor {
         }
 
         processingEnv.getMessager().printMessage(kind, message, element);
-    }
-
-    /**
-     * Uses both {@link Types#erasure} and string manipulation to strip any generic types.
-     */
-    private String doubleErasure(TypeMirror elementType) {
-        String name = typeUtils.erasure(elementType).toString();
-        int typeParamStart = name.indexOf('<');
-        if (typeParamStart != -1) {
-            name = name.substring(0, typeParamStart);
-        }
-        return name;
-    }
-
-    private String simpleName(TypeMirror elementType) {
-        String name = doubleErasure(elementType);
-        return name.substring(name.lastIndexOf(".") + 1);
     }
 }
