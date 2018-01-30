@@ -12,7 +12,6 @@ dependencies {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-
 //region jitpack
 apply plugin: 'maven'
 group='com.github.enbandari'
