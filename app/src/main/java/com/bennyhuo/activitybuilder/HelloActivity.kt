@@ -7,6 +7,7 @@ import com.bennyhuo.annotations.Optional
 import com.bennyhuo.annotations.Required
 import com.bennyhuo.factory.ObjectCreator
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.Serializable
 
 /**
  * Created by benny on 1/29/18.
@@ -30,10 +31,10 @@ class HelloActivity: AppCompatActivity() {
     lateinit var subTitle: String
 
     @Optional(creator = DetailsCreator::class)
-    lateinit var details: String
+    lateinit var details: Serializable
 
-    class DetailsCreator: ObjectCreator<String>{
-        override fun create(cls: Class<String>):String {
+    class DetailsCreator: ObjectCreator<Serializable>{
+        override fun create(cls: Class<Serializable>):Serializable {
             return "details..."
         }
     }

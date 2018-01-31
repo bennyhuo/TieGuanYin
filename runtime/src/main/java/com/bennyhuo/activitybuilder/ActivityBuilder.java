@@ -2,6 +2,8 @@ package com.bennyhuo.activitybuilder;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -74,5 +76,21 @@ public class ActivityBuilder {
 
     public void removeOnActivityCreateListener(OnActivityCreateListener onActivityCreateListener){
         this.onActivityCreateListeners.remove(onActivityCreateListener);
+    }
+
+    public void setListenerForResult(Activity activity, OnActivityResultListener onActivityResultListener) {
+        FragmentManager fragmentManager = activity.getFragmentManager();
+        Fragment fragment = fragmentManager.findFragmentByTag(ResultFragment.TAG);
+        ResultFragment resultFragment;
+        if (fragment != null && fragment instanceof ResultFragment) {
+            resultFragment = (ResultFragment) fragment;
+        } else {
+            resultFragment = new ResultFragment();
+            fragmentManager.beginTransaction()
+                    .remove(fragment)
+                    .add(resultFragment, ResultFragment.TAG)
+                    .commitAllowingStateLoss();
+        }
+        resultFragment.setOnActivityResultListener(onActivityResultListener);
     }
 }

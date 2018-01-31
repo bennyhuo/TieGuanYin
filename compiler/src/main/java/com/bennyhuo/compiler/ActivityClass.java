@@ -1,5 +1,6 @@
 package com.bennyhuo.compiler;
 
+import com.bennyhuo.annotations.GenerateBuilder;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
@@ -31,10 +32,16 @@ public class ActivityClass {
     private TypeElement type;
     private TreeSet<RequiredField> optionalBindings = new TreeSet<>();
     private TreeSet<RequiredField> requiredBindings = new TreeSet<>();
+    private ActivityResultClass activityResultClass;
 
     public ActivityClass(ProcessingEnvironment env, TypeElement type) {
         this.env = env;
         this.type = type;
+
+        GenerateBuilder generateBuilder = type.getAnnotation(GenerateBuilder.class);
+        if(generateBuilder.forResult()){
+            activityResultClass = new ActivityResultClass(getPackage(), type, generateBuilder.resultTypes());
+        }
     }
 
     public void addSymbol(RequiredField binding) {
@@ -43,13 +50,6 @@ public class ActivityClass {
         } else {
             optionalBindings.add(binding);
         }
-    }
-
-    public Set<RequiredField> getAllBindings(){
-        Set<RequiredField> set = new TreeSet<>();
-        set.addAll(requiredBindings);
-        set.addAll(optionalBindings);
-        return set;
     }
 
     public Set<RequiredField> getRequiredBindings(){
@@ -89,7 +89,7 @@ public class ActivityClass {
             injectMethod.visitBinding(optionalBinding);
         }
 
-        openMethod.end();
+        openMethod.endWithResult(activityResultClass);
         injectMethod.end();
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName(getType().asType()) + POSIX)
@@ -109,15 +109,19 @@ public class ActivityClass {
                     method.visitBinding(binding);
                     names.add(Utils.capitalize(binding.getName()));
                 }
-                method.end();
+                method.endWithResult(activityResultClass);
                 method.renameTo(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPERATOR));
                 typeBuilder.addMethod(method.build());
             }
         }
 
         if (size > 0) {
-            openMethodNoOptional.end();
+            openMethodNoOptional.endWithResult(activityResultClass);
             typeBuilder.addMethod(openMethodNoOptional.build());
+        }
+
+        if(activityResultClass != null){
+            typeBuilder.addType(activityResultClass.buildListenerInterface());
         }
 
         try {

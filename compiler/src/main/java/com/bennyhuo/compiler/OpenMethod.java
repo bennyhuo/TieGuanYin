@@ -49,7 +49,17 @@ public class OpenMethod {
         visitedBindings.add(binding);
     }
 
-    public void end(){
+    public void endWithResult(ActivityResultClass activityResultClass){
+        if(activityResultClass != null){
+//            ClassName activityClassName = ClassName.get("android.app", "Activity");
+//            methodBuilder.beginControlFlow("if(context instanceof $T", activityClassName)
+//                    .addStatement("$T.INSTANCE.setListenerForResult(($T) context, $N)", ActivityBuilder.class, activityClassName, activityResultClass.createOnResultListenerObject())
+//                    .endControlFlow();
+        }
+        end();
+    }
+
+    private void end(){
         methodBuilder.addStatement("context.startActivity(intent)")
                 .addStatement("inject()");
     }
