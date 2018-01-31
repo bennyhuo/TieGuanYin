@@ -3,6 +3,7 @@ package com.bennyhuo.activitybuilder;
 import android.support.v7.app.AppCompatActivity;
 
 import com.bennyhuo.annotations.GenerateBuilder;
+import com.bennyhuo.annotations.Optional;
 import com.bennyhuo.annotations.Required;
 
 /**
@@ -11,7 +12,9 @@ import com.bennyhuo.annotations.Required;
 @GenerateBuilder
 public class HelloInJavaActivity extends AppCompatActivity {
 
-    @Required("num")
+    @Required
     int num;
 
+    @Optional
+    boolean isJava;
 }

@@ -105,7 +105,7 @@ public class BuilderProcessor extends AbstractProcessor {
                     if (activityClass == null) {
                         error(element, "Field " + element + " annotated as Required while " + element.getEnclosingElement() + " not annotated.");
                     } else {
-                        activityClass.addSymbol(new ParamBinding((Symbol.VarSymbol) element, true));
+                        activityClass.addSymbol(new RequiredField((Symbol.VarSymbol) element));
                     }
                 }
             } catch (Exception e) {
@@ -121,7 +121,7 @@ public class BuilderProcessor extends AbstractProcessor {
                     if (activityClass == null) {
                         error(element, "Field " + element + " annotated as Optional while " + element.getEnclosingElement() + " not annotated.");
                     } else {
-                        activityClass.addSymbol(new ParamBinding((Symbol.VarSymbol) element, false));
+                        activityClass.addSymbol(new OptionalField((Symbol.VarSymbol) element));
                     }
                 }
             } catch (Exception e) {

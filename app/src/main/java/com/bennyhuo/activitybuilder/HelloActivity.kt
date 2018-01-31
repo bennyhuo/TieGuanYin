@@ -13,19 +13,19 @@ import kotlinx.android.synthetic.main.activity_main.*
 @GenerateBuilder
 class HelloActivity: AppCompatActivity() {
 
-    @Required("name")
+    @Required()
     lateinit var name: String
 
-    @Required("age")
+    @Required()
     var age: Int = 0
 
-    @Optional("title")
+    @Optional()
     lateinit var title: String
 
-    @Optional("subTitle")
+    @Optional()
     lateinit var subTitle: String
 
-    @Optional("details")
+    @Optional()
     lateinit var details: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,5 +36,9 @@ class HelloActivity: AppCompatActivity() {
 //        title = intent.extras["title"] as String? ?: "No Title"
         setTitle(title)
         clickMe.text = name + age
+    }
+
+    override fun finish() {
+        super.finish()
     }
 }

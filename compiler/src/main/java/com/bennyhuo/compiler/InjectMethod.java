@@ -41,7 +41,7 @@ public class InjectMethod {
 
     }
 
-    public void visitBinding(ParamBinding binding){
+    public void visitBinding(RequiredField binding){
         String name = binding.getName();
         Set<Modifier> modifiers = binding.getSymbol().getModifiers();
         Type type = binding.getSymbol().type;
@@ -51,10 +51,17 @@ public class InjectMethod {
         } else {
             typeName = TypeName.get(type);
         }
+
+        onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S)", typeName, name, BundleUtils.class, typeName, name);
+        if(!binding.isRequired()) {
+            onActivityCreatedMethodBuilder.beginControlFlow("if($LValue == null)", name)
+                    .addStatement("$LValue = new $T().create($T.class)", name, ((OptionalField)binding).getCreator(), typeName)
+                    .endControlFlow();
+        }
         if (modifiers.contains(Modifier.PRIVATE)) {
-            onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($T.<$T>get(extras, $S))", Utils.capitalize(name), BundleUtils.class, typeName, name);
+            onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($LValue)", Utils.capitalize(name), name);
         } else {
-            onActivityCreatedMethodBuilder.addStatement("typedActivity.$L = $T.<$T>get(extras, $S)", name, BundleUtils.class, typeName, name);
+            onActivityCreatedMethodBuilder.addStatement("typedActivity.$L = $LValue", name, name);
         }
     }
 

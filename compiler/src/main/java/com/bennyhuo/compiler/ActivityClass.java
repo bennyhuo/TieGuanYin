@@ -29,15 +29,15 @@ public class ActivityClass {
 
     private ProcessingEnvironment env;
     private TypeElement type;
-    private TreeSet<ParamBinding> optionalBindings = new TreeSet<>();
-    private TreeSet<ParamBinding> requiredBindings = new TreeSet<>();
+    private TreeSet<RequiredField> optionalBindings = new TreeSet<>();
+    private TreeSet<RequiredField> requiredBindings = new TreeSet<>();
 
     public ActivityClass(ProcessingEnvironment env, TypeElement type) {
         this.env = env;
         this.type = type;
     }
 
-    public void addSymbol(ParamBinding binding) {
+    public void addSymbol(RequiredField binding) {
         if (binding.isRequired()) {
             requiredBindings.add(binding);
         } else {
@@ -45,18 +45,18 @@ public class ActivityClass {
         }
     }
 
-    public Set<ParamBinding> getAllBindings(){
-        Set<ParamBinding> set = new TreeSet<>();
+    public Set<RequiredField> getAllBindings(){
+        Set<RequiredField> set = new TreeSet<>();
         set.addAll(requiredBindings);
         set.addAll(optionalBindings);
         return set;
     }
 
-    public Set<ParamBinding> getRequiredBindings(){
+    public Set<RequiredField> getRequiredBindings(){
         return requiredBindings;
     }
 
-    public Set<ParamBinding> getOptionalBindings() {
+    public Set<RequiredField> getOptionalBindings() {
         return optionalBindings;
     }
 
@@ -72,18 +72,19 @@ public class ActivityClass {
         }
     }
 
+
     public void brewJava(Filer filer){
         OpenMethod openMethod = new OpenMethod(this, METHOD_NAME);
         InjectMethod injectMethod = new InjectMethod(this);
 
-        for (ParamBinding binding : getRequiredBindings()) {
+        for (RequiredField binding : getRequiredBindings()) {
             openMethod.visitBinding(binding);
             injectMethod.visitBinding(binding);
         }
 
         OpenMethod openMethodNoOptional = openMethod.copy(METHOD_NAME_NO_OPTIONAL);
 
-        for (ParamBinding optionalBinding : getOptionalBindings()) {
+        for (RequiredField optionalBinding : getOptionalBindings()) {
             openMethod.visitBinding(optionalBinding);
             injectMethod.visitBinding(optionalBinding);
         }
@@ -96,7 +97,7 @@ public class ActivityClass {
                 .addMethod(injectMethod.build())
                 .addMethod(openMethod.build());
 
-        ArrayList<ParamBinding> optionalBindings = new ArrayList<>(getOptionalBindings());
+        ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalBindings());
         int size = optionalBindings.size();
         //选择长度为 i 的参数列表
         for (int step = 1; step < size; step++) {
@@ -104,7 +105,7 @@ public class ActivityClass {
                 ArrayList<String> names = new ArrayList<>();
                 OpenMethod method = openMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL);
                 for(int index = start; index < step + start; index++){
-                    ParamBinding binding = optionalBindings.get(index % size);
+                    RequiredField binding = optionalBindings.get(index % size);
                     method.visitBinding(binding);
                     names.add(Utils.capitalize(binding.getName()));
                 }
