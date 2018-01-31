@@ -9,7 +9,7 @@ import com.bennyhuo.factory.ObjectCreator;
 public class DefaultCreator implements ObjectCreator {
 
     @Override
-    public <T> T create(Class<T> cls) {
+    public Object create(Class cls) {
         Object result = null;
         if (cls == boolean.class || cls == Boolean.class) {
             result = false;
@@ -28,6 +28,6 @@ public class DefaultCreator implements ObjectCreator {
         } else if(cls == Object[].class){
             result = new Object[0];
         }
-        return (T) result;
+        return result;
     }
 }

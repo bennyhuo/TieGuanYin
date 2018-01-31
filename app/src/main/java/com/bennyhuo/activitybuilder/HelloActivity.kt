@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import com.bennyhuo.annotations.GenerateBuilder
 import com.bennyhuo.annotations.Optional
 import com.bennyhuo.annotations.Required
+import com.bennyhuo.factory.ObjectCreator
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
@@ -19,14 +20,23 @@ class HelloActivity: AppCompatActivity() {
     @Required()
     var age: Int = 0
 
-    @Optional()
+    @Optional(intValue = 123)
+    var num: Int = 0
+
+    @Optional(stringValue = "I'm title!!")
     lateinit var title: String
 
     @Optional()
     lateinit var subTitle: String
 
-    @Optional()
+    @Optional(creator = DetailsCreator::class)
     lateinit var details: String
+
+    class DetailsCreator: ObjectCreator<String>{
+        override fun create(cls: Class<String>):String {
+            return "details..."
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +45,7 @@ class HelloActivity: AppCompatActivity() {
 //        age = intent.extras["age"] as Int
 //        title = intent.extras["title"] as String? ?: "No Title"
         setTitle(title)
-        clickMe.text = name + age
+        clickMe.text = name + age + num + details
     }
 
     override fun finish() {

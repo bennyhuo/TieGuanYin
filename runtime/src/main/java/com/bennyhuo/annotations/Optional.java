@@ -14,6 +14,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.CLASS)
 public @interface Optional {
-    String value() default "";
-     Class<? extends ObjectCreator> creator() default DefaultCreator.class;
+    String stringValue() default "";
+
+    int intValue() default 0;
+
+    float floatValue() default 0f;
+
+    boolean booleanValue() default false;
+
+    Class<? extends ObjectCreator> creator() default DefaultCreator.class;
 }

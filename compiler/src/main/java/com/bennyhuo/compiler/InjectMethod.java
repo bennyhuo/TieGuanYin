@@ -2,7 +2,7 @@ package com.bennyhuo.compiler;
 
 import com.bennyhuo.activitybuilder.ActivityBuilder;
 import com.bennyhuo.activitybuilder.OnActivityCreateListener;
-import com.bennyhuo.utils.BundleUtils;
+import com.bennyhuo.utils.Utils;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -38,7 +38,6 @@ public class InjectMethod {
                 .beginControlFlow("if(activity instanceof $T)", activityClass.getType())
                 .addStatement("$T typedActivity = ($T) activity", activityClass.getType(), activityClass.getType())
                 .addStatement("$T extras = activity.getIntent().getExtras()", ClassName.get("android.os", "Bundle"));
-
     }
 
     public void visitBinding(RequiredField binding){
@@ -47,19 +46,22 @@ public class InjectMethod {
         Type type = binding.getSymbol().type;
         TypeName typeName;
         if (type.isPrimitive()) {
-            typeName = Utils.toWrapperType(type);
+            typeName = com.bennyhuo.compiler.Utils.toWrapperType(type);
         } else {
             typeName = TypeName.get(type);
         }
 
-        onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S)", typeName, name, BundleUtils.class, typeName, name);
         if(!binding.isRequired()) {
+            OptionalField optionalField = ((OptionalField)binding);
+            onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S, $L)", typeName, name, Utils.class, typeName, name, optionalField.getValue());
             onActivityCreatedMethodBuilder.beginControlFlow("if($LValue == null)", name)
-                    .addStatement("$LValue = new $T().create($T.class)", name, ((OptionalField)binding).getCreator(), typeName)
+                    .addStatement("$LValue = ($T)(new $T().create($T.class))", name, type, optionalField.getCreator(), typeName)
                     .endControlFlow();
+        } else {
+            onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S)", typeName, name, Utils.class, typeName, name);
         }
         if (modifiers.contains(Modifier.PRIVATE)) {
-            onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($LValue)", Utils.capitalize(name), name);
+            onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($LValue)", com.bennyhuo.compiler.Utils.capitalize(name), name);
         } else {
             onActivityCreatedMethodBuilder.addStatement("typedActivity.$L = $LValue", name, name);
         }
