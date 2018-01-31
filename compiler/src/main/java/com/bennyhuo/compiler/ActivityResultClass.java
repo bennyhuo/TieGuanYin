@@ -76,14 +76,19 @@ public class ActivityResultClass {
                 .build();
     }
 
-    public TypeSpec createOnResultListenerObject() {
+    public ClassName getListenerClass(){
+        return ClassName.get(packageName + "." +activityType.getSimpleName().toString() + "Builder", "On" + activityType.getSimpleName().toString() + "ResultListener");
+    }
 
-        TypeSpec onResultListenerType = TypeSpec.anonymousClassBuilder("")
+    public String getListenerName(){
+        return "on" + activityType.getSimpleName().toString() + "ResultListener";
+    }
+
+    public TypeSpec createOnResultListenerObject() {
+        return TypeSpec.anonymousClassBuilder("")
                 .addSuperinterface(OnActivityResultListener.class)
                 .addMethod(onResultMethodBuilder.build())
                 .build();
-
-        return null;
     }
 
     /*

@@ -16,6 +16,7 @@ public class ResultFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         onActivityResultListener.onResult(data.getExtras());
+        onActivityResultListener = null;
     }
 
     public void setOnActivityResultListener(OnActivityResultListener onActivityResultListener) {

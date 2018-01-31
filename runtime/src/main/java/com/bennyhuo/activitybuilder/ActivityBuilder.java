@@ -5,6 +5,7 @@ import android.app.Application;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import java.util.ArrayList;
@@ -78,7 +79,7 @@ public class ActivityBuilder {
         this.onActivityCreateListeners.remove(onActivityCreateListener);
     }
 
-    public void setListenerForResult(Activity activity, OnActivityResultListener onActivityResultListener) {
+    public void startActivityForResult(Activity activity, Intent intent, OnActivityResultListener onActivityResultListener) {
         FragmentManager fragmentManager = activity.getFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag(ResultFragment.TAG);
         ResultFragment resultFragment;
@@ -87,10 +88,11 @@ public class ActivityBuilder {
         } else {
             resultFragment = new ResultFragment();
             fragmentManager.beginTransaction()
-                    .remove(fragment)
                     .add(resultFragment, ResultFragment.TAG)
                     .commitAllowingStateLoss();
+            fragmentManager.executePendingTransactions();
         }
         resultFragment.setOnActivityResultListener(onActivityResultListener);
+        resultFragment.startActivityForResult(intent, 1);
     }
 }

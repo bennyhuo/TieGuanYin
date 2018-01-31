@@ -51,17 +51,19 @@ public class OpenMethod {
 
     public void endWithResult(ActivityResultClass activityResultClass){
         if(activityResultClass != null){
-//            ClassName activityClassName = ClassName.get("android.app", "Activity");
-//            methodBuilder.beginControlFlow("if(context instanceof $T", activityClassName)
-//                    .addStatement("$T.INSTANCE.setListenerForResult(($T) context, $N)", ActivityBuilder.class, activityClassName, activityResultClass.createOnResultListenerObject())
-//                    .endControlFlow();
-        }
-        end();
-    }
+            ClassName activityClassName = ClassName.get("android.app", "Activity");
+            methodBuilder.beginControlFlow("if(context instanceof $T)", activityClassName)
+                    .addStatement("$T.INSTANCE.startActivityForResult(($T) context, intent, $L)", ActivityBuilder.class, activityClassName, activityResultClass.createOnResultListenerObject())
+                    .endControlFlow()
+                    .beginControlFlow("else")
+                    .addStatement("context.startActivity(intent)")
+                    .endControlFlow();
 
-    private void end(){
-        methodBuilder.addStatement("context.startActivity(intent)")
-                .addStatement("inject()");
+            methodBuilder.addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
+        } else {
+            methodBuilder.addStatement("context.startActivity(intent)");
+        }
+        methodBuilder.addStatement("inject()");
     }
 
     public MethodSpec build() {
