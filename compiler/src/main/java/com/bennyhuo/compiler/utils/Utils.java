@@ -1,4 +1,4 @@
-package com.bennyhuo.compiler;
+package com.bennyhuo.compiler.utils;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;

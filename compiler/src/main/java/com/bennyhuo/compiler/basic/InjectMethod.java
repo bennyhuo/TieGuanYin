@@ -1,4 +1,4 @@
-package com.bennyhuo.compiler;
+package com.bennyhuo.compiler.basic;
 
 import com.bennyhuo.activitybuilder.ActivityBuilder;
 import com.bennyhuo.activitybuilder.OnActivityCreateListener;
@@ -46,7 +46,7 @@ public class InjectMethod {
         Type type = binding.getSymbol().type;
         TypeName typeName;
         if (type.isPrimitive()) {
-            typeName = com.bennyhuo.compiler.Utils.toWrapperType(type);
+            typeName = com.bennyhuo.compiler.utils.Utils.toWrapperType(type);
         } else {
             typeName = TypeName.get(type);
         }
@@ -61,7 +61,7 @@ public class InjectMethod {
             onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S)", typeName, name, Utils.class, typeName, name);
         }
         if (modifiers.contains(Modifier.PRIVATE)) {
-            onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($LValue)", com.bennyhuo.compiler.Utils.capitalize(name), name);
+            onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($LValue)", com.bennyhuo.compiler.utils.Utils.capitalize(name), name);
         } else {
             onActivityCreatedMethodBuilder.addStatement("typedActivity.$L = $LValue", name, name);
         }

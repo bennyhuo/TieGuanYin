@@ -1,4 +1,4 @@
-package com.bennyhuo.compiler;
+package com.bennyhuo.compiler.basic;
 
 import com.bennyhuo.annotations.Optional;
 import com.squareup.javapoet.ClassName;

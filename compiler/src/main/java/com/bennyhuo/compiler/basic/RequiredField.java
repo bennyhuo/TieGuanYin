@@ -1,4 +1,4 @@
-package com.bennyhuo.compiler;
+package com.bennyhuo.compiler.basic;
 
 import com.sun.tools.javac.code.Symbol;
 

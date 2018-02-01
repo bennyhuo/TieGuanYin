@@ -1,6 +1,8 @@
-package com.bennyhuo.compiler;
+package com.bennyhuo.compiler.basic;
 
 import com.bennyhuo.annotations.GenerateBuilder;
+import com.bennyhuo.compiler.result.ActivityResultClass;
+import com.bennyhuo.compiler.utils.Utils;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.kotlinpoet.FileSpec;
@@ -132,7 +134,19 @@ public class ActivityClass {
 
         if(activityResultClass != null){
             typeBuilder.addType(activityResultClass.buildListenerInterface());
-            typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
+            if (isKotlin) {
+                try {
+                    FileSpec fileSpec = activityResultClass.createKotlinExt();
+                    FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, getPackage(), fileSpec.getName() + ".kt");
+                    Writer writer = fileObject.openWriter();
+                    fileSpec.writeTo(writer);
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
+            }
         }
 
         try {
@@ -140,19 +154,6 @@ public class ActivityClass {
             file.writeTo(filer);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        if (activityResultClass != null && isKotlin) {
-            try {
-                FileSpec fileSpec = activityResultClass.createKotlinExt();
-                FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, getPackage(), fileSpec.getName() + ".kt");
-                Writer writer = fileObject.openWriter();
-                fileSpec.writeTo(writer);
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
         }
     }
 

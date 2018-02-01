@@ -1,13 +1,17 @@
-package com.bennyhuo.compiler;
+package com.bennyhuo.compiler.result;
 
 import com.bennyhuo.activitybuilder.OnActivityResultListener;
 import com.bennyhuo.annotations.ResultEntity;
+import com.bennyhuo.compiler.utils.JavaTypes;
+import com.bennyhuo.compiler.utils.KotlinTypes;
+import com.bennyhuo.compiler.utils.Utils;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.kotlinpoet.FileSpec;
 import com.squareup.kotlinpoet.FunSpec;
+import com.squareup.kotlinpoet.TypeNames;
 
 import java.util.ArrayList;
 
@@ -44,12 +48,12 @@ public class ActivityResultClass {
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addParameter(ClassName.get(activityType), "activity")
                 .returns(TypeName.VOID)
-                .addStatement("$T intent = new $T()", ClassName.get("android.content", "Intent"), ClassName.get("android.content", "Intent"));
+                .addStatement("$T intent = new $T()", JavaTypes.INTENT, JavaTypes.INTENT);
 
         onResultMethodBuilder = MethodSpec.methodBuilder("onResult")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get("android.os", "Bundle"), "bundle")
+                .addParameter(JavaTypes.BUNDLE, "bundle")
                 .returns(TypeName.VOID);
 
         onResultMethodBuilder.beginControlFlow("if($L != null)", "on" + activityType.getSimpleName().toString() + "ResultListener");
@@ -57,7 +61,6 @@ public class ActivityResultClass {
         ArrayList<Object> args = new ArrayList<>();
 
         args.add("on" + activityType.getSimpleName().toString() + "ResultListener");
-        ClassName utilsClass = ClassName.get("com.bennyhuo.utils", "Utils");
         for (ResultEntity resultEntity : resultEntities) {
             TypeMirror typeMirror = null;
             try {
@@ -68,7 +71,7 @@ public class ActivityResultClass {
             TypeName resultClass = ClassName.get(typeMirror);
             interfaceOnResultMethodBuilder.addParameter(resultClass, resultEntity.name());
             statementBuilder.append("$T.<$T>get(bundle, $S),");
-            args.add(utilsClass);
+            args.add(JavaTypes.RUNTIME_UTILS);
             args.add(resultClass.box());
             args.add(resultEntity.name());
 
@@ -103,11 +106,11 @@ public class ActivityResultClass {
                 .build();
     }
 
-    public com.squareup.kotlinpoet.FileSpec createKotlinExt() {
+    public FileSpec createKotlinExt() {
         FunSpec.Builder funBuilder = FunSpec.builder("finishWithResult")
-                .receiver(com.squareup.kotlinpoet.ClassName.bestGuess(activityType.getQualifiedName().toString()));
+                .receiver(TypeNames.get(activityType.asType()));
 
-        funBuilder.addStatement("val intent = %T()", com.squareup.kotlinpoet.ClassName.bestGuess("android.content.Intent"));
+        funBuilder.addStatement("val intent = %T()", KotlinTypes.INTENT);
         for (ResultEntity resultEntity : resultEntities) {
             TypeMirror typeMirror = null;
             try {
@@ -127,29 +130,4 @@ public class ActivityResultClass {
     public MethodSpec buildFinishWithResultMethod() {
         return finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("activity.finish()").build();
     }
-
-    /*
-      public interface OnHelloInJavaActivityResultListener{
-    void onResult(int kotlin, String java);
-  }
-
-  public static void open(Context context, int num, boolean isJava, final OnHelloInJavaActivityResultListener onHelloInJavaActivityResultListener) {
-    ActivityBuilder.INSTANCE.init(context);
-    Intent intent = new Intent(context, HelloInJavaActivity.class);
-    intent.putExtra("num", num);
-    intent.putExtra("isJava", isJava);
-    if(context instanceof Activity) {
-      ActivityBuilder.INSTANCE.setListenerForResult((Activity) context, new OnActivityResultListener() {
-        @Override
-        public void onResult(Bundle bundle) {
-          if(onHelloInJavaActivityResultListener != null)
-            onHelloInJavaActivityResultListener.onResult(Utils.<Integer>get(bundle, "kotlin"), Utils.<String>get(bundle, "java"));
-        }
-      });
-    }
-    context.startActivity(intent);
-    inject();
-  }
-     */
-
 }
