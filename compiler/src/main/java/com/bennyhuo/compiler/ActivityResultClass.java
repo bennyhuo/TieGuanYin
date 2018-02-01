@@ -6,6 +6,9 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.kotlinpoet.FileSpec;
+import com.squareup.kotlinpoet.FunSpec;
+import com.squareup.kotlinpoet.TypeNames;
 
 import java.util.ArrayList;
 
@@ -25,6 +28,7 @@ public class ActivityResultClass {
 
     private MethodSpec.Builder onResultMethodBuilder;
     private MethodSpec.Builder interfaceOnResultMethodBuilder;
+    private MethodSpec.Builder finishWithResultMethodBuilder;
 
     private String packageName;
 
@@ -36,6 +40,12 @@ public class ActivityResultClass {
         interfaceOnResultMethodBuilder = MethodSpec.methodBuilder("onResult")
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(TypeName.VOID);
+
+        finishWithResultMethodBuilder = MethodSpec.methodBuilder("finishWithResult")
+                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .addParameter(ClassName.get(activityType), "activity")
+                .returns(TypeName.VOID)
+                .addStatement("$T intent = new $T()", ClassName.get("android.content", "Intent"), ClassName.get("android.content", "Intent"));
 
         onResultMethodBuilder = MethodSpec.methodBuilder("onResult")
                 .addAnnotation(Override.class)
@@ -62,6 +72,9 @@ public class ActivityResultClass {
             args.add(utilsClass);
             args.add(resultClass.box());
             args.add(resultEntity.name());
+
+            finishWithResultMethodBuilder.addParameter(ClassName.get(typeMirror), resultEntity.name());
+            finishWithResultMethodBuilder.addStatement("intent.putExtra($S, $L)", resultEntity.name(), resultEntity.name());
         }
         //onHelloInJavaActivityResultListener.onResult(Utils.<Integer>get(bundle, "kotlin"), Utils.<String>get(bundle, "java"));
         statementBuilder.deleteCharAt(statementBuilder.length() - 1);
@@ -89,6 +102,30 @@ public class ActivityResultClass {
                 .addSuperinterface(OnActivityResultListener.class)
                 .addMethod(onResultMethodBuilder.build())
                 .build();
+    }
+
+    public com.squareup.kotlinpoet.FileSpec createKotlinExt() {
+        FunSpec.Builder funBuilder = FunSpec.builder("finishWithResult")
+                .receiver(com.squareup.kotlinpoet.ClassName.bestGuess(activityType.getQualifiedName().toString()));
+
+        funBuilder.addStatement("val intent = %T()", com.squareup.kotlinpoet.ClassName.bestGuess("android.content.Intent"));
+        for (ResultEntity resultEntity : resultEntities) {
+            TypeMirror typeMirror = null;
+            try {
+                resultEntity.type();
+            } catch (MirroredTypeException e) {
+                typeMirror = e.getTypeMirror();
+            }
+            funBuilder.addParameter(resultEntity.name(), TypeNames.get(typeMirror));
+            funBuilder.addStatement("intent.putExtra(%S, %L)", resultEntity.name(), resultEntity.name());
+        }
+        funBuilder.addStatement("setResult(1, intent)");
+        return FileSpec.builder(packageName, activityType.getSimpleName().toString() + "Ext")
+                .addFunction(funBuilder.build()).build();
+    }
+
+    public MethodSpec buildFinishWithResultMethod() {
+        return finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("activity.finish()").build();
     }
 
     /*

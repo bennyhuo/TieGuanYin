@@ -1,7 +1,5 @@
 package com.bennyhuo.activitybuilder;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -34,11 +32,14 @@ public class HelloInJavaActivity extends AppCompatActivity {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent testIntent = new Intent();
-                testIntent.putExtra("kotlin", 1234567);
-                testIntent.putExtra("java", "I am Java!");
-                setResult(Activity.RESULT_OK, testIntent);
-                finish();
+//                Intent testIntent = new Intent();
+//                testIntent.putExtra("kotlin", 1234567);
+//                testIntent.putExtra("java", "I am Java!");
+//                setResult(Activity.RESULT_OK, testIntent);
+//
+//                finish();
+
+                HelloInJavaActivityBuilder.finishWithResult(HelloInJavaActivity.this, "JavaJava！！", 1231231);
             }
         });
     }

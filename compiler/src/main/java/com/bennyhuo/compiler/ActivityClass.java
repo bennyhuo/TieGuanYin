@@ -33,10 +33,12 @@ public class ActivityClass {
     private TreeSet<RequiredField> optionalBindings = new TreeSet<>();
     private TreeSet<RequiredField> requiredBindings = new TreeSet<>();
     private ActivityResultClass activityResultClass;
+    private boolean isKotlin;
 
-    public ActivityClass(ProcessingEnvironment env, TypeElement type) {
+    public ActivityClass(ProcessingEnvironment env, TypeElement type, boolean isKotlin) {
         this.env = env;
         this.type = type;
+        this.isKotlin = isKotlin;
 
         GenerateBuilder generateBuilder = type.getAnnotation(GenerateBuilder.class);
         if(generateBuilder.forResult()){
@@ -50,6 +52,10 @@ public class ActivityClass {
         } else {
             optionalBindings.add(binding);
         }
+    }
+
+    public boolean isKotlin() {
+        return isKotlin;
     }
 
     public Set<RequiredField> getRequiredBindings(){
@@ -122,6 +128,7 @@ public class ActivityClass {
 
         if(activityResultClass != null){
             typeBuilder.addType(activityResultClass.buildListenerInterface());
+            typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
         }
 
         try {
@@ -130,6 +137,19 @@ public class ActivityClass {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+//        if (activityResultClass != null && isKotlin) {
+//            try {
+//                FileSpec fileSpec = activityResultClass.createKotlinExt();
+//                FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, getPackage(), fileSpec.getName() + ".kt");
+//                Writer writer = fileObject.openWriter();
+//                fileSpec.writeTo(writer);
+//                writer.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
     }
 
     /**

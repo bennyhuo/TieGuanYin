@@ -21,6 +21,7 @@
             android:name=".HelloActivity"
             android:theme="@style/AppTheme"/>
         <activity android:name=".HelloInJavaActivity"/>
+        <activity android:name=".HelloInKotlinActivity"/>
     </application>
 
 </manifest>

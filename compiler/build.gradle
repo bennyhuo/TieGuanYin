@@ -8,6 +8,8 @@ dependencies {
     implementation 'com.google.auto.service:auto-service:1.0-rc4'
     implementation 'com.google.auto:auto-common:0.8'
     implementation 'com.squareup:javapoet:1.9.0'
+    implementation 'com.squareup:kotlinpoet:0.6.0'
+    implementation"org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compileOnly files(Jvm.current().getToolsJar())
 }
 
