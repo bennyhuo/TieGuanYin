@@ -8,7 +8,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.kotlinpoet.FileSpec;
 import com.squareup.kotlinpoet.FunSpec;
-import com.squareup.kotlinpoet.TypeNames;
 
 import java.util.ArrayList;
 
@@ -116,10 +115,11 @@ public class ActivityResultClass {
             } catch (MirroredTypeException e) {
                 typeMirror = e.getTypeMirror();
             }
-            funBuilder.addParameter(resultEntity.name(), TypeNames.get(typeMirror));
+            funBuilder.addParameter(resultEntity.name(), Utils.toKotlinType(typeMirror));
             funBuilder.addStatement("intent.putExtra(%S, %L)", resultEntity.name(), resultEntity.name());
         }
         funBuilder.addStatement("setResult(1, intent)");
+        funBuilder.addStatement("finish()");
         return FileSpec.builder(packageName, activityType.getSimpleName().toString() + "Ext")
                 .addFunction(funBuilder.build()).build();
     }

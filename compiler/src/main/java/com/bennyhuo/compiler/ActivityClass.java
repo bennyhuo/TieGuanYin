@@ -3,8 +3,10 @@ package com.bennyhuo.compiler;
 import com.bennyhuo.annotations.GenerateBuilder;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.kotlinpoet.FileSpec;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -16,6 +18,8 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 
 /**
  * Created by benny on 1/29/18.
@@ -138,18 +142,18 @@ public class ActivityClass {
             e.printStackTrace();
         }
 
-//        if (activityResultClass != null && isKotlin) {
-//            try {
-//                FileSpec fileSpec = activityResultClass.createKotlinExt();
-//                FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, getPackage(), fileSpec.getName() + ".kt");
-//                Writer writer = fileObject.openWriter();
-//                fileSpec.writeTo(writer);
-//                writer.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//        }
+        if (activityResultClass != null && isKotlin) {
+            try {
+                FileSpec fileSpec = activityResultClass.createKotlinExt();
+                FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, getPackage(), fileSpec.getName() + ".kt");
+                Writer writer = fileObject.openWriter();
+                fileSpec.writeTo(writer);
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     /**

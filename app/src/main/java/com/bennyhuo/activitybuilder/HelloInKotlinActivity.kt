@@ -1,7 +1,5 @@
 package com.bennyhuo.activitybuilder
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
@@ -27,11 +25,7 @@ class HelloInKotlinActivity : AppCompatActivity() {
         setContentView(R.layout.activity_test)
         val textView = findViewById<TextView>(R.id.clickMe)
         textView.setOnClickListener {
-            val testIntent = Intent()
-            testIntent.putExtra("kotlin", 1234567)
-            testIntent.putExtra("java", "I am Java!")
-            setResult(Activity.RESULT_OK, testIntent)
-            finish()
+            finishWithResult("Javaaaaa", 78127391)
         }
     }
 }

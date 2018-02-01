@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         clickMe.setOnClickListener {
             //HelloActivityBuilder.openWithOptionalTitle(this, 18, "bennyhuo", "kotlin")
-            HelloInJavaActivityBuilder.open(this, 12121212, false){
+            HelloInKotlinActivityBuilder.open(this, 12121212, false){
                 java, kotlin ->
                 Log.d("test", "java: $java, kotlin: $kotlin")
             }
