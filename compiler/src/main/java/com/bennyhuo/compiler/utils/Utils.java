@@ -106,6 +106,7 @@ public class Utils {
                 if(typeMirror.toString().equals("java.lang.String")){
                     return STRING;
                 }
+                break;
             case ARRAY:
                 ArrayType arrayType = (ArrayType) typeMirror;
                 switch (arrayType.getComponentType().getKind()){
