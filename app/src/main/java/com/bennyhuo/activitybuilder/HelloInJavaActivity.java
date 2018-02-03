@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder;
+import com.bennyhuo.activitybuilder.runtime.annotations.GenerateMode;
 import com.bennyhuo.activitybuilder.runtime.annotations.Optional;
 import com.bennyhuo.activitybuilder.runtime.annotations.Required;
 import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity;
@@ -14,7 +15,7 @@ import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity;
 /**
  * Created by benny on 1/29/18.
  */
-@GenerateBuilder(forResult = true,
+@GenerateBuilder(forResult = true, mode = GenerateMode.JavaOnly,
         resultTypes = {@ResultEntity(name = "java", type = String.class), @ResultEntity(name = "kotlin", type=int.class)})
 public class HelloInJavaActivity extends AppCompatActivity {
 
@@ -38,7 +39,7 @@ public class HelloInJavaActivity extends AppCompatActivity {
 //                setResult(Activity.RESULT_OK, testIntent);
 //
 //                finish();
-
+                HelloActivityBuilderKt.openHelloActivity(HelloInJavaActivity.this, 121, "nu", null, null, null, null);
                 HelloInJavaActivityBuilder.finishWithResult(HelloInJavaActivity.this, "JavaJava！！", 1231231);
             }
         });

@@ -1,6 +1,7 @@
 package com.bennyhuo.compiler.basic;
 
 import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder;
+import com.bennyhuo.activitybuilder.runtime.annotations.GenerateMode;
 import com.bennyhuo.compiler.result.ActivityResultClass;
 import com.bennyhuo.compiler.utils.TypeUtils;
 import com.bennyhuo.compiler.utils.Utils;
@@ -35,11 +36,10 @@ public class ActivityClass {
     private static final String POSIX = "Builder";
 
     private TypeElement type;
-    private TreeSet<RequiredField> optionalBindings = new TreeSet<>();
-    private TreeSet<RequiredField> requiredBindings = new TreeSet<>();
+    private TreeSet<RequiredField> optionalFields = new TreeSet<>();
+    private TreeSet<RequiredField> requiredFields = new TreeSet<>();
     private ActivityResultClass activityResultClass;
-    private boolean isKotlin;
-    private boolean forceJava;
+    private GenerateMode generateMode;
 
     public final String simpleName;
     public final String packageName;
@@ -51,73 +51,50 @@ public class ActivityClass {
 
         Metadata metadata = type.getAnnotation(Metadata.class);
         //如果有这个注解，说明就是 Kotlin 类。
-        isKotlin = metadata != null;
+        boolean isKotlin = metadata != null;
 
         GenerateBuilder generateBuilder = type.getAnnotation(GenerateBuilder.class);
         if(generateBuilder.forResult()){
             activityResultClass = new ActivityResultClass(this, generateBuilder.resultTypes());
         }
-        forceJava = generateBuilder.forceJava();
+        generateMode = isKotlin ? generateBuilder.mode() : GenerateMode.JavaOnly;
     }
 
-    public void addSymbol(RequiredField binding) {
-        if (binding.isRequired()) {
-            requiredBindings.add(binding);
+    public void addSymbol(RequiredField field) {
+        if (field.isRequired()) {
+            requiredFields.add(field);
         } else {
-            optionalBindings.add(binding);
+            optionalFields.add(field);
         }
     }
 
-    public boolean isKotlin() {
-        return isKotlin;
+    public Set<RequiredField> getRequiredFields() {
+        return requiredFields;
     }
 
-    public boolean isForceJava() {
-        return forceJava;
-    }
-
-    public Set<RequiredField> getRequiredBindings(){
-        return requiredBindings;
-    }
-
-    public Set<RequiredField> getOptionalBindings() {
-        return optionalBindings;
+    public Set<RequiredField> getOptionalFields() {
+        return optionalFields;
     }
 
     public TypeElement getType() {
         return type;
     }
 
-    public void brewJava(Filer filer){
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName + POSIX)
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-
-        KotlinOpenMethod kotlinOpenMethod = new KotlinOpenMethod(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
+    public void buildOpenMethod(TypeSpec.Builder typeBuilder) {
         OpenMethod openMethod = new OpenMethod(this, METHOD_NAME);
-        InjectMethod injectMethod = new InjectMethod(this);
-
-        for (RequiredField binding : getRequiredBindings()) {
-            openMethod.visitBinding(binding);
-            kotlinOpenMethod.visitBinding(binding);
-            injectMethod.visitBinding(binding);
+        for (RequiredField field : getRequiredFields()) {
+            openMethod.visitField(field);
         }
 
         OpenMethod openMethodNoOptional = openMethod.copy(METHOD_NAME_NO_OPTIONAL);
 
-        for (RequiredField optionalBinding : getOptionalBindings()) {
-            openMethod.visitBinding(optionalBinding);
-            kotlinOpenMethod.visitBinding(optionalBinding);
-            injectMethod.visitBinding(optionalBinding);
+        for (RequiredField field : getOptionalFields()) {
+            openMethod.visitField(field);
         }
-
         openMethod.endWithResult(activityResultClass);
-        kotlinOpenMethod.endWithResult(activityResultClass);
-        injectMethod.end();
+        typeBuilder.addMethod(openMethod.build());
 
-        typeBuilder.addMethod(injectMethod.build())
-                .addMethod(openMethod.build());
-
-        ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalBindings());
+        ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalFields());
         int size = optionalBindings.size();
         //选择长度为 i 的参数列表
         for (int step = 1; step < size; step++) {
@@ -126,7 +103,7 @@ public class ActivityClass {
                 OpenMethod method = openMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL);
                 for(int index = start; index < step + start; index++){
                     RequiredField binding = optionalBindings.get(index % size);
-                    method.visitBinding(binding);
+                    method.visitField(binding);
                     names.add(Utils.capitalize(binding.getName()));
                 }
                 method.endWithResult(activityResultClass);
@@ -139,33 +116,94 @@ public class ActivityClass {
             openMethodNoOptional.endWithResult(activityResultClass);
             typeBuilder.addMethod(openMethodNoOptional.build());
         }
+    }
 
-        if (isKotlin) {
-            FileSpec.Builder fileSpecBuilder = FileSpec.builder(packageName, simpleName + "Ext");
-            fileSpecBuilder.addFunction(kotlinOpenMethod.build());
-            if(activityResultClass != null){
-                typeBuilder.addType(activityResultClass.buildListenerInterface());
-                fileSpecBuilder.addFunction(activityResultClass.buildFinishWithResultExt());
-            }
-            try {
-                FileSpec fileSpec = fileSpecBuilder.build();
-                FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, packageName, fileSpec.getName() + ".kt");
-                Writer writer = fileObject.openWriter();
-                fileSpec.writeTo(writer);
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            if(activityResultClass != null){
-                typeBuilder.addType(activityResultClass.buildListenerInterface());
-                typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
-            }
+    public void buildInjectMethod(TypeSpec.Builder typeBuilder) {
+        InjectMethod injectMethod = new InjectMethod(this);
+
+        for (RequiredField field : getRequiredFields()) {
+            injectMethod.visitField(field);
         }
 
+        for (RequiredField field : getOptionalFields()) {
+            injectMethod.visitField(field);
+        }
+        injectMethod.end();
+
+        typeBuilder.addMethod(injectMethod.build());
+    }
+
+    public void buildOpenFunKt(FileSpec.Builder fileSpecBuilder) {
+        OpenMethodKt openMethodKt = new OpenMethodKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
+
+        for (RequiredField field : getRequiredFields()) {
+            openMethodKt.visitField(field);
+        }
+
+        for (RequiredField field : getOptionalFields()) {
+            openMethodKt.visitField(field);
+        }
+
+        openMethodKt.endWithResult(activityResultClass);
+        fileSpecBuilder.addFunction(openMethodKt.build());
+    }
+
+    public void brew(Filer filer) {
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName + POSIX)
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+
+        buildInjectMethod(typeBuilder);
+
+        if(activityResultClass != null){
+            typeBuilder.addType(activityResultClass.buildOnActivityResultListenerInterface());
+        }
+
+        switch (generateMode) {
+            case JavaOnly:
+                buildOpenMethod(typeBuilder);
+                if(activityResultClass != null){
+                    typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
+                }
+                break;
+            case Both:
+                buildOpenMethod(typeBuilder);
+                if(activityResultClass != null){
+                    typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
+                }
+            case KotlinOnly:
+                //region kotlin
+                FileSpec.Builder fileSpecBuilder = FileSpec.builder(packageName, simpleName + POSIX);
+//                        .addAnnotation(AnnotationSpec.builder(JvmName.class)
+//                        .useSiteTarget(AnnotationSpec.UseSiteTarget.FILE)
+//                    .addMember("%S", simpleName + POSIX)
+//                    .build());
+                buildOpenFunKt(fileSpecBuilder);
+                if (activityResultClass != null) {
+                    fileSpecBuilder.addFunction(activityResultClass.buildFinishWithResultKt());
+                }
+                writeKotlinToFile(filer, fileSpecBuilder.build());
+                //endregion
+                break;
+        }
+
+        writeJavaToFile(filer, typeBuilder.build());
+    }
+
+    private void writeJavaToFile(Filer filer, TypeSpec typeSpec){
         try {
-            JavaFile file = JavaFile.builder(packageName, typeBuilder.build()).build();
+            JavaFile file = JavaFile.builder(packageName, typeSpec).build();
             file.writeTo(filer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeKotlinToFile(Filer filer, FileSpec fileSpec){
+        try {
+            FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, packageName, fileSpec.getName() + ".kt");
+            Writer writer = fileObject.openWriter();
+            fileSpec.writeTo(writer);
+            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

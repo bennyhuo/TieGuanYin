@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
 public @interface GenerateBuilder {
-    boolean forceJava() default false;
+    GenerateMode mode() default GenerateMode.Both;
     boolean forResult() default false;
     ResultEntity[] resultTypes() default {};
 }

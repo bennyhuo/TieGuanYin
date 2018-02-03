@@ -83,7 +83,7 @@ public class BuilderProcessor extends AbstractProcessor {
         parse(env, activityClasses);
 
         for (ActivityClass activityClass : activityClasses.values()) {
-            activityClass.brewJava(filer);
+            activityClass.brew(filer);
         }
         return true;
     }

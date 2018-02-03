@@ -44,7 +44,7 @@ public class OpenMethod {
         methodBuilder.addStatement("$T intent = new $T(context, $T.class)", intentClass, intentClass, activityClass.getType());
     }
 
-    public void visitBinding(RequiredField binding){
+    public void visitField(RequiredField binding){
         String name = binding.getName();
         methodBuilder.addParameter(ClassName.get(binding.getSymbol().type), name);
         methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
@@ -82,7 +82,7 @@ public class OpenMethod {
     public OpenMethod copy(String name){
         OpenMethod openMethod = new OpenMethod(activityClass, name);
         for (RequiredField visitedBinding : visitedBindings) {
-            openMethod.visitBinding(visitedBinding);
+            openMethod.visitField(visitedBinding);
         }
         return openMethod;
     }

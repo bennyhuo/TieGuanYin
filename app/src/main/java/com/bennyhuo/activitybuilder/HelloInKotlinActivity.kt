@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder
+import com.bennyhuo.activitybuilder.runtime.annotations.GenerateMode.Both
 import com.bennyhuo.activitybuilder.runtime.annotations.Optional
 import com.bennyhuo.activitybuilder.runtime.annotations.Required
 import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity
@@ -11,7 +12,7 @@ import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity
 /**
  * Created by benny on 1/29/18.
  */
-@GenerateBuilder(forResult = true,
+@GenerateBuilder(forResult = true, mode = Both,
         resultTypes = [(ResultEntity(name = "java", type = String::class)), (ResultEntity(name = "kotlin", type = Int::class))])
 class HelloInKotlinActivity : AppCompatActivity() {
 

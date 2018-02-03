@@ -3,6 +3,7 @@ package com.bennyhuo.activitybuilder
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder
+import com.bennyhuo.activitybuilder.runtime.annotations.GenerateMode.KotlinOnly
 import com.bennyhuo.activitybuilder.runtime.annotations.Optional
 import com.bennyhuo.activitybuilder.runtime.annotations.Required
 import com.bennyhuo.activitybuilder.runtime.factory.ObjectCreator
@@ -12,7 +13,7 @@ import java.io.Serializable
 /**
  * Created by benny on 1/29/18.
  */
-@GenerateBuilder
+@GenerateBuilder(mode = KotlinOnly)
 class HelloActivity: AppCompatActivity() {
 
     @Required()

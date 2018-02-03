@@ -40,7 +40,7 @@ public class InjectMethod {
                 .addStatement("$T extras = activity.getIntent().getExtras()", JavaTypes.BUNDLE);
     }
 
-    public void visitBinding(RequiredField binding){
+    public void visitField(RequiredField binding){
         String name = binding.getName();
         Set<Modifier> modifiers = binding.getSymbol().getModifiers();
         Type type = binding.getSymbol().type;

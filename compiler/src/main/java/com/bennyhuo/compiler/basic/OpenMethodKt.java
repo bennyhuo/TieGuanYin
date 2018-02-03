@@ -14,13 +14,13 @@ import kotlin.Unit;
  * Created by benny on 1/31/18.
  */
 
-public class KotlinOpenMethod {
+public class OpenMethodKt {
 
     private String builderClassName;
     private FunSpec.Builder methodBuilder;
     private ActivityClass activityClass;
 
-    public KotlinOpenMethod(ActivityClass activityClass, String builderClassName, String name) {
+    public OpenMethodKt(ActivityClass activityClass, String builderClassName, String name) {
 
         this.activityClass = activityClass;
         this.builderClassName = builderClassName;
@@ -33,7 +33,7 @@ public class KotlinOpenMethod {
         methodBuilder.addStatement("val intent = %T(this, %T::class.java)", KotlinTypes.INTENT, activityClass.getType());
     }
 
-    public void visitBinding(RequiredField binding){
+    public void visitField(RequiredField binding){
         String name = binding.getName();
         TypeName className = KotlinTypes.toKotlinType(binding.getSymbol().type);
         if(!binding.isRequired()){
