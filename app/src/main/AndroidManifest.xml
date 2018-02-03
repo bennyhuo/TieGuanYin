@@ -3,7 +3,6 @@
           package="com.bennyhuo.activitybuilder">
 
     <application
-        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -18,10 +17,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HelloActivity"
+            android:name=".GenerateBothActivity"
             android:theme="@style/AppTheme"/>
-        <activity android:name=".HelloInJavaActivity"/>
-        <activity android:name=".HelloInKotlinActivity"/>
+        <activity android:name=".JavaActivity"/>
+        <activity android:name=".KotlinActivity"/>
     </application>
 
 </manifest>

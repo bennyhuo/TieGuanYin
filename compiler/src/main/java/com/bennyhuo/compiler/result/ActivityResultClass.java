@@ -12,6 +12,7 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
 import com.squareup.kotlinpoet.LambdaTypeName;
+import com.squareup.kotlinpoet.ParameterSpec;
 import com.squareup.kotlinpoet.TypeNames;
 
 import java.util.ArrayList;
@@ -59,15 +60,12 @@ public class ActivityResultClass {
         return ClassName.get(activityClass.packageName + "." +activityClass.simpleName + "Builder", "On" + activityClass.simpleName + "ResultListener");
     }
 
-    /**
-     * @return (Int, String) ->Unit
-     */
     public com.squareup.kotlinpoet.LambdaTypeName getListenerClassKt() {
-        ArrayList<com.squareup.kotlinpoet.TypeName> argTypeNames = new ArrayList<>();
+        ArrayList<ParameterSpec> argTypeNames = new ArrayList<>();
         for (ResultEntity resultEntity : resultEntities) {
-            argTypeNames.add(KotlinTypes.toKotlinType(getResultType(resultEntity)));
+            argTypeNames.add(ParameterSpec.builder(resultEntity.name(), KotlinTypes.toKotlinType(getResultType(resultEntity))).build());
         }
-        return LambdaTypeName.get(null, argTypeNames.toArray(new com.squareup.kotlinpoet.TypeName[0]), TypeNames.get(Unit.class));
+        return LambdaTypeName.get(null, argTypeNames, TypeNames.get(Unit.class));
     }
 
     /**

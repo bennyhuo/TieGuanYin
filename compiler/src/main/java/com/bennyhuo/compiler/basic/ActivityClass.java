@@ -173,10 +173,6 @@ public class ActivityClass {
             case KotlinOnly:
                 //region kotlin
                 FileSpec.Builder fileSpecBuilder = FileSpec.builder(packageName, simpleName + POSIX);
-//                        .addAnnotation(AnnotationSpec.builder(JvmName.class)
-//                        .useSiteTarget(AnnotationSpec.UseSiteTarget.FILE)
-//                    .addMember("%S", simpleName + POSIX)
-//                    .build());
                 buildOpenFunKt(fileSpecBuilder);
                 if (activityResultClass != null) {
                     fileSpecBuilder.addFunction(activityResultClass.buildFinishWithResultKt());
