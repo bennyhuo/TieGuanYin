@@ -1,5 +1,6 @@
 package com.bennyhuo.activitybuilder;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 
@@ -15,7 +16,9 @@ public class ResultFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        onActivityResultListener.onResult(data.getExtras());
+        if(resultCode == Activity.RESULT_CANCELED || data != null){
+            onActivityResultListener.onResult(data.getExtras());
+        }
         onActivityResultListener = null;
     }
 
