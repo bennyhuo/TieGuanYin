@@ -1,6 +1,6 @@
 package com.bennyhuo.compiler.basic;
 
-import com.bennyhuo.annotations.Optional;
+import com.bennyhuo.activitybuilder.runtime.annotations.Optional;
 import com.squareup.javapoet.ClassName;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;

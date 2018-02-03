@@ -12,7 +12,7 @@ public class JavaTypes {
     public static final ClassName ACTIVITY = ClassName.get("android.app", "Activity");
 
 
-    public static final ClassName RUNTIME_UTILS = ClassName.get("com.bennyhuo.utils", "Utils");
+    public static final ClassName RUNTIME_UTILS = ClassName.get("com.bennyhuo.activitybuilder.runtime.utils", "Utils");
 
 
 }

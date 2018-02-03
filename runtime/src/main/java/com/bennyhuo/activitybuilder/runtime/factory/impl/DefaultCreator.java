@@ -1,6 +1,6 @@
-package com.bennyhuo.factory.impl;
+package com.bennyhuo.activitybuilder.runtime.factory.impl;
 
-import com.bennyhuo.factory.ObjectCreator;
+import com.bennyhuo.activitybuilder.runtime.factory.ObjectCreator;
 
 /**
  * Created by benny on 1/31/18.

@@ -1,10 +1,9 @@
 package com.bennyhuo.compiler.result;
 
-import com.bennyhuo.activitybuilder.OnActivityResultListener;
-import com.bennyhuo.annotations.ResultEntity;
+import com.bennyhuo.activitybuilder.runtime.core.OnActivityResultListener;
+import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity;
 import com.bennyhuo.compiler.utils.JavaTypes;
 import com.bennyhuo.compiler.utils.KotlinTypes;
-import com.bennyhuo.compiler.utils.Utils;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -95,7 +94,7 @@ public class ActivityResultClass {
             argsKt.add(KotlinTypes.RUNTIME_UTILS);
             argsKt.add(resultEntity.name());
 
-            argTypeNames.add(Utils.toKotlinType(typeMirror));
+            argTypeNames.add(KotlinTypes.toKotlinType(typeMirror));
 
             finishWithResultMethodBuilder.addParameter(ClassName.get(typeMirror), resultEntity.name());
             finishWithResultMethodBuilder.addStatement("intent.putExtra($S, $L)", resultEntity.name(), resultEntity.name());
@@ -157,7 +156,7 @@ public class ActivityResultClass {
             } catch (MirroredTypeException e) {
                 typeMirror = e.getTypeMirror();
             }
-            funBuilder.addParameter(resultEntity.name(), Utils.toKotlinType(typeMirror));
+            funBuilder.addParameter(resultEntity.name(), KotlinTypes.toKotlinType(typeMirror));
             funBuilder.addStatement("intent.putExtra(%S, %L)", resultEntity.name(), resultEntity.name());
         }
         funBuilder.addStatement("setResult(1, intent)");

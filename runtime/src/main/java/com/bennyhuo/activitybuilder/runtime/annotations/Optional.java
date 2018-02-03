@@ -1,7 +1,7 @@
-package com.bennyhuo.annotations;
+package com.bennyhuo.activitybuilder.runtime.annotations;
 
-import com.bennyhuo.factory.ObjectCreator;
-import com.bennyhuo.factory.impl.DefaultCreator;
+import com.bennyhuo.activitybuilder.runtime.factory.ObjectCreator;
+import com.bennyhuo.activitybuilder.runtime.factory.impl.DefaultCreator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

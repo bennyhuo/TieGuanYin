@@ -1,6 +1,6 @@
 package com.bennyhuo.compiler.basic;
 
-import com.bennyhuo.annotations.GenerateBuilder;
+import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder;
 import com.bennyhuo.compiler.result.ActivityResultClass;
 import com.bennyhuo.compiler.utils.Utils;
 import com.squareup.javapoet.JavaFile;
@@ -33,7 +33,7 @@ public class ActivityClass {
     private static final String METHOD_NAME = "open";
     private static final String METHOD_NAME_NO_OPTIONAL = "openWithoutOptional";
     private static final String METHOD_NAME_FOR_OPTIONAL = "openWithOptional";
-    private static final String METHOD_NAME_SEPERATOR = "And";
+    private static final String METHOD_NAME_SEPARATOR = "And";
     private static final String EXT_FUN_NAME_PREFIX = "open";
     private static final String POSIX = "Builder";
 
@@ -136,7 +136,7 @@ public class ActivityClass {
                     names.add(Utils.capitalize(binding.getName()));
                 }
                 method.endWithResult(activityResultClass);
-                method.renameTo(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPERATOR));
+                method.renameTo(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPARATOR));
                 typeBuilder.addMethod(method.build());
             }
         }

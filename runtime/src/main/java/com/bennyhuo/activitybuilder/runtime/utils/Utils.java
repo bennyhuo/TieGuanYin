@@ -1,4 +1,4 @@
-package com.bennyhuo.utils;
+package com.bennyhuo.activitybuilder.runtime.utils;
 
 import android.os.Bundle;
 

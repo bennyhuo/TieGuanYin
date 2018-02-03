@@ -2,10 +2,10 @@ package com.bennyhuo.activitybuilder
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.bennyhuo.annotations.GenerateBuilder
-import com.bennyhuo.annotations.Optional
-import com.bennyhuo.annotations.Required
-import com.bennyhuo.factory.ObjectCreator
+import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder
+import com.bennyhuo.activitybuilder.runtime.annotations.Optional
+import com.bennyhuo.activitybuilder.runtime.annotations.Required
+import com.bennyhuo.activitybuilder.runtime.factory.ObjectCreator
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.Serializable
 

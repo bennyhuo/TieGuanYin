@@ -1,15 +1,13 @@
 package com.bennyhuo.compiler.basic;
 
-import com.bennyhuo.activitybuilder.ActivityBuilder;
+import com.bennyhuo.activitybuilder.runtime.core.ActivityBuilder;
 import com.bennyhuo.compiler.result.ActivityResultClass;
 import com.bennyhuo.compiler.utils.KotlinTypes;
-import com.bennyhuo.compiler.utils.Utils;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
 import com.squareup.kotlinpoet.ParameterSpec;
 import com.squareup.kotlinpoet.TypeName;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import kotlin.Unit;
@@ -19,16 +17,6 @@ import kotlin.Unit;
  */
 
 public class KotlinOpenMethod {
-
-    private static Field field;
-    static {
-        try {
-            field = FunSpec.Builder.class.getDeclaredField("name");
-            field.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-    }
 
     private String builderClassName;
     private FunSpec.Builder methodBuilder;
@@ -50,7 +38,7 @@ public class KotlinOpenMethod {
 
     public void visitBinding(RequiredField binding){
         String name = binding.getName();
-        TypeName className = Utils.toKotlinType(binding.getSymbol().type);
+        TypeName className = KotlinTypes.toKotlinType(binding.getSymbol().type);
         if(!binding.isRequired()){
             className = className.asNullable();
             methodBuilder.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
@@ -79,21 +67,5 @@ public class KotlinOpenMethod {
 
     public FunSpec build() {
         return methodBuilder.build();
-    }
-
-    public void renameTo(String newName){
-        try {
-            field.set(methodBuilder, newName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public KotlinOpenMethod copy(String name){
-        KotlinOpenMethod openMethod = new KotlinOpenMethod(activityClass, builderClassName, name);
-        for (RequiredField visitedBinding : visitedBindings) {
-            openMethod.visitBinding(visitedBinding);
-        }
-        return openMethod;
     }
 }

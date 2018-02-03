@@ -1,8 +1,8 @@
 package com.bennyhuo.compiler;
 
-import com.bennyhuo.annotations.GenerateBuilder;
-import com.bennyhuo.annotations.Optional;
-import com.bennyhuo.annotations.Required;
+import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder;
+import com.bennyhuo.activitybuilder.runtime.annotations.Optional;
+import com.bennyhuo.activitybuilder.runtime.annotations.Required;
 import com.bennyhuo.compiler.basic.ActivityClass;
 import com.bennyhuo.compiler.basic.OptionalField;
 import com.bennyhuo.compiler.basic.RequiredField;

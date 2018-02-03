@@ -1,4 +1,4 @@
-package com.bennyhuo.factory;
+package com.bennyhuo.activitybuilder.runtime.factory;
 
 /**
  * Created by benny on 1/31/18.

@@ -1,6 +1,6 @@
 package com.bennyhuo.compiler.basic;
 
-import com.bennyhuo.activitybuilder.ActivityBuilder;
+import com.bennyhuo.activitybuilder.runtime.core.ActivityBuilder;
 import com.bennyhuo.compiler.result.ActivityResultClass;
 import com.bennyhuo.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;

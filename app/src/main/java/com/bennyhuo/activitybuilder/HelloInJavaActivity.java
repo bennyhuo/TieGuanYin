@@ -6,10 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.bennyhuo.annotations.GenerateBuilder;
-import com.bennyhuo.annotations.Optional;
-import com.bennyhuo.annotations.Required;
-import com.bennyhuo.annotations.ResultEntity;
+import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder;
+import com.bennyhuo.activitybuilder.runtime.annotations.Optional;
+import com.bennyhuo.activitybuilder.runtime.annotations.Required;
+import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity;
 
 /**
  * Created by benny on 1/29/18.

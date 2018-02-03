@@ -1,9 +1,9 @@
 package com.bennyhuo.compiler.basic;
 
-import com.bennyhuo.activitybuilder.ActivityBuilder;
-import com.bennyhuo.activitybuilder.OnActivityCreateListener;
-import com.bennyhuo.utils.Utils;
-import com.squareup.javapoet.ClassName;
+import com.bennyhuo.activitybuilder.runtime.core.ActivityBuilder;
+import com.bennyhuo.activitybuilder.runtime.core.OnActivityCreateListener;
+import com.bennyhuo.compiler.utils.JavaTypes;
+import com.bennyhuo.compiler.utils.Utils;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -32,36 +32,31 @@ public class InjectMethod {
         onActivityCreatedMethodBuilder = MethodSpec.methodBuilder("onActivityCreated")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get("android.app", "Activity"), "activity")
-                .addParameter(ClassName.get("android.os", "Bundle"), "savedInstanceState")
+                .addParameter(JavaTypes.ACTIVITY, "activity")
+                .addParameter(JavaTypes.BUNDLE, "savedInstanceState")
                 .returns(TypeName.VOID)
                 .beginControlFlow("if(activity instanceof $T)", activityClass.getType())
                 .addStatement("$T typedActivity = ($T) activity", activityClass.getType(), activityClass.getType())
-                .addStatement("$T extras = activity.getIntent().getExtras()", ClassName.get("android.os", "Bundle"));
+                .addStatement("$T extras = activity.getIntent().getExtras()", JavaTypes.BUNDLE);
     }
 
     public void visitBinding(RequiredField binding){
         String name = binding.getName();
         Set<Modifier> modifiers = binding.getSymbol().getModifiers();
         Type type = binding.getSymbol().type;
-        TypeName typeName;
-        if (type.isPrimitive()) {
-            typeName = com.bennyhuo.compiler.utils.Utils.toWrapperType(type);
-        } else {
-            typeName = TypeName.get(type);
-        }
+        TypeName typeName = TypeName.get(type).box();
 
         if(!binding.isRequired()) {
             OptionalField optionalField = ((OptionalField)binding);
-            onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S, $L)", typeName, name, Utils.class, typeName, name, optionalField.getValue());
+            onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S, $L)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name, optionalField.getValue());
             onActivityCreatedMethodBuilder.beginControlFlow("if($LValue == null)", name)
                     .addStatement("$LValue = ($T)(new $T().create($T.class))", name, type, optionalField.getCreator(), typeName)
                     .endControlFlow();
         } else {
-            onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S)", typeName, name, Utils.class, typeName, name);
+            onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name);
         }
         if (modifiers.contains(Modifier.PRIVATE)) {
-            onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($LValue)", com.bennyhuo.compiler.utils.Utils.capitalize(name), name);
+            onActivityCreatedMethodBuilder.addStatement("typedActivity.set$L($LValue)", Utils.capitalize(name), name);
         } else {
             onActivityCreatedMethodBuilder.addStatement("typedActivity.$L = $LValue", name, name);
         }
