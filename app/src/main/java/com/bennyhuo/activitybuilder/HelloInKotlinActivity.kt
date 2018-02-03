@@ -11,7 +11,8 @@ import com.bennyhuo.annotations.ResultEntity
 /**
  * Created by benny on 1/29/18.
  */
-@GenerateBuilder(forResult = true, resultTypes = [(ResultEntity(name = "java", type = String::class)), (ResultEntity(name = "kotlin", type = Int::class))])
+@GenerateBuilder(forResult = true,
+        resultTypes = [(ResultEntity(name = "java", type = String::class)), (ResultEntity(name = "kotlin", type = Int::class))])
 class HelloInKotlinActivity : AppCompatActivity() {
 
     @Required

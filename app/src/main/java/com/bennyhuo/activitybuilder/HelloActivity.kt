@@ -52,4 +52,8 @@ class HelloActivity: AppCompatActivity() {
     override fun finish() {
         super.finish()
     }
+
+    companion object {
+
+    }
 }

@@ -9,6 +9,7 @@ import com.squareup.javapoet.ClassName;
 public class JavaTypes {
     public static final ClassName INTENT = ClassName.get("android.content", "Intent");
     public static final ClassName BUNDLE = ClassName.get("android.os", "Bundle");
+    public static final ClassName ACTIVITY = ClassName.get("android.app", "Activity");
 
 
     public static final ClassName RUNTIME_UTILS = ClassName.get("com.bennyhuo.utils", "Utils");

@@ -23,6 +23,8 @@ import javax.lang.model.util.Types;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
+import kotlin.Metadata;
+
 /**
  * Created by benny on 1/29/18.
  */
@@ -32,6 +34,7 @@ public class ActivityClass {
     private static final String METHOD_NAME_NO_OPTIONAL = "openWithoutOptional";
     private static final String METHOD_NAME_FOR_OPTIONAL = "openWithOptional";
     private static final String METHOD_NAME_SEPERATOR = "And";
+    private static final String EXT_FUN_NAME_PREFIX = "open";
     private static final String POSIX = "Builder";
 
     private ProcessingEnvironment env;
@@ -40,16 +43,22 @@ public class ActivityClass {
     private TreeSet<RequiredField> requiredBindings = new TreeSet<>();
     private ActivityResultClass activityResultClass;
     private boolean isKotlin;
+    private boolean forceJava;
 
-    public ActivityClass(ProcessingEnvironment env, TypeElement type, boolean isKotlin) {
+    public ActivityClass(ProcessingEnvironment env, TypeElement type) {
         this.env = env;
         this.type = type;
-        this.isKotlin = isKotlin;
+
+        Metadata metadata = type.getAnnotation(Metadata.class);
+        //如果有这个注解，说明就是 Kotlin 类。
+        isKotlin = metadata != null;
 
         GenerateBuilder generateBuilder = type.getAnnotation(GenerateBuilder.class);
         if(generateBuilder.forResult()){
             activityResultClass = new ActivityResultClass(getPackage(), type, generateBuilder.resultTypes());
         }
+
+        forceJava = generateBuilder.forceJava();
     }
 
     public void addSymbol(RequiredField binding) {
@@ -86,11 +95,16 @@ public class ActivityClass {
 
 
     public void brewJava(Filer filer){
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName(getType().asType()) + POSIX)
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+
+        KotlinOpenMethod kotlinOpenMethod = new KotlinOpenMethod(this, simpleName(getType().asType()) + POSIX, EXT_FUN_NAME_PREFIX + simpleName(getType().asType()));
         OpenMethod openMethod = new OpenMethod(this, METHOD_NAME);
         InjectMethod injectMethod = new InjectMethod(this);
 
         for (RequiredField binding : getRequiredBindings()) {
             openMethod.visitBinding(binding);
+            kotlinOpenMethod.visitBinding(binding);
             injectMethod.visitBinding(binding);
         }
 
@@ -98,15 +112,15 @@ public class ActivityClass {
 
         for (RequiredField optionalBinding : getOptionalBindings()) {
             openMethod.visitBinding(optionalBinding);
+            kotlinOpenMethod.visitBinding(optionalBinding);
             injectMethod.visitBinding(optionalBinding);
         }
 
         openMethod.endWithResult(activityResultClass);
+        kotlinOpenMethod.endWithResult(activityResultClass);
         injectMethod.end();
 
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName(getType().asType()) + POSIX)
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addMethod(injectMethod.build())
+        typeBuilder.addMethod(injectMethod.build())
                 .addMethod(openMethod.build());
 
         ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalBindings());
@@ -132,19 +146,25 @@ public class ActivityClass {
             typeBuilder.addMethod(openMethodNoOptional.build());
         }
 
-        if(activityResultClass != null){
-            typeBuilder.addType(activityResultClass.buildListenerInterface());
-            if (isKotlin) {
-                try {
-                    FileSpec fileSpec = activityResultClass.createKotlinExt();
-                    FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, getPackage(), fileSpec.getName() + ".kt");
-                    Writer writer = fileObject.openWriter();
-                    fileSpec.writeTo(writer);
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
+        if (isKotlin) {
+            FileSpec.Builder fileSpecBuilder = FileSpec.builder(getPackage(), simpleName(type.asType())+ "Ext");
+            fileSpecBuilder.addFunction(kotlinOpenMethod.build());
+            if(activityResultClass != null){
+                typeBuilder.addType(activityResultClass.buildListenerInterface());
+                fileSpecBuilder.addFunction(activityResultClass.buildFinishWithResultExt());
+            }
+            try {
+                FileSpec fileSpec = fileSpecBuilder.build();
+                FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, getPackage(), fileSpec.getName() + ".kt");
+                Writer writer = fileObject.openWriter();
+                fileSpec.writeTo(writer);
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            if(activityResultClass != null){
+                typeBuilder.addType(activityResultClass.buildListenerInterface());
                 typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
             }
         }

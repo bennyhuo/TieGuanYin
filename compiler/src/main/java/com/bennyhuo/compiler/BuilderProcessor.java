@@ -30,8 +30,6 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
-import kotlin.Metadata;
-
 /**
  * Created by benny on 10/2/16.
  */
@@ -51,6 +49,7 @@ public class BuilderProcessor extends AbstractProcessor {
         typeUtils = env.getTypeUtils();
         filer = env.getFiler();
         processingEnvironment = env;
+        Logger.messager = env.getMessager();
     }
 
     @Override
@@ -95,13 +94,7 @@ public class BuilderProcessor extends AbstractProcessor {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
                 if (element.getKind().isClass()) {
-                    Metadata metadata = element.getAnnotation(Metadata.class);
-                    boolean isKotlin = metadata != null;
-                    //如果有这个注解，说明就是 Kotlin 类。
-                    if(metadata != null){
-                        note(element, "element is Kotlin file.");
-                    }
-                    activityClasses.put(element, new ActivityClass(processingEnv, (TypeElement) element, isKotlin));
+                    activityClasses.put(element, new ActivityClass(processingEnv, (TypeElement) element));
                 }
             } catch (Exception e) {
                 logParsingError(element, GenerateBuilder.class, e);

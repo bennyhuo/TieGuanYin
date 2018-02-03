@@ -2,6 +2,7 @@ package com.bennyhuo.compiler.basic;
 
 import com.bennyhuo.activitybuilder.ActivityBuilder;
 import com.bennyhuo.compiler.result.ActivityResultClass;
+import com.bennyhuo.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -51,19 +52,18 @@ public class OpenMethod {
     }
 
     public void endWithResult(ActivityResultClass activityResultClass){
+        methodBuilder.beginControlFlow("if(context instanceof $T)", JavaTypes.ACTIVITY);
         if(activityResultClass != null){
-            ClassName activityClassName = ClassName.get("android.app", "Activity");
-            methodBuilder.beginControlFlow("if(context instanceof $T)", activityClassName)
-                    .addStatement("$T.INSTANCE.startActivityForResult(($T) context, intent, $L)", ActivityBuilder.class, activityClassName, activityResultClass.createOnResultListenerObject())
-                    .endControlFlow()
-                    .beginControlFlow("else")
-                    .addStatement("context.startActivity(intent)")
-                    .endControlFlow();
-
+            methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(($T) context, intent, $L)", ActivityBuilder.class, JavaTypes.ACTIVITY, activityResultClass.createOnResultListenerObject());
             methodBuilder.addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
         } else {
             methodBuilder.addStatement("context.startActivity(intent)");
         }
+        methodBuilder.endControlFlow()
+                .beginControlFlow("else")
+                .addStatement("intent.addFlags($T.FLAG_ACTIVITY_NEW_TASK)", JavaTypes.INTENT)
+                .addStatement("context.startActivity(intent)")
+                .endControlFlow();
         methodBuilder.addStatement("inject()");
     }
 

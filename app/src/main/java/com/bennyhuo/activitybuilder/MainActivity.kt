@@ -17,6 +17,11 @@ class MainActivity : AppCompatActivity() {
                 java, kotlin ->
                 Log.d("test", "java: $java, kotlin: $kotlin")
             }
+
+            openHelloInKotlinActivity(21212) {
+                a: String, b: Int->
+
+            }
         }
     }
 
