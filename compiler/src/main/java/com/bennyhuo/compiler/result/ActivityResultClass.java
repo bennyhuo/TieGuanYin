@@ -1,7 +1,8 @@
 package com.bennyhuo.compiler.result;
 
-import com.bennyhuo.activitybuilder.runtime.core.OnActivityResultListener;
 import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity;
+import com.bennyhuo.activitybuilder.runtime.core.OnActivityResultListener;
+import com.bennyhuo.compiler.basic.ActivityClass;
 import com.bennyhuo.compiler.utils.JavaTypes;
 import com.bennyhuo.compiler.utils.KotlinTypes;
 import com.squareup.javapoet.ClassName;
@@ -16,7 +17,6 @@ import com.squareup.kotlinpoet.TypeNames;
 import java.util.ArrayList;
 
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
 
@@ -29,8 +29,6 @@ public class ActivityResultClass {
 
     private ResultEntity[] resultEntities;
 
-    private TypeElement activityType;
-
     private FunSpec.Builder onResultFunBuilderKt;
     private MethodSpec.Builder onResultMethodBuilder;
     private MethodSpec.Builder interfaceOnResultMethodBuilder;
@@ -38,11 +36,10 @@ public class ActivityResultClass {
 
     private LambdaTypeName onResultLambdaType;
 
-    private String packageName;
+    private ActivityClass activityClass;
 
-    public ActivityResultClass(String packageName, TypeElement activityType, ResultEntity[] resultEntities) {
-        this.packageName = packageName;
-        this.activityType = activityType;
+    public ActivityResultClass(ActivityClass activityClass, ResultEntity[] resultEntities) {
+        this.activityClass = activityClass;
         this.resultEntities = resultEntities;
 
         interfaceOnResultMethodBuilder = MethodSpec.methodBuilder("onResult")
@@ -51,7 +48,7 @@ public class ActivityResultClass {
 
         finishWithResultMethodBuilder = MethodSpec.methodBuilder("finishWithResult")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .addParameter(ClassName.get(activityType), "activity")
+                .addParameter(ClassName.get(activityClass.getType()), "activity")
                 .returns(TypeName.VOID)
                 .addStatement("$T intent = new $T()", JavaTypes.INTENT, JavaTypes.INTENT);
 
@@ -66,16 +63,16 @@ public class ActivityResultClass {
                 .addParameter("bundle", KotlinTypes.BUNDLE)
                 .returns(TypeNames.UNIT);
 
-        onResultMethodBuilder.beginControlFlow("if($L != null)", "on" + activityType.getSimpleName().toString() + "ResultListener");
-        onResultFunBuilderKt.beginControlFlow("if(%L != null)", "on" + activityType.getSimpleName().toString() + "ResultListener");
+        onResultMethodBuilder.beginControlFlow("if($L != null)", "on" + activityClass.simpleName + "ResultListener");
+        onResultFunBuilderKt.beginControlFlow("if(%L != null)", "on" + activityClass.simpleName + "ResultListener");
         StringBuilder statementBuilder = new StringBuilder();
         StringBuilder statementBuilderKt = new StringBuilder();
         ArrayList<Object> args = new ArrayList<>();
         ArrayList<Object> argsKt = new ArrayList<>();
         ArrayList<com.squareup.kotlinpoet.TypeName> argTypeNames = new ArrayList<>();
 
-        args.add("on" + activityType.getSimpleName().toString() + "ResultListener");
-        argsKt.add("on" + activityType.getSimpleName().toString() + "ResultListener");
+        args.add("on" + activityClass.simpleName + "ResultListener");
+        argsKt.add("on" + activityClass.simpleName + "ResultListener");
         for (ResultEntity resultEntity : resultEntities) {
             TypeMirror typeMirror = null;
             try {
@@ -111,23 +108,23 @@ public class ActivityResultClass {
     }
 
     public TypeSpec buildListenerInterface() {
-        return TypeSpec.interfaceBuilder(ClassName.get(packageName, "On" + activityType.getSimpleName().toString() + "ResultListener"))
+        return TypeSpec.interfaceBuilder(ClassName.get(activityClass.packageName, "On" + activityClass.simpleName + "ResultListener"))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addMethod(interfaceOnResultMethodBuilder.build())
                 .build();
     }
 
     public ClassName getListenerClass(){
-        return ClassName.get(packageName + "." +activityType.getSimpleName().toString() + "Builder", "On" + activityType.getSimpleName().toString() + "ResultListener");
+        return ClassName.get(activityClass.packageName + "." +activityClass.simpleName + "Builder", "On" + activityClass.simpleName + "ResultListener");
     }
 
     public com.squareup.kotlinpoet.LambdaTypeName getListenerClassKt() {
-        //return new com.squareup.kotlinpoet.ClassName(packageName + "." + activityType.getSimpleName().toString() + "Builder", "On" + activityType.getSimpleName().toString() + "ResultListener");
+        //return new com.squareup.kotlinpoet.ClassName(packageName + "." + activityClass.simpleName + "Builder", "On" + activityClass.simpleName + "ResultListener");
         return onResultLambdaType;
     }
 
     public String getListenerName(){
-        return "on" + activityType.getSimpleName().toString() + "ResultListener";
+        return "on" + activityClass.simpleName + "ResultListener";
     }
 
     public TypeSpec createOnResultListenerObject() {
@@ -146,7 +143,7 @@ public class ActivityResultClass {
 
     public FunSpec buildFinishWithResultExt() {
         FunSpec.Builder funBuilder = FunSpec.builder("finishWithResult")
-                .receiver(TypeNames.get(activityType.asType()));
+                .receiver(TypeNames.get(activityClass.getType().asType()));
 
         funBuilder.addStatement("val intent = %T()", KotlinTypes.INTENT);
         for (ResultEntity resultEntity : resultEntities) {

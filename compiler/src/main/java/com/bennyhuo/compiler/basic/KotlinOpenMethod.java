@@ -8,8 +8,6 @@ import com.squareup.kotlinpoet.KModifier;
 import com.squareup.kotlinpoet.ParameterSpec;
 import com.squareup.kotlinpoet.TypeName;
 
-import java.util.ArrayList;
-
 import kotlin.Unit;
 
 /**
@@ -21,7 +19,6 @@ public class KotlinOpenMethod {
     private String builderClassName;
     private FunSpec.Builder methodBuilder;
     private ActivityClass activityClass;
-    private ArrayList<RequiredField> visitedBindings = new ArrayList<>();
 
     public KotlinOpenMethod(ActivityClass activityClass, String builderClassName, String name) {
 
@@ -46,7 +43,6 @@ public class KotlinOpenMethod {
             methodBuilder.addParameter(name, className);
         }
         methodBuilder.addStatement("intent.putExtra(%S, %L)", name, name);
-        visitedBindings.add(binding);
     }
 
     public void endWithResult(ActivityResultClass activityResultClass){
@@ -62,7 +58,7 @@ public class KotlinOpenMethod {
                 .addStatement("intent.addFlags(%T.FLAG_ACTIVITY_NEW_TASK)", KotlinTypes.INTENT)
                 .addStatement("startActivity(intent)")
                 .endControlFlow();
-        methodBuilder.addStatement("%T.inject()", new com.squareup.kotlinpoet.ClassName(activityClass.getPackage(), builderClassName));
+        methodBuilder.addStatement("%T.inject()", new com.squareup.kotlinpoet.ClassName(activityClass.packageName, builderClassName));
     }
 
     public FunSpec build() {

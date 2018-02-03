@@ -1,4 +1,4 @@
-package com.bennyhuo.compiler;
+package com.bennyhuo.compiler.utils;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;

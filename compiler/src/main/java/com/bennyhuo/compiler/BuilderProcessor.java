@@ -6,6 +6,8 @@ import com.bennyhuo.activitybuilder.runtime.annotations.Required;
 import com.bennyhuo.compiler.basic.ActivityClass;
 import com.bennyhuo.compiler.basic.OptionalField;
 import com.bennyhuo.compiler.basic.RequiredField;
+import com.bennyhuo.compiler.utils.Logger;
+import com.bennyhuo.compiler.utils.TypeUtils;
 import com.google.auto.common.SuperficialValidation;
 import com.google.auto.service.AutoService;
 import com.sun.tools.javac.code.Symbol;
@@ -27,7 +29,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 /**
@@ -38,17 +39,15 @@ public class BuilderProcessor extends AbstractProcessor {
     public static final String TAG = "BuilderProcessor";
 
     private Elements elementUtils;
-    private Types typeUtils;
     private Filer filer;
-    private ProcessingEnvironment processingEnvironment;
 
     @Override
     public synchronized void init(ProcessingEnvironment env) {
         super.init(env);
         elementUtils = env.getElementUtils();
-        typeUtils = env.getTypeUtils();
         filer = env.getFiler();
-        processingEnvironment = env;
+
+        TypeUtils.types = env.getTypeUtils();
         Logger.messager = env.getMessager();
     }
 
@@ -94,7 +93,7 @@ public class BuilderProcessor extends AbstractProcessor {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
                 if (element.getKind().isClass()) {
-                    activityClasses.put(element, new ActivityClass(processingEnv, (TypeElement) element));
+                    activityClasses.put(element, new ActivityClass((TypeElement) element));
                 }
             } catch (Exception e) {
                 logParsingError(element, GenerateBuilder.class, e);
