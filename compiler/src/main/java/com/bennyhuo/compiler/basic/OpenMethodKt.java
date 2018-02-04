@@ -17,20 +17,25 @@ import kotlin.Unit;
 public class OpenMethodKt {
 
     private String builderClassName;
-    private FunSpec.Builder methodBuilder;
+    private FunSpec.Builder openExtFunBuilderForContext;
+    private FunSpec.Builder openExtFunBuilderForView;
     private ActivityClass activityClass;
 
     public OpenMethodKt(ActivityClass activityClass, String builderClassName, String name) {
 
         this.activityClass = activityClass;
         this.builderClassName = builderClassName;
-        methodBuilder = FunSpec.builder(name)
+        openExtFunBuilderForContext = FunSpec.builder(name)
                 .receiver(KotlinTypes.CONTEXT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class)
-                .addStatement("%T.INSTANCE.init(this)", ActivityBuilder.class);
+                .addStatement("%T.INSTANCE.init(this)", ActivityBuilder.class)
+                .addStatement("val intent = %T(this, %T::class.java)", KotlinTypes.INTENT, activityClass.getType());
 
-        methodBuilder.addStatement("val intent = %T(this, %T::class.java)", KotlinTypes.INTENT, activityClass.getType());
+        openExtFunBuilderForView = FunSpec.builder(name)
+                .receiver(KotlinTypes.VIEW)
+                .addModifiers(KModifier.PUBLIC)
+                .returns(Unit.class);
     }
 
     public void visitField(RequiredField binding){
@@ -38,30 +43,42 @@ public class OpenMethodKt {
         TypeName className = KotlinTypes.toKotlinType(binding.getSymbol().type);
         if(!binding.isRequired()){
             className = className.asNullable();
-            methodBuilder.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
+            openExtFunBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
         } else {
-            methodBuilder.addParameter(name, className);
+            openExtFunBuilderForContext.addParameter(name, className);
         }
-        methodBuilder.addStatement("intent.putExtra(%S, %L)", name, name);
+        openExtFunBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
     }
 
     public void endWithResult(ActivityResultClass activityResultClass){
-        methodBuilder.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
+        openExtFunBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
         if(activityResultClass != null){
-            methodBuilder.addStatement("%T.INSTANCE.startActivityForResult(this, intent, %L)", ActivityBuilder.class, activityResultClass.createOnResultListenerObjectKt());
-            methodBuilder.addParameter(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable());
+            openExtFunBuilderForContext.addStatement("%T.INSTANCE.startActivityForResult(this, intent, %L)", ActivityBuilder.class, activityResultClass.createOnResultListenerObjectKt());
+            openExtFunBuilderForContext.addParameter(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable());
         } else {
-            methodBuilder.addStatement("startActivity(intent)");
+            openExtFunBuilderForContext.addStatement("startActivity(intent)");
         }
-        methodBuilder.endControlFlow()
+        openExtFunBuilderForContext.endControlFlow()
                 .beginControlFlow("else")
                 .addStatement("intent.addFlags(%T.FLAG_ACTIVITY_NEW_TASK)", KotlinTypes.INTENT)
                 .addStatement("startActivity(intent)")
                 .endControlFlow();
-        methodBuilder.addStatement("%T.inject()", new com.squareup.kotlinpoet.ClassName(activityClass.packageName, builderClassName));
+        openExtFunBuilderForContext.addStatement("%T.inject()", new com.squareup.kotlinpoet.ClassName(activityClass.packageName, builderClassName));
+
+        StringBuilder paramBuilder = new StringBuilder();
+        for (ParameterSpec parameterSpec : openExtFunBuilderForContext.getParameters$kotlinpoet()) {
+            paramBuilder.append(parameterSpec.getName()).append(",");
+            openExtFunBuilderForView.addParameter(parameterSpec);
+        }
+        paramBuilder.deleteCharAt(paramBuilder.length() - 1);
+        openExtFunBuilderForView.addStatement("context.%L(%L)", openExtFunBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
     }
 
-    public FunSpec build() {
-        return methodBuilder.build();
+    public FunSpec buildForContext() {
+        return openExtFunBuilderForContext.build();
+    }
+
+    public FunSpec buildForView() {
+        return openExtFunBuilderForView.build();
     }
 }

@@ -17,6 +17,7 @@ public class KotlinTypes {
     public static final ClassName INTENT = new ClassName("android.content", "Intent");
     public static final ClassName ACTIVITY = new ClassName("android.app", "Activity");
     public static final ClassName CONTEXT = new ClassName("android.content", "Context");
+    public static final ClassName VIEW = new ClassName("android.view", "View");
 
     public static final ClassName RUNTIME_UTILS = new ClassName("com.bennyhuo.activitybuilder.runtime.utils", "Utils");
 
