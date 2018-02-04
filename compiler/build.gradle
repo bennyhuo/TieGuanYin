@@ -20,6 +20,14 @@ targetCompatibility = "1.7"
 apply plugin: 'maven'
 group='com.github.enbandari'
 
+jar {
+    from {
+        fileTree(dir: 'libs', include: ['*.jar']).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
