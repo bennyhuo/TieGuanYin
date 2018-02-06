@@ -93,6 +93,7 @@ public class BuilderProcessor extends AbstractProcessor {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
                 if (element.getKind().isClass()) {
+                    note(element, element.toString());
                     activityClasses.put(element, new ActivityClass((TypeElement) element));
                 }
             } catch (Exception e) {

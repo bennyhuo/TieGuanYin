@@ -14,16 +14,20 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setTitle(this.javaClass.simpleName)
         openJavaActivity.setOnClickListener {
-            JavaActivityBuilder.open(this@MainActivity, 1234, true){
+            JavaUtils.open(this@MainActivity, 1234, true){
                 java, kotlin ->
-                toast("Result From JavaActivity: java=$java, kotlin=$kotlin")
+                toast("Result From JavaActivity: java=$java, kotlin=$kotlin" )
+                textView.text = "Result From JavaActivity: java=$java, kotlin=$kotlin"
             }
         }
 
         openKotlinActivity.setOnClickListener {
+            Log.d("Main", "leave: "+this@MainActivity.toString())
             openKotlinActivity(1234){
                 java, kotlin ->
                 toast("Result From KotlinActivity: java=$java, kotlin=$kotlin")
+                textView.text = "Result From JavaActivity: java=$java, kotlin=$kotlin"
+                Log.d("Main", "back: " + this@MainActivity.toString())
             }
         }
 
