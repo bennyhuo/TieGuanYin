@@ -16,7 +16,7 @@ public class ResultFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode != Activity.RESULT_CANCELED && data != null){
+        if(onActivityResultListener != null && resultCode != Activity.RESULT_CANCELED && data != null){
             onActivityResultListener.onResult(data.getExtras());
         }
         onActivityResultListener = null;
