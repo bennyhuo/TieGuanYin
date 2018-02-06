@@ -147,6 +147,7 @@ public class ActivityClass {
         openMethodKt.endWithResult(activityResultClass);
         fileSpecBuilder.addFunction(openMethodKt.buildForContext());
         fileSpecBuilder.addFunction(openMethodKt.buildForView());
+        fileSpecBuilder.addFunction(openMethodKt.buildForFragment());
     }
 
     public void brew(Filer filer) {

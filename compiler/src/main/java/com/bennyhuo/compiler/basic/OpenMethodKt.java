@@ -19,6 +19,7 @@ public class OpenMethodKt {
     private String builderClassName;
     private FunSpec.Builder openExtFunBuilderForContext;
     private FunSpec.Builder openExtFunBuilderForView;
+    private FunSpec.Builder openExtFunBuilderForFragment;
     private ActivityClass activityClass;
 
     public OpenMethodKt(ActivityClass activityClass, String builderClassName, String name) {
@@ -34,6 +35,11 @@ public class OpenMethodKt {
 
         openExtFunBuilderForView = FunSpec.builder(name)
                 .receiver(KotlinTypes.VIEW)
+                .addModifiers(KModifier.PUBLIC)
+                .returns(Unit.class);
+
+        openExtFunBuilderForFragment = FunSpec.builder(name)
+                .receiver(KotlinTypes.FRAGMENT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
     }
@@ -69,9 +75,11 @@ public class OpenMethodKt {
         for (ParameterSpec parameterSpec : openExtFunBuilderForContext.getParameters$kotlinpoet()) {
             paramBuilder.append(parameterSpec.getName()).append(",");
             openExtFunBuilderForView.addParameter(parameterSpec);
+            openExtFunBuilderForFragment.addParameter(parameterSpec);
         }
         paramBuilder.deleteCharAt(paramBuilder.length() - 1);
         openExtFunBuilderForView.addStatement("context.%L(%L)", openExtFunBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
+        openExtFunBuilderForFragment.addStatement("activity?.%L(%L)", openExtFunBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
     }
 
     public FunSpec buildForContext() {
@@ -80,5 +88,9 @@ public class OpenMethodKt {
 
     public FunSpec buildForView() {
         return openExtFunBuilderForView.build();
+    }
+
+    public FunSpec buildForFragment() {
+        return openExtFunBuilderForFragment.build();
     }
 }
