@@ -39,8 +39,8 @@ public class ResultFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         if(onActivityResultListener == null && savedInstanceState != null){
             Parcelable savedState = savedInstanceState.getParcelable(SAVE_STATE_KEY);
             if(savedState != null && savedState instanceof SavedListenerState){

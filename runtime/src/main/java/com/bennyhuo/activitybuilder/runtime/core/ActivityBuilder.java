@@ -94,9 +94,19 @@ public class ActivityBuilder {
         ListenerEnv env = new ListenerEnv(onActivityResultListener);
         try {
             Field realListenerField = onActivityResultListener.getClass().getDeclaredFields()[0];
+            realListenerField.setAccessible(true);
 
             Object obj = realListenerField.get(onActivityResultListener);
             Class cls = obj.getClass();
+
+            while (!cls.isAnonymousClass()){
+                Log.e("listenerEnv", "find probable class: " + cls.toString());
+                realListenerField = cls.getDeclaredFields()[0];
+                realListenerField.setAccessible(true);
+                obj = realListenerField.get(obj);
+                cls = obj.getClass();
+            }
+
             while (cls.getEnclosingClass() != null){
                 Class enclosingClass = cls.getEnclosingClass();
                 Object enclosingObj = null;
@@ -146,7 +156,9 @@ public class ActivityBuilder {
                 if(resultFragment.getActivity() == null){
                     Log.e("listenerEnv", "activity == null");
                 } else {
-                    listenerEnv.activityField.apply(resultFragment.getActivity());
+                    if(listenerEnv.activityField != null) {
+                        listenerEnv.activityField.apply(resultFragment.getActivity());
+                    }
                     for (ViewField viewField: listenerEnv.viewFields) {
                         viewField.apply(resultFragment.getActivity().findViewById(viewField.id));
                     }

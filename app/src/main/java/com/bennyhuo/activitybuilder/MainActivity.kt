@@ -4,20 +4,34 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.widget.Button
+import com.bennyhuo.activitybuilder.utils.startJavaActivity
 import com.bennyhuo.activitybuilder.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
+    var x = 2
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setTitle(this.javaClass.simpleName)
+
+        val button = findViewById<Button>(R.id.openJavaActivity)
+
         openJavaActivity.setOnClickListener {
-            JavaUtils.open(this@MainActivity, 1234, true){
+            x ++
+//            JavaUtils.open(this@MainActivity, 1234, true){
+//                java, kotlin ->
+//                toast("Result From JavaActivity: java=$java, kotlin=$kotlin" )
+//                textView.text = "Result From JavaActivity: java=$java, kotlin=$kotlin, x=$x"
+//            }
+            textView.startJavaActivity(1234, true){
                 java, kotlin ->
                 toast("Result From JavaActivity: java=$java, kotlin=$kotlin" )
-                textView.text = "Result From JavaActivity: java=$java, kotlin=$kotlin"
+                textView.text = "Result From JavaActivity: java=$java, kotlin=$kotlin, x=$x"
+                button.setText(java)
             }
         }
 
