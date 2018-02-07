@@ -1,22 +1,49 @@
-apply plugin: 'java'
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
 
 dependencies {
-    compileOnly "com.google.android:android:4.1.1.4"
-    //compileOnly "com.google.android:support-v4:r7"
+    compileOnly 'com.android.support:support-fragment:27.0.2'
+    api project(":annotations")
 }
-
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
 
 //region jitpack
-apply plugin: 'maven'
+apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.enbandari'
 
-task sourcesJar(type: Jar, dependsOn: classes) {
+// build a jar with source files
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
-    from sourceSets.main.allSource
 }
 
+task javadoc(type: Javadoc) {
+    failOnError  false
+    source = android.sourceSets.main.java.sourceFiles
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
+}
+
+// build a jar with javadoc
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
@@ -25,20 +52,5 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives sourcesJar
     archives javadocJar
-}
-
-// To specify a license in the pom:
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution 'repo'
-                }
-            }
-        }
-    }
 }
 //endregion

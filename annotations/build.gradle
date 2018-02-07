@@ -1,32 +1,15 @@
-import org.gradle.internal.jvm.Jvm
-
 apply plugin: 'java'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':annotations')
-    implementation 'com.google.auto.service:auto-service:1.0-rc4'
-    implementation 'com.google.auto:auto-common:0.8'
-    implementation 'com.squareup:javapoet:1.9.0'
-    //implementation 'com.squareup:kotlinpoet:0.6.0'
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    compileOnly files(Jvm.current().getToolsJar())
 }
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+targetCompatibility = '1.7'
+sourceCompatibility = '1.7'
 
 //region jitpack
 apply plugin: 'maven'
 group='com.github.enbandari'
-
-jar {
-    from {
-        fileTree(dir: 'libs', include: ['*.jar']).collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
-}
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -57,4 +40,4 @@ install {
         }
     }
 }
-//endregion
+//endreg

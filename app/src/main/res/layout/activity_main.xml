@@ -28,6 +28,13 @@
         android:text="openGenerateBothActivity"
         android:textAllCaps="false"/>
 
+    <Button
+        android:id="@+id/openFragmentContainerActivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="openFragmentContainerActivity"
+        android:textAllCaps="false"/>
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"

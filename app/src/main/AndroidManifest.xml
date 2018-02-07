@@ -21,6 +21,7 @@
             android:theme="@style/AppTheme"/>
         <activity android:name=".JavaActivity"/>
         <activity android:name=".KotlinActivity"/>
+        <activity android:name=".FragmentContainerActivity"/>
     </application>
 
 </manifest>

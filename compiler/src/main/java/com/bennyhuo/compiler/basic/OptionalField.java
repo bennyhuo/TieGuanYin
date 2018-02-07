@@ -1,12 +1,9 @@
 package com.bennyhuo.compiler.basic;
 
-import com.bennyhuo.activitybuilder.runtime.annotations.Optional;
+import com.bennyhuo.activitybuilder.annotations.Optional;
 import com.squareup.javapoet.ClassName;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
-
-import javax.lang.model.type.MirroredTypeException;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Created by benny on 1/31/18.
@@ -15,17 +12,11 @@ import javax.lang.model.type.TypeMirror;
 public class OptionalField extends RequiredField {
 
     private Object value;
-    private TypeMirror creator;
 
     public OptionalField(Symbol.VarSymbol symbol) {
         super(symbol, false);
         Optional optional = symbol.getAnnotation(Optional.class);
         retrieveDefaultValue(symbol.type, optional);
-        try {
-            optional.creator();
-        } catch (MirroredTypeException e) {
-            creator = e.getTypeMirror();
-        }
     }
 
     private void retrieveDefaultValue(Type type, Optional optional) {
@@ -55,9 +46,5 @@ public class OptionalField extends RequiredField {
 
     public Object getValue() {
         return value;
-    }
-
-    public TypeMirror getCreator() {
-        return creator;
     }
 }

@@ -1,7 +1,8 @@
-package com.bennyhuo.compiler.basic;
+package com.bennyhuo.compiler.activity;
 
-import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder;
-import com.bennyhuo.activitybuilder.runtime.annotations.GenerateMode;
+import com.bennyhuo.activitybuilder.annotations.ActivityBuilder;
+import com.bennyhuo.activitybuilder.annotations.GenerateMode;
+import com.bennyhuo.compiler.basic.RequiredField;
 import com.bennyhuo.compiler.result.ActivityResultClass;
 import com.bennyhuo.compiler.utils.TypeUtils;
 import com.bennyhuo.compiler.utils.Utils;
@@ -28,11 +29,11 @@ import kotlin.Metadata;
  */
 
 public class ActivityClass {
-    private static final String METHOD_NAME = "open";
-    private static final String METHOD_NAME_NO_OPTIONAL = "openWithoutOptional";
-    private static final String METHOD_NAME_FOR_OPTIONAL = "openWithOptional";
+    private static final String METHOD_NAME = "start";
+    private static final String METHOD_NAME_NO_OPTIONAL = METHOD_NAME + "WithoutOptional";
+    private static final String METHOD_NAME_FOR_OPTIONAL = METHOD_NAME + "WithOptional";
     private static final String METHOD_NAME_SEPARATOR = "And";
-    private static final String EXT_FUN_NAME_PREFIX = "open";
+    private static final String EXT_FUN_NAME_PREFIX = METHOD_NAME;
     private static final String POSIX = "Builder";
 
     private TypeElement type;
@@ -53,11 +54,11 @@ public class ActivityClass {
         //如果有这个注解，说明就是 Kotlin 类。
         boolean isKotlin = metadata != null;
 
-        GenerateBuilder generateBuilder = type.getAnnotation(GenerateBuilder.class);
+        ActivityBuilder generateBuilder = type.getAnnotation(ActivityBuilder.class);
         if(generateBuilder.forResult()){
             activityResultClass = new ActivityResultClass(this, generateBuilder.resultTypes());
         }
-        generateMode = isKotlin ? generateBuilder.mode() : GenerateMode.JavaOnly;
+        generateMode = generateBuilder.mode();
     }
 
     public void addSymbol(RequiredField field) {

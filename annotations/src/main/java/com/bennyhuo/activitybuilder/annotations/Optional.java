@@ -1,4 +1,4 @@
-package com.bennyhuo.activitybuilder.runtime.annotations;
+package com.bennyhuo.activitybuilder.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,6 +10,12 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.CLASS)
-public @interface Required {
+public @interface Optional {
+    String stringValue() default "";
 
+    int intValue() default 0;
+
+    float floatValue() default 0f;
+
+    boolean booleanValue() default false;
 }

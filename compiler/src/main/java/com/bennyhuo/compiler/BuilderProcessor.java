@@ -1,11 +1,13 @@
 package com.bennyhuo.compiler;
 
-import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder;
-import com.bennyhuo.activitybuilder.runtime.annotations.Optional;
-import com.bennyhuo.activitybuilder.runtime.annotations.Required;
-import com.bennyhuo.compiler.basic.ActivityClass;
+import com.bennyhuo.activitybuilder.annotations.ActivityBuilder;
+import com.bennyhuo.activitybuilder.annotations.FragmentBuilder;
+import com.bennyhuo.activitybuilder.annotations.Optional;
+import com.bennyhuo.activitybuilder.annotations.Required;
+import com.bennyhuo.compiler.activity.ActivityClass;
 import com.bennyhuo.compiler.basic.OptionalField;
 import com.bennyhuo.compiler.basic.RequiredField;
+import com.bennyhuo.compiler.fragment.FragmentClass;
 import com.bennyhuo.compiler.utils.Logger;
 import com.bennyhuo.compiler.utils.TypeUtils;
 import com.google.auto.common.SuperficialValidation;
@@ -67,8 +69,10 @@ public class BuilderProcessor extends AbstractProcessor {
 
     private Set<Class<? extends Annotation>> getSupportedAnnotations() {
         Set<Class<? extends Annotation>> annotations = new LinkedHashSet<>();
-        annotations.add(GenerateBuilder.class);
+        annotations.add(ActivityBuilder.class);
+        annotations.add(FragmentBuilder.class);
         annotations.add(Required.class);
+        annotations.add(Optional.class);
         return annotations;
     }
 
@@ -80,34 +84,66 @@ public class BuilderProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
         HashMap<Element, ActivityClass> activityClasses = new HashMap<>();
-        parse(env, activityClasses);
+        parseActivityClass(env, activityClasses);
+
+        HashMap<Element, FragmentClass> fragmentClasses = new HashMap<>();
+        parseFragmentClass(env, fragmentClasses);
+
+        parseActivityFields(env, activityClasses);
+        parseFragmentFields(env, fragmentClasses);
 
         for (ActivityClass activityClass : activityClasses.values()) {
             activityClass.brew(filer);
         }
+
+        for (FragmentClass fragmentClass : fragmentClasses.values()) {
+            fragmentClass.brew(filer);
+        }
         return true;
     }
 
-    private void parse(RoundEnvironment env, HashMap<Element, ActivityClass> activityClasses) {
-        for (Element element : env.getElementsAnnotatedWith(GenerateBuilder.class)) {
+    private void parseFragmentFields(RoundEnvironment env, HashMap<Element, FragmentClass> fragmentClasses){
+        for (Element element : env.getElementsAnnotatedWith(Required.class)) {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
-                if (element.getKind().isClass()) {
-                    note(element, element.toString());
-                    activityClasses.put(element, new ActivityClass((TypeElement) element));
+                if (element.getKind() == ElementKind.FIELD) {
+                    FragmentClass fragmentClass = fragmentClasses.get(element.getEnclosingElement());
+                    if (fragmentClass == null) {
+                        //error(element, "Field " + element + " annotated as Required while " + element.getEnclosingElement() + " not annotated.");
+                    } else {
+                        fragmentClass.addSymbol(new RequiredField((Symbol.VarSymbol) element));
+                    }
                 }
             } catch (Exception e) {
-                logParsingError(element, GenerateBuilder.class, e);
+                logParsingError(element, Required.class, e);
             }
         }
 
+        for (Element element : env.getElementsAnnotatedWith(Optional.class)) {
+            if (!SuperficialValidation.validateElement(element)) continue;
+            try {
+                if (element.getKind() == ElementKind.FIELD) {
+                    FragmentClass fragmentClass = fragmentClasses.get(element.getEnclosingElement());
+                    if (fragmentClass == null) {
+                        //error(element, "Field " + element + " annotated as Optional while " + element.getEnclosingElement() + " not annotated.");
+                    } else {
+                        fragmentClass.addSymbol(new OptionalField((Symbol.VarSymbol) element));
+                    }
+                }
+            } catch (Exception e) {
+                logParsingError(element, Required.class, e);
+            }
+        }
+    }
+
+    private void parseActivityFields(RoundEnvironment env, HashMap<Element, ActivityClass> activityClasses){
         for (Element element : env.getElementsAnnotatedWith(Required.class)) {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
                 if (element.getKind() == ElementKind.FIELD) {
                     ActivityClass activityClass = activityClasses.get(element.getEnclosingElement());
                     if (activityClass == null) {
-                        error(element, "Field " + element + " annotated as Required while " + element.getEnclosingElement() + " not annotated.");
+                        //error(element, "Field " + element + " annotated as Required while " + element.getEnclosingElement() + " not annotated.");
                     } else {
                         activityClass.addSymbol(new RequiredField((Symbol.VarSymbol) element));
                     }
@@ -123,13 +159,41 @@ public class BuilderProcessor extends AbstractProcessor {
                 if (element.getKind() == ElementKind.FIELD) {
                     ActivityClass activityClass = activityClasses.get(element.getEnclosingElement());
                     if (activityClass == null) {
-                        error(element, "Field " + element + " annotated as Optional while " + element.getEnclosingElement() + " not annotated.");
+                        //error(element, "Field " + element + " annotated as Optional while " + element.getEnclosingElement() + " not annotated.");
                     } else {
                         activityClass.addSymbol(new OptionalField((Symbol.VarSymbol) element));
                     }
                 }
             } catch (Exception e) {
                 logParsingError(element, Required.class, e);
+            }
+        }
+    }
+
+    private void parseActivityClass(RoundEnvironment env, HashMap<Element, ActivityClass> activityClasses) {
+        for (Element element : env.getElementsAnnotatedWith(ActivityBuilder.class)) {
+            if (!SuperficialValidation.validateElement(element)) continue;
+            try {
+                if (element.getKind().isClass()) {
+                    note(element, "添加 Activity: "+element.toString());
+                    activityClasses.put(element, new ActivityClass((TypeElement) element));
+                }
+            } catch (Exception e) {
+                logParsingError(element, ActivityBuilder.class, e);
+            }
+        }
+    }
+
+    private void parseFragmentClass(RoundEnvironment env, HashMap<Element, FragmentClass> fragmentClasses) {
+        for (Element element : env.getElementsAnnotatedWith(FragmentBuilder.class)) {
+            if (!SuperficialValidation.validateElement(element)) continue;
+            try {
+                if (element.getKind().isClass()) {
+                    note(element,  "添加 Fragment: " + element.toString());
+                    fragmentClasses.put(element, new FragmentClass((TypeElement) element));
+                }
+            } catch (Exception e) {
+                logParsingError(element, FragmentBuilder.class, e);
             }
         }
     }

@@ -1,7 +1,7 @@
-package com.bennyhuo.compiler.basic;
+package com.bennyhuo.compiler.activity;
 
-import com.bennyhuo.activitybuilder.runtime.core.ActivityBuilder;
-import com.bennyhuo.activitybuilder.runtime.core.OnActivityCreateListener;
+import com.bennyhuo.compiler.basic.OptionalField;
+import com.bennyhuo.compiler.basic.RequiredField;
 import com.bennyhuo.compiler.utils.JavaTypes;
 import com.bennyhuo.compiler.utils.Utils;
 import com.squareup.javapoet.MethodSpec;
@@ -49,9 +49,6 @@ public class InjectMethod {
         if(!binding.isRequired()) {
             OptionalField optionalField = ((OptionalField)binding);
             onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S, $L)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name, optionalField.getValue());
-            onActivityCreatedMethodBuilder.beginControlFlow("if($LValue == null)", name)
-                    .addStatement("$LValue = ($T)(new $T().create($T.class))", name, type, optionalField.getCreator(), typeName)
-                    .endControlFlow();
         } else {
             onActivityCreatedMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name);
         }
@@ -63,13 +60,13 @@ public class InjectMethod {
     }
 
     public void end(){
-        onActivityCreatedMethodBuilder.addStatement("$T.INSTANCE.removeOnActivityCreateListener(this)", ActivityBuilder.class)
+        onActivityCreatedMethodBuilder.addStatement("$T.INSTANCE.removeOnActivityCreateListener(this)", JavaTypes.ACTIVITY_BUILDER)
                 .endControlFlow();
         TypeSpec onActivityCreateListenerType = TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(OnActivityCreateListener.class)
+                .addSuperinterface(JavaTypes.ON_ACTIVITY_CREATE_LISTENER)
                 .addMethod(onActivityCreatedMethodBuilder.build())
                 .build();
-        injectMethodBuilder.addStatement("$T.INSTANCE.addOnActivityCreateListener($L)", ActivityBuilder.class, onActivityCreateListenerType);
+        injectMethodBuilder.addStatement("$T.INSTANCE.addOnActivityCreateListener($L)", JavaTypes.ACTIVITY_BUILDER, onActivityCreateListenerType);
 
     }
 

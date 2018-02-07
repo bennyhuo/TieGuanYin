@@ -2,18 +2,17 @@ package com.bennyhuo.activitybuilder
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder
-import com.bennyhuo.activitybuilder.runtime.annotations.GenerateMode.KotlinOnly
-import com.bennyhuo.activitybuilder.runtime.annotations.Optional
-import com.bennyhuo.activitybuilder.runtime.annotations.Required
-import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity
-import com.bennyhuo.activitybuilder.utils.toast
+import com.bennyhuo.activitybuilder.annotations.ActivityBuilder
+import com.bennyhuo.activitybuilder.annotations.GenerateMode.KotlinOnly
+import com.bennyhuo.activitybuilder.annotations.Optional
+import com.bennyhuo.activitybuilder.annotations.Required
+import com.bennyhuo.activitybuilder.annotations.ResultEntity
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * Created by benny on 1/29/18.
  */
-@GenerateBuilder(forResult = true, mode = KotlinOnly,
+@ActivityBuilder(forResult = true, mode = KotlinOnly,
         resultTypes = [(ResultEntity(name = "java", type = String::class)), (ResultEntity(name = "kotlin", type = Int::class))])
 class KotlinActivity : AppCompatActivity() {
 
@@ -28,10 +27,10 @@ class KotlinActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setTitle(this.javaClass.simpleName)
         openJavaActivity.setOnClickListener {
-            JavaActivityBuilder.open(this@KotlinActivity, 1234, true){
-                java, kotlin ->
-                toast("Result From JavaActivity: java=$java, kotlin=$kotlin")
-            }
+//            JavaActivityBuilder.open(this@KotlinActivity, 1234, true){
+//                java, kotlin ->
+//                toast("Result From JavaActivity: java=$java, kotlin=$kotlin")
+//            }
         }
 
         openKotlinActivity.text = "Finish With java='I'm Kotlin!' & kotlin=12"
@@ -40,7 +39,7 @@ class KotlinActivity : AppCompatActivity() {
         }
 
         openGenerateBothActivity.setOnClickListener {
-            openGenerateBothActivity(30, "bennyhuo", num = 1234)
+//            openGenerateBothActivity(30, "bennyhuo", num = 1234)
         }
     }
 }

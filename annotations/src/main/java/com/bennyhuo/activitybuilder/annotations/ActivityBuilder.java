@@ -1,4 +1,4 @@
-package com.bennyhuo.activitybuilder.runtime.annotations;
+package com.bennyhuo.activitybuilder.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface GenerateBuilder {
+public @interface ActivityBuilder {
     GenerateMode mode() default GenerateMode.Both;
     boolean forResult() default false;
     ResultEntity[] resultTypes() default {};

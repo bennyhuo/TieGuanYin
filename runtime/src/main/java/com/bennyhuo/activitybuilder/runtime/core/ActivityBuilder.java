@@ -39,6 +39,7 @@ public class ActivityBuilder {
             for (OnActivityCreateListener onActivityCreateListener : onActivityCreateListeners) {
                 onActivityCreateListener.onActivityCreated(activity, savedInstanceState);
             }
+            FragmentBuilder.INSTANCE.onActivityCreated(activity);
         }
 
         @Override
@@ -68,7 +69,7 @@ public class ActivityBuilder {
 
         @Override
         public void onActivityDestroyed(Activity activity) {
-
+            FragmentBuilder.INSTANCE.onActivityDestroyed(activity);
         }
     };
 
@@ -118,6 +119,9 @@ public class ActivityBuilder {
                         env.viewFields.add(new ViewField(obj, field, id));
                     } else if(Fragment.class.isAssignableFrom(field.getType())){
                         int id = ((Fragment)field.get(obj)).getId();
+                        env.fragmentFields.add(new FragmentField(obj, field, id));
+                    } else if(android.support.v4.app.Fragment.class.isAssignableFrom(field.getType())){
+                        int id = ((android.support.v4.app.Fragment)field.get(obj)).getId();
                         env.fragmentFields.add(new FragmentField(obj, field, id));
                     } else if(Activity.class.isAssignableFrom(field.getType())){
                         env.activityField = new ActivityField(obj, field);

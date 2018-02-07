@@ -1,6 +1,6 @@
-package com.bennyhuo.compiler.basic;
+package com.bennyhuo.compiler.activity;
 
-import com.bennyhuo.activitybuilder.runtime.core.ActivityBuilder;
+import com.bennyhuo.compiler.basic.RequiredField;
 import com.bennyhuo.compiler.result.ActivityResultClass;
 import com.bennyhuo.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;
@@ -38,7 +38,7 @@ public class OpenMethod {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
                 .addParameter(ClassName.get("android.content", "Context"), "context")
-                .addStatement("$T.INSTANCE.init(context)", ActivityBuilder.class);
+                .addStatement("$T.INSTANCE.init(context)", JavaTypes.ACTIVITY_BUILDER);
 
         ClassName intentClass = ClassName.get("android.content", "Intent");
         methodBuilder.addStatement("$T intent = new $T(context, $T.class)", intentClass, intentClass, activityClass.getType());
@@ -54,7 +54,7 @@ public class OpenMethod {
     public void endWithResult(ActivityResultClass activityResultClass){
         methodBuilder.beginControlFlow("if(context instanceof $T)", JavaTypes.ACTIVITY);
         if(activityResultClass != null){
-            methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(($T) context, intent, $L)", ActivityBuilder.class, JavaTypes.ACTIVITY, activityResultClass.createOnResultListenerObject());
+            methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(($T) context, intent, $L)", JavaTypes.ACTIVITY_BUILDER, JavaTypes.ACTIVITY, activityResultClass.createOnResultListenerObject());
             methodBuilder.addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
         } else {
             methodBuilder.addStatement("context.startActivity(intent)");

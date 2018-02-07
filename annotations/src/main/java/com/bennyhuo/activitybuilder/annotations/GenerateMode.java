@@ -1,4 +1,4 @@
-package com.bennyhuo.activitybuilder.runtime.annotations;
+package com.bennyhuo.activitybuilder.annotations;
 
 /**
  * Created by benny on 2/3/18.
@@ -15,5 +15,10 @@ public enum GenerateMode {
      */
     KotlinOnly,
 
-    Both
+    Both,
+
+    /**
+     * Generate methods according to the source file.
+     */
+    Auto
 }

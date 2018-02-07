@@ -1,6 +1,6 @@
-package com.bennyhuo.compiler.basic;
+package com.bennyhuo.compiler.activity;
 
-import com.bennyhuo.activitybuilder.runtime.core.ActivityBuilder;
+import com.bennyhuo.compiler.basic.RequiredField;
 import com.bennyhuo.compiler.result.ActivityResultClass;
 import com.bennyhuo.compiler.utils.KotlinTypes;
 import com.squareup.kotlinpoet.FunSpec;
@@ -30,7 +30,7 @@ public class OpenMethodKt {
                 .receiver(KotlinTypes.CONTEXT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class)
-                .addStatement("%T.INSTANCE.init(this)", ActivityBuilder.class)
+                .addStatement("%T.INSTANCE.init(this)", KotlinTypes.ACTIVITY_BUILDER)
                 .addStatement("val intent = %T(this, %T::class.java)", KotlinTypes.INTENT, activityClass.getType());
 
         openExtFunBuilderForView = FunSpec.builder(name)
@@ -59,7 +59,7 @@ public class OpenMethodKt {
     public void endWithResult(ActivityResultClass activityResultClass){
         openExtFunBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
         if(activityResultClass != null){
-            openExtFunBuilderForContext.addStatement("%T.INSTANCE.startActivityForResult(this, intent, %L)", ActivityBuilder.class, activityResultClass.createOnResultListenerObjectKt());
+            openExtFunBuilderForContext.addStatement("%T.INSTANCE.startActivityForResult(this, intent, %L)", KotlinTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObjectKt());
             openExtFunBuilderForContext.addParameter(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable());
         } else {
             openExtFunBuilderForContext.addStatement("startActivity(intent)");
@@ -77,7 +77,9 @@ public class OpenMethodKt {
             openExtFunBuilderForView.addParameter(parameterSpec);
             openExtFunBuilderForFragment.addParameter(parameterSpec);
         }
-        paramBuilder.deleteCharAt(paramBuilder.length() - 1);
+        if(paramBuilder.length() > 0) {
+            paramBuilder.deleteCharAt(paramBuilder.length() - 1);
+        }
         openExtFunBuilderForView.addStatement("context.%L(%L)", openExtFunBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
         openExtFunBuilderForFragment.addStatement("activity?.%L(%L)", openExtFunBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
     }

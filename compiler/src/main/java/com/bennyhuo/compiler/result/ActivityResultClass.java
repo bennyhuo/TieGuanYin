@@ -1,8 +1,7 @@
 package com.bennyhuo.compiler.result;
 
-import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity;
-import com.bennyhuo.activitybuilder.runtime.core.OnActivityResultListener;
-import com.bennyhuo.compiler.basic.ActivityClass;
+import com.bennyhuo.activitybuilder.annotations.ResultEntity;
+import com.bennyhuo.compiler.activity.ActivityClass;
 import com.bennyhuo.compiler.utils.JavaTypes;
 import com.bennyhuo.compiler.utils.KotlinTypes;
 import com.squareup.javapoet.ClassName;
@@ -94,12 +93,14 @@ public class ActivityResultClass {
             args.add(resultClass.box());
             args.add(resultEntity.name());
         }
-        statementBuilder.deleteCharAt(statementBuilder.length() - 1);
+        if (statementBuilder.length() > 0){
+            statementBuilder.deleteCharAt(statementBuilder.length() - 1);
+        }
         onResultMethodBuilder.addStatement("$L.onResult(" + statementBuilder.toString() + ")", args.toArray());
         onResultMethodBuilder.endControlFlow();
 
         return TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(OnActivityResultListener.class)
+                .addSuperinterface(JavaTypes.ON_ACTIVITY_RESULT_LISTENER)
                 .addMethod(onResultMethodBuilder.build())
                 .build();
     }
@@ -123,13 +124,14 @@ public class ActivityResultClass {
             argsKt.add(KotlinTypes.RUNTIME_UTILS);
             argsKt.add(resultEntity.name());
         }
-        statementBuilderKt.deleteCharAt(statementBuilderKt.length() - 1);
-
+        if(statementBuilderKt.length() > 0) {
+            statementBuilderKt.deleteCharAt(statementBuilderKt.length() - 1);
+        }
         onResultFunBuilderKt.addStatement("%L(" + statementBuilderKt.toString() + ")", argsKt.toArray());
         onResultFunBuilderKt.endControlFlow();
 
         return com.squareup.kotlinpoet.TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(OnActivityResultListener.class)
+                .addSuperinterface(KotlinTypes.ON_ACTIVITY_RESULT_LISTENER)
                 .addFunction(onResultFunBuilderKt.build())
                 .build();
     }

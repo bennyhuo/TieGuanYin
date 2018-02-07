@@ -6,11 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.bennyhuo.activitybuilder.runtime.annotations.GenerateBuilder;
-import com.bennyhuo.activitybuilder.runtime.annotations.GenerateMode;
-import com.bennyhuo.activitybuilder.runtime.annotations.Optional;
-import com.bennyhuo.activitybuilder.runtime.annotations.Required;
-import com.bennyhuo.activitybuilder.runtime.annotations.ResultEntity;
+import com.bennyhuo.activitybuilder.annotations.ActivityBuilder;
+import com.bennyhuo.activitybuilder.annotations.GenerateMode;
+import com.bennyhuo.activitybuilder.annotations.Optional;
+import com.bennyhuo.activitybuilder.annotations.Required;
+import com.bennyhuo.activitybuilder.annotations.ResultEntity;
 import com.bennyhuo.activitybuilder.utils.ActivityUtils;
 
 import kotlin.Unit;
@@ -19,7 +19,7 @@ import kotlin.jvm.functions.Function2;
 /**
  * Created by benny on 1/29/18.
  */
-@GenerateBuilder(forResult = true, mode = GenerateMode.JavaOnly,
+@ActivityBuilder(forResult = true, mode = GenerateMode.JavaOnly,
         resultTypes = {@ResultEntity(name = "java", type = String.class), @ResultEntity(name = "kotlin", type=int.class)})
 public class JavaActivity extends AppCompatActivity {
 
@@ -40,13 +40,13 @@ public class JavaActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                JavaActivityBuilder.finishWithResult(JavaActivity.this, "I'm Java!!", 2);
+                //JavaActivityBuilder.finishWithResult(JavaActivity.this, "I'm Java!!", 2);
             }
         });
         findViewById(R.id.openKotlinActivity).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                KotlinActivityBuilderKt.openKotlinActivity(JavaActivity.this, 1234, null, new Function2<String, Integer, Unit>() {
+                KotlinActivityBuilderKt.startKotlinActivity(JavaActivity.this, 1234, null, new Function2<String, Integer, Unit>() {
                     @Override
                     public Unit invoke(String s, Integer integer) {
                         ActivityUtils.toast(JavaActivity.this, "Result from KotlinActivity: s=" + s + "; integer=" + integer);
@@ -59,7 +59,7 @@ public class JavaActivity extends AppCompatActivity {
         findViewById(R.id.openGenerateBothActivity).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GenerateBothActivityBuilder.openWithOptionalNum(JavaActivity.this, 30, "bennyhuo", 1234);
+                GenerateBothActivityBuilder.startWithOptionalNum(JavaActivity.this, 30, "bennyhuo", 1234);
             }
         });
     }

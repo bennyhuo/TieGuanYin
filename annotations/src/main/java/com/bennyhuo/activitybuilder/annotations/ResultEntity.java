@@ -1,4 +1,4 @@
-package com.bennyhuo.activitybuilder.runtime.annotations;
+package com.bennyhuo.activitybuilder.annotations;
 
 public @interface ResultEntity {
 
