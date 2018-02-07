@@ -90,7 +90,27 @@
 	    }
 	}
 	```
-	
+
+## 如何接入？
+
+仓库配置：
+
+```
+repositories {
+    ...
+    maven { url 'https://jitpack.io' }
+    ...
+}
+```
+
+依赖配置：
+
+```
+compile 'com.github.enbandari.tieguanyin:runtime:master-SNAPSHOT'
+kapt 'com.github.enbandari.tieguanyin:compiler:master-SNAPSHOT'
+```
+如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
+
 ## 项目规划
 
 看心情。
