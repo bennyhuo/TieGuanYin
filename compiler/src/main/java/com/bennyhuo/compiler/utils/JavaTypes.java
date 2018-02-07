@@ -10,6 +10,7 @@ public class JavaTypes {
     public static final ClassName INTENT = ClassName.get("android.content", "Intent");
     public static final ClassName BUNDLE = ClassName.get("android.os", "Bundle");
     public static final ClassName ACTIVITY = ClassName.get("android.app", "Activity");
+    public static final ClassName CONTEXT = ClassName.get("android.content", "Context");
 
     public static final ClassName SUPPORT_FRAGMENT = ClassName.get("android.support.v4.app", "Fragment");
     public static final ClassName SUPPORT_ACTIVITY = ClassName.get("android.support.v4.app", "FragmentActivity");

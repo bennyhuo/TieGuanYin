@@ -59,8 +59,16 @@ public class OpenMethodKt {
     public void endWithResult(ActivityResultClass activityResultClass){
         openExtFunBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
         if(activityResultClass != null){
-            openExtFunBuilderForContext.addStatement("%T.INSTANCE.startActivityForResult(this, intent, %L)", KotlinTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObjectKt());
-            openExtFunBuilderForContext.addParameter(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable());
+            openExtFunBuilderForContext
+                    .beginControlFlow("if(%N == null)", activityResultClass.getListenerName())
+                    .addStatement("startActivityForResult(intent, 1)")
+                    .endControlFlow()
+                    .beginControlFlow("else")
+                    .addStatement("%T.INSTANCE.startActivityForResult(this, intent, %L)", KotlinTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObjectKt())
+                    .endControlFlow()
+                    .addParameter(
+                            ParameterSpec.builder(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable())
+                                    .defaultValue("null").build());
         } else {
             openExtFunBuilderForContext.addStatement("startActivity(intent)");
         }

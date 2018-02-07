@@ -27,12 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         openKotlinActivity.setOnClickListener {
             Log.d("Main", "leave: "+this@MainActivity.toString())
-            startKotlinActivity(1234) {
-                java, kotlin ->
-                toast("Result From KotlinActivity: java=$java, kotlin=$kotlin")
-                textView.text = "Result From JavaActivity: java=$java, kotlin=$kotlin"
-                Log.d("Main", "back: " + this@MainActivity.toString())
-            }
+            startKotlinActivity(1234)
         }
 
         openGenerateBothActivity.setOnClickListener {
@@ -47,5 +42,6 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d("test", "resultCode: $resultCode, data: $data")
+        textView.text = "onActivityResult -- "
     }
 }

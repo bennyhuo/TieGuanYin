@@ -37,11 +37,10 @@ public class OpenMethod {
         methodBuilder = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
-                .addParameter(ClassName.get("android.content", "Context"), "context")
+                .addParameter(JavaTypes.CONTEXT, "context")
                 .addStatement("$T.INSTANCE.init(context)", JavaTypes.ACTIVITY_BUILDER);
 
-        ClassName intentClass = ClassName.get("android.content", "Intent");
-        methodBuilder.addStatement("$T intent = new $T(context, $T.class)", intentClass, intentClass, activityClass.getType());
+        methodBuilder.addStatement("$T intent = new $T(context, $T.class)", JavaTypes.INTENT, JavaTypes.INTENT, activityClass.getType());
     }
 
     public void visitField(RequiredField binding){
@@ -54,8 +53,13 @@ public class OpenMethod {
     public void endWithResult(ActivityResultClass activityResultClass){
         methodBuilder.beginControlFlow("if(context instanceof $T)", JavaTypes.ACTIVITY);
         if(activityResultClass != null){
-            methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(($T) context, intent, $L)", JavaTypes.ACTIVITY_BUILDER, JavaTypes.ACTIVITY, activityResultClass.createOnResultListenerObject());
-            methodBuilder.addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
+            methodBuilder.beginControlFlow("if($N == null)", activityResultClass.getListenerName())
+                    .addStatement("(($T)context).startActivityForResult(intent, 1)", JavaTypes.ACTIVITY)
+                    .endControlFlow()
+                    .beginControlFlow("else")
+                    .addStatement("$T.INSTANCE.startActivityForResult(($T) context, intent, $L)", JavaTypes.ACTIVITY_BUILDER, JavaTypes.ACTIVITY, activityResultClass.createOnResultListenerObject())
+                    .endControlFlow()
+                    .addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
         } else {
             methodBuilder.addStatement("context.startActivity(intent)");
         }
