@@ -86,12 +86,12 @@ public class ActivityClass {
     }
 
     public void buildOpenMethod(TypeSpec.Builder typeBuilder) {
-        OpenMethod openMethod = new OpenMethod(this, METHOD_NAME);
+        StartMethod openMethod = new StartMethod(this, METHOD_NAME);
         for (RequiredField field : getRequiredFields()) {
             openMethod.visitField(field);
         }
 
-        OpenMethod openMethodNoOptional = openMethod.copy(METHOD_NAME_NO_OPTIONAL);
+        StartMethod openMethodNoOptional = openMethod.copy(METHOD_NAME_NO_OPTIONAL);
 
         for (RequiredField field : getOptionalFields()) {
             openMethod.visitField(field);
@@ -105,7 +105,7 @@ public class ActivityClass {
         for (int step = 1; step < size; step++) {
             for (int start = 0; start < size; start++) {
                 ArrayList<String> names = new ArrayList<>();
-                OpenMethod method = openMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL);
+                StartMethod method = openMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL);
                 for(int index = start; index < step + start; index++){
                     RequiredField binding = optionalBindings.get(index % size);
                     method.visitField(binding);
@@ -139,7 +139,7 @@ public class ActivityClass {
     }
 
     public void buildOpenFunKt(FileSpec.Builder fileSpecBuilder) {
-        OpenMethodKt openMethodKt = new OpenMethodKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
+        StartFunctionKt openMethodKt = new StartFunctionKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
 
         for (RequiredField field : getRequiredFields()) {
             openMethodKt.visitField(field);

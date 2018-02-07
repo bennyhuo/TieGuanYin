@@ -14,31 +14,31 @@ import kotlin.Unit;
  * Created by benny on 1/31/18.
  */
 
-public class OpenMethodKt {
+public class StartFunctionKt {
 
     private String builderClassName;
-    private FunSpec.Builder openExtFunBuilderForContext;
-    private FunSpec.Builder openExtFunBuilderForView;
-    private FunSpec.Builder openExtFunBuilderForFragment;
+    private FunSpec.Builder funBuilderForContext;
+    private FunSpec.Builder funBuilderForView;
+    private FunSpec.Builder funBuilderForFragment;
     private ActivityClass activityClass;
 
-    public OpenMethodKt(ActivityClass activityClass, String builderClassName, String name) {
+    public StartFunctionKt(ActivityClass activityClass, String builderClassName, String name) {
 
         this.activityClass = activityClass;
         this.builderClassName = builderClassName;
-        openExtFunBuilderForContext = FunSpec.builder(name)
+        funBuilderForContext = FunSpec.builder(name)
                 .receiver(KotlinTypes.CONTEXT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class)
                 .addStatement("%T.INSTANCE.init(this)", KotlinTypes.ACTIVITY_BUILDER)
                 .addStatement("val intent = %T(this, %T::class.java)", KotlinTypes.INTENT, activityClass.getType());
 
-        openExtFunBuilderForView = FunSpec.builder(name)
+        funBuilderForView = FunSpec.builder(name)
                 .receiver(KotlinTypes.VIEW)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
 
-        openExtFunBuilderForFragment = FunSpec.builder(name)
+        funBuilderForFragment = FunSpec.builder(name)
                 .receiver(KotlinTypes.FRAGMENT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
@@ -49,17 +49,17 @@ public class OpenMethodKt {
         TypeName className = KotlinTypes.toKotlinType(binding.getSymbol().type);
         if(!binding.isRequired()){
             className = className.asNullable();
-            openExtFunBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
+            funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
         } else {
-            openExtFunBuilderForContext.addParameter(name, className);
+            funBuilderForContext.addParameter(name, className);
         }
-        openExtFunBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
+        funBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
     }
 
     public void endWithResult(ActivityResultClass activityResultClass){
-        openExtFunBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
+        funBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
         if(activityResultClass != null){
-            openExtFunBuilderForContext
+            funBuilderForContext
                     .beginControlFlow("if(%N == null)", activityResultClass.getListenerName())
                     .addStatement("startActivityForResult(intent, 1)")
                     .endControlFlow()
@@ -70,37 +70,37 @@ public class OpenMethodKt {
                             ParameterSpec.builder(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable())
                                     .defaultValue("null").build());
         } else {
-            openExtFunBuilderForContext.addStatement("startActivity(intent)");
+            funBuilderForContext.addStatement("startActivity(intent)");
         }
-        openExtFunBuilderForContext.endControlFlow()
+        funBuilderForContext.endControlFlow()
                 .beginControlFlow("else")
                 .addStatement("intent.addFlags(%T.FLAG_ACTIVITY_NEW_TASK)", KotlinTypes.INTENT)
                 .addStatement("startActivity(intent)")
                 .endControlFlow();
-        openExtFunBuilderForContext.addStatement("%T.inject()", new com.squareup.kotlinpoet.ClassName(activityClass.packageName, builderClassName));
+        funBuilderForContext.addStatement("%T.inject()", new com.squareup.kotlinpoet.ClassName(activityClass.packageName, builderClassName));
 
         StringBuilder paramBuilder = new StringBuilder();
-        for (ParameterSpec parameterSpec : openExtFunBuilderForContext.getParameters$kotlinpoet()) {
+        for (ParameterSpec parameterSpec : funBuilderForContext.getParameters$kotlinpoet()) {
             paramBuilder.append(parameterSpec.getName()).append(",");
-            openExtFunBuilderForView.addParameter(parameterSpec);
-            openExtFunBuilderForFragment.addParameter(parameterSpec);
+            funBuilderForView.addParameter(parameterSpec);
+            funBuilderForFragment.addParameter(parameterSpec);
         }
         if(paramBuilder.length() > 0) {
             paramBuilder.deleteCharAt(paramBuilder.length() - 1);
         }
-        openExtFunBuilderForView.addStatement("context.%L(%L)", openExtFunBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
-        openExtFunBuilderForFragment.addStatement("activity?.%L(%L)", openExtFunBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
+        funBuilderForView.addStatement("context.%L(%L)", funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
+        funBuilderForFragment.addStatement("activity?.%L(%L)", funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
     }
 
     public FunSpec buildForContext() {
-        return openExtFunBuilderForContext.build();
+        return funBuilderForContext.build();
     }
 
     public FunSpec buildForView() {
-        return openExtFunBuilderForView.build();
+        return funBuilderForView.build();
     }
 
     public FunSpec buildForFragment() {
-        return openExtFunBuilderForFragment.build();
+        return funBuilderForFragment.build();
     }
 }

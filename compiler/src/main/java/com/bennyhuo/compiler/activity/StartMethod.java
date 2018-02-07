@@ -16,7 +16,7 @@ import javax.lang.model.element.Modifier;
  * Created by benny on 1/31/18.
  */
 
-public class OpenMethod {
+public class StartMethod {
 
     private static Field field;
     static {
@@ -32,7 +32,7 @@ public class OpenMethod {
     private ActivityClass activityClass;
     private ArrayList<RequiredField> visitedBindings = new ArrayList<>();
 
-    public OpenMethod(ActivityClass activityClass, String name) {
+    public StartMethod(ActivityClass activityClass, String name) {
         this.activityClass = activityClass;
         methodBuilder = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -83,8 +83,8 @@ public class OpenMethod {
         }
     }
 
-    public OpenMethod copy(String name){
-        OpenMethod openMethod = new OpenMethod(activityClass, name);
+    public StartMethod copy(String name){
+        StartMethod openMethod = new StartMethod(activityClass, name);
         for (RequiredField visitedBinding : visitedBindings) {
             openMethod.visitField(visitedBinding);
         }

@@ -17,19 +17,19 @@ import kotlin.Unit;
  * Created by benny on 1/31/18.
  */
 
-public class OpenMethodKt {
+public class ShowFunctionKt {
 
     private String builderClassName;
-    private FunSpec.Builder openExtFunBuilderForContext;
-    private FunSpec.Builder openExtFunBuilderForViewGroup;
-    private FunSpec.Builder openExtFunBuilderForFragment;
+    private FunSpec.Builder funBuilderForContext;
+    private FunSpec.Builder funBuilderForViewGroup;
+    private FunSpec.Builder funBuilderForFragment;
     private FragmentClass fragmentClass;
 
-    public OpenMethodKt(FragmentClass fragmentClass, String builderClassName, String name) {
+    public ShowFunctionKt(FragmentClass fragmentClass, String builderClassName, String name) {
 
         this.fragmentClass = fragmentClass;
         this.builderClassName = builderClassName;
-        openExtFunBuilderForContext = FunSpec.builder(name)
+        funBuilderForContext = FunSpec.builder(name)
                 .receiver(KotlinTypes.SUPPORT_ACTIVITY)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class)
@@ -37,12 +37,12 @@ public class OpenMethodKt {
                 .addStatement("%T.INSTANCE.init(this)", KotlinTypes.ACTIVITY_BUILDER)
                 .addStatement("val intent = %T()", KotlinTypes.INTENT);
 
-        openExtFunBuilderForViewGroup = FunSpec.builder(name)
+        funBuilderForViewGroup = FunSpec.builder(name)
                 .receiver(KotlinTypes.VIEW_GROUP)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
 
-        openExtFunBuilderForFragment = FunSpec.builder(name)
+        funBuilderForFragment = FunSpec.builder(name)
                 .receiver(KotlinTypes.SUPPORT_FRAGMENT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
@@ -53,44 +53,44 @@ public class OpenMethodKt {
         TypeName className = KotlinTypes.toKotlinType(binding.getSymbol().type);
         if (!binding.isRequired()) {
             className = className.asNullable();
-            openExtFunBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
+            funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
         } else {
-            openExtFunBuilderForContext.addParameter(name, className);
+            funBuilderForContext.addParameter(name, className);
         }
-        openExtFunBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
+        funBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
     }
 
     public void end() {
-        openExtFunBuilderForContext
+        funBuilderForContext
                 .addStatement("val fragment = %T()", fragmentClass.getType())
                 .addStatement("fragment.arguments = intent.getExtras()")
                 .addStatement("supportFragmentManager.beginTransaction().replace(containerId, fragment).commit()")
                 .addStatement("%T.inject()", new ClassName(fragmentClass.packageName, builderClassName));
 
         StringBuilder paramBuilder = new StringBuilder();
-        List<ParameterSpec> parameterSpecList = openExtFunBuilderForContext.getParameters$kotlinpoet();
+        List<ParameterSpec> parameterSpecList = funBuilderForContext.getParameters$kotlinpoet();
         for (int i = 1; i < parameterSpecList.size(); i++) {
             ParameterSpec parameterSpec = parameterSpecList.get(i);
             paramBuilder.append(parameterSpec.getName()).append(",");
-            openExtFunBuilderForViewGroup.addParameter(parameterSpec);
-            openExtFunBuilderForFragment.addParameter(parameterSpec);
+            funBuilderForViewGroup.addParameter(parameterSpec);
+            funBuilderForFragment.addParameter(parameterSpec);
         }
         if (paramBuilder.length() > 0) {
             paramBuilder.deleteCharAt(paramBuilder.length() - 1);
         }
-        openExtFunBuilderForViewGroup.addStatement("(context as? %T)?.%L(id, %L)", KotlinTypes.SUPPORT_ACTIVITY, openExtFunBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
-        openExtFunBuilderForFragment.addStatement("(view?.parent as? %T)?.%L(%L)", KotlinTypes.VIEW_GROUP, openExtFunBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
+        funBuilderForViewGroup.addStatement("(context as? %T)?.%L(id, %L)", KotlinTypes.SUPPORT_ACTIVITY, funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
+        funBuilderForFragment.addStatement("(view?.parent as? %T)?.%L(%L)", KotlinTypes.VIEW_GROUP, funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
     }
 
     public FunSpec buildForContext() {
-        return openExtFunBuilderForContext.build();
+        return funBuilderForContext.build();
     }
 
     public FunSpec buildForView() {
-        return openExtFunBuilderForViewGroup.build();
+        return funBuilderForViewGroup.build();
     }
 
     public FunSpec buildForFragment() {
-        return openExtFunBuilderForFragment.build();
+        return funBuilderForFragment.build();
     }
 }
