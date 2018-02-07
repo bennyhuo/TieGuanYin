@@ -27,7 +27,10 @@ class MainActivity : AppCompatActivity() {
 
         openKotlinActivity.setOnClickListener {
             Log.d("Main", "leave: "+this@MainActivity.toString())
-            startKotlinActivity(1234)
+            startKotlinActivity(1234){
+                java, kotlin ->
+                toast("Result From JavaActivity: java=$java, kotlin=$kotlin" )
+            }
         }
 
         openGenerateBothActivity.setOnClickListener {
