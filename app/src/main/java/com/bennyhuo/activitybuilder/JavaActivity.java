@@ -19,7 +19,7 @@ import kotlin.jvm.functions.Function2;
 /**
  * Created by benny on 1/29/18.
  */
-@ActivityBuilder(forResult = true, mode = GenerateMode.JavaOnly,
+@ActivityBuilder(mode = GenerateMode.JavaOnly,
         resultTypes = {@ResultEntity(name = "java", type = String.class), @ResultEntity(name = "kotlin", type=int.class)})
 public class JavaActivity extends AppCompatActivity {
 

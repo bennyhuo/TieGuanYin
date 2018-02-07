@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 /**
  * Created by benny on 1/29/18.
  */
-@ActivityBuilder(forResult = true, mode = KotlinOnly,
+@ActivityBuilder(mode = KotlinOnly,
         resultTypes = [(ResultEntity(name = "java", type = String::class)), (ResultEntity(name = "kotlin", type = Int::class))])
 class KotlinActivity : AppCompatActivity() {
 

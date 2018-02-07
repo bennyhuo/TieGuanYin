@@ -55,7 +55,7 @@ public class ActivityClass {
         boolean isKotlin = metadata != null;
 
         ActivityBuilder generateBuilder = type.getAnnotation(ActivityBuilder.class);
-        if(generateBuilder.forResult()){
+        if(generateBuilder.resultTypes().length > 0){
             activityResultClass = new ActivityResultClass(this, generateBuilder.resultTypes());
         }
         generateMode = generateBuilder.mode();

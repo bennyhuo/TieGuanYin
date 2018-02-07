@@ -12,6 +12,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface ActivityBuilder {
     GenerateMode mode() default GenerateMode.Both;
-    boolean forResult() default false;
     ResultEntity[] resultTypes() default {};
 }
