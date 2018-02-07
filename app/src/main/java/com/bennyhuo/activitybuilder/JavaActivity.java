@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 
 import com.bennyhuo.activitybuilder.annotations.ActivityBuilder;
-import com.bennyhuo.activitybuilder.annotations.GenerateMode;
 import com.bennyhuo.activitybuilder.annotations.Optional;
 import com.bennyhuo.activitybuilder.annotations.Required;
 import com.bennyhuo.activitybuilder.annotations.ResultEntity;
@@ -19,8 +18,7 @@ import kotlin.jvm.functions.Function2;
 /**
  * Created by benny on 1/29/18.
  */
-@ActivityBuilder(mode = GenerateMode.JavaOnly,
-        resultTypes = {@ResultEntity(name = "java", type = String.class), @ResultEntity(name = "kotlin", type=int.class)})
+@ActivityBuilder(resultTypes = {@ResultEntity(name = "java", type = String.class), @ResultEntity(name = "kotlin", type=int.class)})
 public class JavaActivity extends AppCompatActivity {
 
     @Required

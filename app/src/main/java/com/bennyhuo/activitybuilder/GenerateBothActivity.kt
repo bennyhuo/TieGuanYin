@@ -3,7 +3,6 @@ package com.bennyhuo.activitybuilder
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.bennyhuo.activitybuilder.annotations.ActivityBuilder
-import com.bennyhuo.activitybuilder.annotations.GenerateMode.Both
 import com.bennyhuo.activitybuilder.annotations.Optional
 import com.bennyhuo.activitybuilder.annotations.Required
 import com.bennyhuo.activitybuilder.utils.toast
@@ -13,7 +12,7 @@ import java.io.Serializable
 /**
  * Created by benny on 1/29/18.
  */
-@ActivityBuilder(mode = Both)
+@ActivityBuilder
 class GenerateBothActivity : AppCompatActivity() {
 
     @Required()

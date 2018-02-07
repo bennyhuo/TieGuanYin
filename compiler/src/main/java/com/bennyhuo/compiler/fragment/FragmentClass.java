@@ -54,6 +54,10 @@ public class FragmentClass {
 
         FragmentBuilder generateBuilder = type.getAnnotation(FragmentBuilder.class);
         generateMode = generateBuilder.mode();
+        if(generateMode == GenerateMode.Auto){
+            if(isKotlin) generateMode = GenerateMode.Both;
+            else generateMode = GenerateMode.JavaOnly;
+        }
     }
 
     public void addSymbol(RequiredField field) {

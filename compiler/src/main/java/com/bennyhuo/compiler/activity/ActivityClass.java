@@ -59,6 +59,10 @@ public class ActivityClass {
             activityResultClass = new ActivityResultClass(this, generateBuilder.resultTypes());
         }
         generateMode = generateBuilder.mode();
+        if(generateMode == GenerateMode.Auto){
+            if(isKotlin) generateMode = GenerateMode.Both;
+            else generateMode = GenerateMode.JavaOnly;
+        }
     }
 
     public void addSymbol(RequiredField field) {

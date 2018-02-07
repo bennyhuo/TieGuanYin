@@ -19,6 +19,8 @@ public enum GenerateMode {
 
     /**
      * Generate methods according to the source file.
+     *
+     * When source is Java file, generate java method, while source is Kotlin file, generate both.
      */
     Auto
 }
