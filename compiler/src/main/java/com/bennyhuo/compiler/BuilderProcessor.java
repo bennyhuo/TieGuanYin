@@ -84,14 +84,15 @@ public class BuilderProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
         HashMap<Element, ActivityClass> activityClasses = new HashMap<>();
-        parseActivityClass(env, activityClasses);
-
         HashMap<Element, FragmentClass> fragmentClasses = new HashMap<>();
+        parseActivityClass(env, activityClasses);
         parseFragmentClass(env, fragmentClasses);
+        parseFields(env, activityClasses, fragmentClasses);
+        brewFiles(activityClasses, fragmentClasses);
+        return true;
+    }
 
-        parseActivityFields(env, activityClasses);
-        parseFragmentFields(env, fragmentClasses);
-
+    private void brewFiles(HashMap<Element, ActivityClass> activityClasses, HashMap<Element, FragmentClass> fragmentClasses){
         for (ActivityClass activityClass : activityClasses.values()) {
             activityClass.brew(filer);
         }
@@ -99,51 +100,21 @@ public class BuilderProcessor extends AbstractProcessor {
         for (FragmentClass fragmentClass : fragmentClasses.values()) {
             fragmentClass.brew(filer);
         }
-        return true;
     }
 
-    private void parseFragmentFields(RoundEnvironment env, HashMap<Element, FragmentClass> fragmentClasses){
-        for (Element element : env.getElementsAnnotatedWith(Required.class)) {
-            if (!SuperficialValidation.validateElement(element)) continue;
-            try {
-                if (element.getKind() == ElementKind.FIELD) {
-                    FragmentClass fragmentClass = fragmentClasses.get(element.getEnclosingElement());
-                    if (fragmentClass == null) {
-                        //error(element, "Field " + element + " annotated as Required while " + element.getEnclosingElement() + " not annotated.");
-                    } else {
-                        fragmentClass.addSymbol(new RequiredField((Symbol.VarSymbol) element));
-                    }
-                }
-            } catch (Exception e) {
-                logParsingError(element, Required.class, e);
-            }
-        }
-
-        for (Element element : env.getElementsAnnotatedWith(Optional.class)) {
-            if (!SuperficialValidation.validateElement(element)) continue;
-            try {
-                if (element.getKind() == ElementKind.FIELD) {
-                    FragmentClass fragmentClass = fragmentClasses.get(element.getEnclosingElement());
-                    if (fragmentClass == null) {
-                        //error(element, "Field " + element + " annotated as Optional while " + element.getEnclosingElement() + " not annotated.");
-                    } else {
-                        fragmentClass.addSymbol(new OptionalField((Symbol.VarSymbol) element));
-                    }
-                }
-            } catch (Exception e) {
-                logParsingError(element, Required.class, e);
-            }
-        }
-    }
-
-    private void parseActivityFields(RoundEnvironment env, HashMap<Element, ActivityClass> activityClasses){
+    private void parseFields(RoundEnvironment env, HashMap<Element, ActivityClass> activityClasses, HashMap<Element, FragmentClass> fragmentClasses) {
         for (Element element : env.getElementsAnnotatedWith(Required.class)) {
             if (!SuperficialValidation.validateElement(element)) continue;
             try {
                 if (element.getKind() == ElementKind.FIELD) {
                     ActivityClass activityClass = activityClasses.get(element.getEnclosingElement());
                     if (activityClass == null) {
-                        //error(element, "Field " + element + " annotated as Required while " + element.getEnclosingElement() + " not annotated.");
+                        FragmentClass fragmentClass = fragmentClasses.get(element.getEnclosingElement());
+                        if (fragmentClass == null) {
+                            error(element, "Field " + element + " annotated as Required while " + element.getEnclosingElement() + " not annotated.");
+                        } else {
+                            fragmentClass.addSymbol(new RequiredField((Symbol.VarSymbol) element));
+                        }
                     } else {
                         activityClass.addSymbol(new RequiredField((Symbol.VarSymbol) element));
                     }
@@ -159,7 +130,12 @@ public class BuilderProcessor extends AbstractProcessor {
                 if (element.getKind() == ElementKind.FIELD) {
                     ActivityClass activityClass = activityClasses.get(element.getEnclosingElement());
                     if (activityClass == null) {
-                        //error(element, "Field " + element + " annotated as Optional while " + element.getEnclosingElement() + " not annotated.");
+                        FragmentClass fragmentClass = fragmentClasses.get(element.getEnclosingElement());
+                        if (fragmentClass == null) {
+                            error(element, "Field " + element + " annotated as Optional while " + element.getEnclosingElement() + " not annotated.");
+                        } else {
+                            fragmentClass.addSymbol(new OptionalField((Symbol.VarSymbol) element));
+                        }
                     } else {
                         activityClass.addSymbol(new OptionalField((Symbol.VarSymbol) element));
                     }
