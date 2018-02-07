@@ -16,7 +16,7 @@ public abstract class ListenerField {
         this.field.setAccessible(true);
     }
 
-    public void apply(Object object){
+    public void update(Object object){
         try {
             field.set(this.receiver, object);
         } catch (Exception e) {
