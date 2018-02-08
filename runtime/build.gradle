@@ -23,7 +23,7 @@ android {
 
 dependencies {
     compileOnly 'com.android.support:support-fragment:27.0.2'
-    api project(":annotations")
+    compile project(":annotations")
 }
 
 task sourcesJar(type: Jar) {
