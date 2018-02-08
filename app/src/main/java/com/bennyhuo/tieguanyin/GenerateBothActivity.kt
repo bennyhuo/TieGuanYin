@@ -17,7 +17,7 @@ import java.io.Serializable
 class GenerateBothActivity : AppCompatActivity() {
 
     @Required()
-    lateinit var name: String
+    lateinit var userName: String
 
     @Required()
     var age: Int = 0

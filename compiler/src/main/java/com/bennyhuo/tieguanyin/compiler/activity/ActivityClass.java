@@ -2,10 +2,12 @@ package com.bennyhuo.tieguanyin.compiler.activity;
 
 import com.bennyhuo.tieguanyin.annotations.ActivityBuilder;
 import com.bennyhuo.tieguanyin.annotations.GenerateMode;
+import com.bennyhuo.tieguanyin.annotations.ResultEntity;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.kotlinpoet.FileSpec;
@@ -35,6 +37,10 @@ public class ActivityClass {
     private static final String METHOD_NAME_SEPARATOR = "And";
     private static final String EXT_FUN_NAME_PREFIX = METHOD_NAME;
     private static final String POSIX = "Builder";
+
+    private static final String CONSTS_REQUIRED_FIELD_PREFIX = "REQUIRED_";
+    private static final String CONSTS_OPTIONAL_FIELD_PREFIX = "OPTIONAL_";
+    private static final String CONSTS_RESULT_PREFIX = "RESULT_";
 
     private TypeElement type;
     private TreeSet<RequiredField> optionalFields = new TreeSet<>();
@@ -85,19 +91,45 @@ public class ActivityClass {
         return type;
     }
 
-    public void buildOpenMethod(TypeSpec.Builder typeBuilder) {
-        StartMethod openMethod = new StartMethod(this, METHOD_NAME);
+    private void buildConstants(TypeSpec.Builder typeBuilder){
+        for (RequiredField field : requiredFields) {
+            typeBuilder.addField(FieldSpec.builder(String.class,
+                    CONSTS_REQUIRED_FIELD_PREFIX + Utils.camelToUnderline(field.getName()),
+                    Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("$S", field.getName())
+                    .build());
+        }
+        for (RequiredField field : optionalFields) {
+            typeBuilder.addField(FieldSpec.builder(String.class,
+                    CONSTS_OPTIONAL_FIELD_PREFIX + Utils.camelToUnderline(field.getName()),
+                    Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("$S", field.getName())
+                    .build());
+        }
+        if(activityResultClass != null){
+            for (ResultEntity resultEntity : activityResultClass.getResultEntities()) {
+                typeBuilder.addField(FieldSpec.builder(String.class,
+                        CONSTS_RESULT_PREFIX + Utils.camelToUnderline(resultEntity.name()),
+                        Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                        .initializer("$S", resultEntity.name())
+                        .build());
+            }
+        }
+    }
+
+    public void buildStartMethod(TypeSpec.Builder typeBuilder) {
+        StartMethod startMethod = new StartMethod(this, METHOD_NAME);
         for (RequiredField field : getRequiredFields()) {
-            openMethod.visitField(field);
+            startMethod.visitField(field);
         }
 
-        StartMethod openMethodNoOptional = openMethod.copy(METHOD_NAME_NO_OPTIONAL);
+        StartMethod startMethodNoOptional = startMethod.copy(METHOD_NAME_NO_OPTIONAL);
 
         for (RequiredField field : getOptionalFields()) {
-            openMethod.visitField(field);
+            startMethod.visitField(field);
         }
-        openMethod.endWithResult(activityResultClass);
-        typeBuilder.addMethod(openMethod.build());
+        startMethod.endWithResult(activityResultClass);
+        typeBuilder.addMethod(startMethod.build());
 
         ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalFields());
         int size = optionalBindings.size();
@@ -105,7 +137,7 @@ public class ActivityClass {
         for (int step = 1; step < size; step++) {
             for (int start = 0; start < size; start++) {
                 ArrayList<String> names = new ArrayList<>();
-                StartMethod method = openMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL);
+                StartMethod method = startMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL);
                 for(int index = start; index < step + start; index++){
                     RequiredField binding = optionalBindings.get(index % size);
                     method.visitField(binding);
@@ -118,8 +150,8 @@ public class ActivityClass {
         }
 
         if (size > 0) {
-            openMethodNoOptional.endWithResult(activityResultClass);
-            typeBuilder.addMethod(openMethodNoOptional.build());
+            startMethodNoOptional.endWithResult(activityResultClass);
+            typeBuilder.addMethod(startMethodNoOptional.build());
         }
     }
 
@@ -138,26 +170,28 @@ public class ActivityClass {
         typeBuilder.addMethod(injectMethod.build());
     }
 
-    public void buildOpenFunKt(FileSpec.Builder fileSpecBuilder) {
-        StartFunctionKt openMethodKt = new StartFunctionKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
+    public void buildStartFunKt(FileSpec.Builder fileSpecBuilder) {
+        StartFunctionKt startMethodKt = new StartFunctionKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
 
         for (RequiredField field : getRequiredFields()) {
-            openMethodKt.visitField(field);
+            startMethodKt.visitField(field);
         }
 
         for (RequiredField field : getOptionalFields()) {
-            openMethodKt.visitField(field);
+            startMethodKt.visitField(field);
         }
 
-        openMethodKt.endWithResult(activityResultClass);
-        fileSpecBuilder.addFunction(openMethodKt.buildForContext());
-        fileSpecBuilder.addFunction(openMethodKt.buildForView());
-        fileSpecBuilder.addFunction(openMethodKt.buildForFragment());
+        startMethodKt.endWithResult(activityResultClass);
+        fileSpecBuilder.addFunction(startMethodKt.buildForContext());
+        fileSpecBuilder.addFunction(startMethodKt.buildForView());
+        fileSpecBuilder.addFunction(startMethodKt.buildForFragment());
     }
 
     public void brew(Filer filer) {
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName + POSIX)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+
+        buildConstants(typeBuilder);
 
         buildInjectMethod(typeBuilder);
 
@@ -167,20 +201,20 @@ public class ActivityClass {
 
         switch (generateMode) {
             case JavaOnly:
-                buildOpenMethod(typeBuilder);
+                buildStartMethod(typeBuilder);
                 if(activityResultClass != null){
                     typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
                 }
                 break;
             case Both:
-                buildOpenMethod(typeBuilder);
+                buildStartMethod(typeBuilder);
                 if(activityResultClass != null){
                     typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
                 }
             case KotlinOnly:
                 //region kotlin
                 FileSpec.Builder fileSpecBuilder = FileSpec.builder(packageName, simpleName + POSIX);
-                buildOpenFunKt(fileSpecBuilder);
+                buildStartFunKt(fileSpecBuilder);
                 if (activityResultClass != null) {
                     fileSpecBuilder.addFunction(activityResultClass.buildFinishWithResultKt());
                 }

@@ -170,7 +170,11 @@ public class ActivityResultClass {
         return finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("activity.finish()").build();
     }
 
-    private TypeMirror getResultType(ResultEntity entity){
+    public ResultEntity[] getResultEntities(){
+        return resultEntities;
+    }
+
+    public static TypeMirror getResultType(ResultEntity entity){
         TypeMirror typeMirror = null;
         try {
             entity.type();

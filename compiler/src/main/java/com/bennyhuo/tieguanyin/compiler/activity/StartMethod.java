@@ -43,11 +43,11 @@ public class StartMethod {
         methodBuilder.addStatement("$T intent = new $T(context, $T.class)", JavaTypes.INTENT, JavaTypes.INTENT, activityClass.getType());
     }
 
-    public void visitField(RequiredField binding){
-        String name = binding.getName();
-        methodBuilder.addParameter(ClassName.get(binding.getSymbol().type), name);
+    public void visitField(RequiredField requiredField){
+        String name = requiredField.getName();
+        methodBuilder.addParameter(ClassName.get(requiredField.getSymbol().type), name);
         methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
-        visitedBindings.add(binding);
+        visitedBindings.add(requiredField);
     }
 
     public void endWithResult(ActivityResultClass activityResultClass){

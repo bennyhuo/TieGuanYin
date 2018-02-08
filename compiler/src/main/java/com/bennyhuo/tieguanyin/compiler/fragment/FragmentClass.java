@@ -5,6 +5,7 @@ import com.bennyhuo.tieguanyin.annotations.GenerateMode;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.kotlinpoet.FileSpec;
@@ -34,6 +35,10 @@ public class FragmentClass {
     private static final String METHOD_NAME_SEPARATOR = "And";
     private static final String EXT_FUN_NAME_PREFIX = METHOD_NAME;
     private static final String POSIX = "Builder";
+
+    private static final String CONSTS_REQUIRED_FIELD_PREFIX = "REQUIRED_";
+    private static final String CONSTS_OPTIONAL_FIELD_PREFIX = "OPTIONAL_";
+    private static final String CONSTS_RESULT_PREFIX = "RESULT_";
 
     private TypeElement type;
     private TreeSet<RequiredField> optionalFields = new TreeSet<>();
@@ -80,19 +85,36 @@ public class FragmentClass {
         return type;
     }
 
-    public void buildOpenMethod(TypeSpec.Builder typeBuilder) {
-        ShowMethod openMethod = new ShowMethod(this, METHOD_NAME);
+    private void buildConstants(TypeSpec.Builder typeBuilder) {
+        for (RequiredField field : requiredFields) {
+            typeBuilder.addField(FieldSpec.builder(String.class,
+                    CONSTS_REQUIRED_FIELD_PREFIX + Utils.camelToUnderline(field.getName()),
+                    Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("$S", field.getName())
+                    .build());
+        }
+        for (RequiredField field : optionalFields) {
+            typeBuilder.addField(FieldSpec.builder(String.class,
+                    CONSTS_OPTIONAL_FIELD_PREFIX + Utils.camelToUnderline(field.getName()),
+                    Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("$S", field.getName())
+                    .build());
+        }
+    }
+
+    public void buildShowMethod(TypeSpec.Builder typeBuilder) {
+        ShowMethod showMethod = new ShowMethod(this, METHOD_NAME);
         for (RequiredField field : getRequiredFields()) {
-            openMethod.visitField(field);
+            showMethod.visitField(field);
         }
 
-        ShowMethod openMethodNoOptional = openMethod.copy(METHOD_NAME_NO_OPTIONAL);
+        ShowMethod showMethodNoOptional = showMethod.copy(METHOD_NAME_NO_OPTIONAL);
 
         for (RequiredField field : getOptionalFields()) {
-            openMethod.visitField(field);
+            showMethod.visitField(field);
         }
-        openMethod.end();
-        typeBuilder.addMethod(openMethod.build());
+        showMethod.end();
+        typeBuilder.addMethod(showMethod.build());
 
         ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalFields());
         int size = optionalBindings.size();
@@ -100,7 +122,7 @@ public class FragmentClass {
         for (int step = 1; step < size; step++) {
             for (int start = 0; start < size; start++) {
                 ArrayList<String> names = new ArrayList<>();
-                ShowMethod method = openMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL);
+                ShowMethod method = showMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL);
                 for(int index = start; index < step + start; index++){
                     RequiredField binding = optionalBindings.get(index % size);
                     method.visitField(binding);
@@ -113,8 +135,8 @@ public class FragmentClass {
         }
 
         if (size > 0) {
-            openMethodNoOptional.end();
-            typeBuilder.addMethod(openMethodNoOptional.build());
+            showMethodNoOptional.end();
+            typeBuilder.addMethod(showMethodNoOptional.build());
         }
     }
 
@@ -133,39 +155,41 @@ public class FragmentClass {
         typeBuilder.addMethod(injectMethod.build());
     }
 
-    public void buildOpenFunKt(FileSpec.Builder fileSpecBuilder) {
-        ShowFunctionKt openMethodKt = new ShowFunctionKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
+    public void buildShowFunKt(FileSpec.Builder fileSpecBuilder) {
+        ShowFunctionKt showMethodKt = new ShowFunctionKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
 
         for (RequiredField field : getRequiredFields()) {
-            openMethodKt.visitField(field);
+            showMethodKt.visitField(field);
         }
 
         for (RequiredField field : getOptionalFields()) {
-            openMethodKt.visitField(field);
+            showMethodKt.visitField(field);
         }
 
-        openMethodKt.end();
-        fileSpecBuilder.addFunction(openMethodKt.buildForContext());
-        fileSpecBuilder.addFunction(openMethodKt.buildForView());
-        fileSpecBuilder.addFunction(openMethodKt.buildForFragment());
+        showMethodKt.end();
+        fileSpecBuilder.addFunction(showMethodKt.buildForContext());
+        fileSpecBuilder.addFunction(showMethodKt.buildForView());
+        fileSpecBuilder.addFunction(showMethodKt.buildForFragment());
     }
 
     public void brew(Filer filer) {
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName + POSIX)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
+        buildConstants(typeBuilder);
+
         buildInjectMethod(typeBuilder);
 
         switch (generateMode) {
             case JavaOnly:
-                buildOpenMethod(typeBuilder);
+                buildShowMethod(typeBuilder);
                 break;
             case Both:
-                buildOpenMethod(typeBuilder);
+                buildShowMethod(typeBuilder);
             case KotlinOnly:
                 //region kotlin
                 FileSpec.Builder fileSpecBuilder = FileSpec.builder(packageName, simpleName + POSIX);
-                buildOpenFunKt(fileSpecBuilder);
+                buildShowFunKt(fileSpecBuilder);
                 writeKotlinToFile(filer, fileSpecBuilder.build());
                 //endregion
                 break;
