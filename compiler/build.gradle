@@ -16,10 +16,6 @@ dependencies {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-//region jitpack
-apply plugin: 'maven'
-group='com.github.enbandari'
-
 jar {
     from {
         fileTree(dir: 'libs', include: ['*.jar']).collect {
@@ -43,18 +39,19 @@ artifacts {
     archives javadocJar
 }
 
-// To specify a license in the pom:
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    distribution 'repo'
-                }
-            }
-        }
-    }
+//region bintray
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+    userOrg = project.userName
+    groupId = project.groupId
+    repoName = project.repoName
+    artifactId = 'tieguanyin-compiler'
+    publishVersion = project.publishVersion
+    desc = project.desc//描述，不重要
+    website = project.website
+    bintrayUser = project.userName
+    bintrayKey = project.apiKey
+    dryRun = project.dryRun
 }
 //endregion

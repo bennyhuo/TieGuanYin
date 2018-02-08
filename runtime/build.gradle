@@ -26,11 +26,6 @@ dependencies {
     api project(":annotations")
 }
 
-//region jitpack
-apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.enbandari'
-
-// build a jar with source files
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
@@ -52,5 +47,21 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+
+//region bintray
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+    userOrg = project.userName
+    groupId = project.groupId
+    repoName = project.repoName
+    artifactId = 'tieguanyin-runtime'
+    publishVersion = project.publishVersion
+    desc = project.desc//描述，不重要
+    website = project.website
+    bintrayUser = project.userName
+    bintrayKey = project.apiKey
+    dryRun = project.dryRun
 }
 //endregion
