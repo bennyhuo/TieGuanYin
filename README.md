@@ -98,7 +98,7 @@
 ```
 repositories {
     ...
-    maven { url 'https://jitpack.io' }
+    jcenter()
     ...
 }
 ```
@@ -106,14 +106,10 @@ repositories {
 依赖配置：
 
 ```
-compile 'com.github.enbandari.tieguanyin:runtime:master-SNAPSHOT'
-kapt 'com.github.enbandari.tieguanyin:compiler:master-SNAPSHOT'
+compile 'com.bennyhuo.tieguanyin:tieguanyin-runtime:0.2-rc'
+kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:0.2-rc'
 ```
 如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
-
-## 项目规划
-
-看心情。
 	
 ## License
 
