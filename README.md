@@ -27,7 +27,7 @@
 	        super.onCreate(savedInstanceState)
 	        setContentView(R.layout.activity_main)
 	
-	        startKotlinActivity.setOnClickListener {
+	        button.setOnClickListener {
 	            startKotlinActivity(1234){
 	                java, kotlin ->
 	                toast("Result From JavaActivity: java=$java, kotlin=$kotlin" )
@@ -54,8 +54,8 @@
 	        setContentView(R.layout.activity_main)
 	        setTitle(this.javaClass.simpleName)
 	
-	        startKotlinActivity.text = "Finish With java='I'm Kotlin!' & kotlin=12"
-	        startKotlinActivity.setOnClickListener {
+	        textView.text = "Finish With java='I'm Kotlin!' & kotlin=12"
+	        button.setOnClickListener {
 	            finishWithResult("I'm Kotlin!", 12)
 	        }
 	    }
