@@ -30,8 +30,7 @@ import kotlin.Unit;
 public class ActivityResultClass {
 
     private List<ResultEntity> resultEntities = new ArrayList<>();
-    private List<ResultEntity> resultEntitiesRecursively = new ArrayList<>();
-
+    private List<ResultEntity> resultEntitiesRecursively;
 
     private ActivityClass activityClass;
 
@@ -54,7 +53,7 @@ public class ActivityResultClass {
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .returns(TypeName.VOID);
 
-        for (ResultEntity resultEntity : resultEntities) {
+        for (ResultEntity resultEntity : getResultEntitiesRecursively()) {
             TypeName resultClass = ClassName.get(getResultType(resultEntity));
             interfaceOnResultMethodBuilder.addParameter(resultClass, resultEntity.name());
         }
@@ -71,7 +70,7 @@ public class ActivityResultClass {
 
     public com.squareup.kotlinpoet.LambdaTypeName getListenerClassKt() {
         ArrayList<ParameterSpec> argTypeNames = new ArrayList<>();
-        for (ResultEntity resultEntity : resultEntities) {
+        for (ResultEntity resultEntity : getResultEntitiesRecursively()) {
             argTypeNames.add(ParameterSpec.builder(resultEntity.name(), KotlinTypes.toKotlinType(getResultType(resultEntity))).build());
         }
         return LambdaTypeName.get(null, argTypeNames, TypeNames.get(Unit.class));
@@ -96,7 +95,7 @@ public class ActivityResultClass {
 
         ArrayList<Object> args = new ArrayList<>();
         args.add(getListenerName());
-        for (ResultEntity resultEntity : resultEntities) {
+        for (ResultEntity resultEntity : getResultEntitiesRecursively()) {
             TypeName resultClass = ClassName.get(getResultType(resultEntity));
             statementBuilder.append("$T.<$T>get(bundle, $S),");
             args.add(JavaTypes.RUNTIME_UTILS);
@@ -129,7 +128,7 @@ public class ActivityResultClass {
         ArrayList<Object> argsKt = new ArrayList<>();
         argsKt.add(getListenerName());
 
-        for (ResultEntity resultEntity : resultEntities) {
+        for (ResultEntity resultEntity : getResultEntitiesRecursively()) {
             statementBuilderKt.append("%T.get(bundle, %S),");
             argsKt.add(KotlinTypes.RUNTIME_UTILS);
             argsKt.add(resultEntity.name());
@@ -151,7 +150,7 @@ public class ActivityResultClass {
                 .receiver(TypeNames.get(activityClass.getType().asType()));
 
         funBuilder.addStatement("val intent = %T()", KotlinTypes.INTENT);
-        for (ResultEntity resultEntity : resultEntities) {
+        for (ResultEntity resultEntity : getResultEntitiesRecursively()) {
             TypeMirror typeMirror = null;
             try {
                 resultEntity.type();
@@ -173,7 +172,7 @@ public class ActivityResultClass {
                 .returns(TypeName.VOID)
                 .addStatement("$T intent = new $T()", JavaTypes.INTENT, JavaTypes.INTENT);
 
-        for (ResultEntity resultEntity : resultEntities) {
+        for (ResultEntity resultEntity : getResultEntitiesRecursively()) {
             finishWithResultMethodBuilder.addParameter(ClassName.get(getResultType(resultEntity)), resultEntity.name());
             finishWithResultMethodBuilder.addStatement("intent.putExtra($S, $L)", resultEntity.name(), resultEntity.name());
         }
