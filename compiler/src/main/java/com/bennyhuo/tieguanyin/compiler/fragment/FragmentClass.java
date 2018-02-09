@@ -3,7 +3,6 @@ package com.bennyhuo.tieguanyin.compiler.fragment;
 import com.bennyhuo.tieguanyin.annotations.FragmentBuilder;
 import com.bennyhuo.tieguanyin.annotations.GenerateMode;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
-import com.bennyhuo.tieguanyin.compiler.utils.Logger;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
 import com.squareup.javapoet.FieldSpec;
@@ -79,11 +78,10 @@ public class FragmentClass {
     public void setupSuperClass(HashMap<Element, FragmentClass> fragmentClasses) {
         TypeMirror typeMirror = type.getSuperclass();
         if (typeMirror == null || typeMirror == Type.noType) {
-            Logger.debug(simpleName + "无 super class");
+            return;
         }
         TypeElement superClassElement = (TypeElement) ((DeclaredType) typeMirror).asElement();
         this.superFragmentClass = fragmentClasses.get(superClassElement);
-        Logger.debug(simpleName + "父类：" + superFragmentClass);
     }
 
     public void addSymbol(RequiredField field) {

@@ -8,6 +8,7 @@
 
 1. 通过注解标注 Activity、Fragment 及其参数和返回值（返回值只支持 Activity）来生成一些扩展方法来帮助你安全、便捷地启动这些页面；
 2. 除了提供用于启动的快捷方法之外，还提供了自动注入的支持。
+3. 支持对 Activity、Fragment 父类标注的成员进行生成和注入。
 
 如果你没有饱受硬编码 Intent 中 extras 的 key 的折磨，那么你一定不会想到这个库能给你带来什么。如果你不知道，那也没关系，迟早有一天你会知道的。
 
@@ -26,7 +27,7 @@
 	        super.onCreate(savedInstanceState)
 	        setContentView(R.layout.activity_main)
 	
-	        openKotlinActivity.setOnClickListener {
+	        startKotlinActivity.setOnClickListener {
 	            startKotlinActivity(1234){
 	                java, kotlin ->
 	                toast("Result From JavaActivity: java=$java, kotlin=$kotlin" )
@@ -53,8 +54,8 @@
 	        setContentView(R.layout.activity_main)
 	        setTitle(this.javaClass.simpleName)
 	
-	        openKotlinActivity.text = "Finish With java='I'm Kotlin!' & kotlin=12"
-	        openKotlinActivity.setOnClickListener {
+	        startKotlinActivity.text = "Finish With java='I'm Kotlin!' & kotlin=12"
+	        startKotlinActivity.setOnClickListener {
 	            finishWithResult("I'm Kotlin!", 12)
 	        }
 	    }
@@ -106,8 +107,8 @@ repositories {
 依赖配置：
 
 ```
-compile 'com.bennyhuo.tieguanyin:tieguanyin-runtime:0.2-rc'
-kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:0.2-rc'
+compile 'com.bennyhuo.tieguanyin:tieguanyin-runtime:0.2-rc3'
+kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:0.2-rc3'
 ```
 如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
 	

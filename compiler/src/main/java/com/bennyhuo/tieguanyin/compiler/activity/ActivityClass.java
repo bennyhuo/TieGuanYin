@@ -5,7 +5,6 @@ import com.bennyhuo.tieguanyin.annotations.GenerateMode;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
-import com.bennyhuo.tieguanyin.compiler.utils.Logger;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
 import com.squareup.javapoet.FieldSpec;
@@ -86,12 +85,10 @@ public class ActivityClass {
     public void setupSuperClass(HashMap<Element, ActivityClass> activityClasses){
         TypeMirror typeMirror = type.getSuperclass();
         if(typeMirror == null || typeMirror == Type.noType){
-            Logger.debug(simpleName + "无 super class");
             return;
         }
         TypeElement superClassElement = (TypeElement) ((DeclaredType)typeMirror).asElement();
         this.superActivityClass = activityClasses.get(superClassElement);
-        Logger.debug(simpleName + "父类："+superActivityClass);
         if(this.superActivityClass != null && this.activityResultClass != null){
             this.activityResultClass.setSuperActivityResultClass(this.superActivityClass.activityResultClass);
         }
