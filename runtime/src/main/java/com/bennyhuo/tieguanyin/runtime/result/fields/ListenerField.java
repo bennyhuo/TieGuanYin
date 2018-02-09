@@ -1,5 +1,7 @@
 package com.bennyhuo.tieguanyin.runtime.result.fields;
 
+import com.bennyhuo.tieguanyin.runtime.utils.Logger;
+
 import java.lang.reflect.Field;
 
 /**
@@ -20,7 +22,7 @@ public abstract class ListenerField {
         try {
             field.set(this.receiver, object);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.warn(e);
         }
     }
 }

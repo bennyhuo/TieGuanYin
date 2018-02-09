@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
+import com.bennyhuo.tieguanyin.runtime.utils.Logger;
+
 /**
  * Created by benny on 2/7/18.
  */
@@ -33,7 +35,7 @@ public class FragmentBuilder {
         try {
             Class.forName(fragment.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("inject", Fragment.class, Bundle.class).invoke(null, fragment, savedInstanceState);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.warn(e);
         }
     }
 
@@ -41,7 +43,7 @@ public class FragmentBuilder {
         try {
             Class.forName(fragment.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("saveState", Fragment.class, Bundle.class).invoke(null, fragment, outState);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.warn(e);
         }
     }
 

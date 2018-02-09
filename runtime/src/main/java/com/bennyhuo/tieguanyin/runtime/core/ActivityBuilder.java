@@ -9,8 +9,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.bennyhuo.tieguanyin.runtime.result.ResultFragment;
 import com.bennyhuo.tieguanyin.runtime.result.ListenerEnvironment;
+import com.bennyhuo.tieguanyin.runtime.result.ResultFragment;
+import com.bennyhuo.tieguanyin.runtime.utils.Logger;
 
 import java.util.ArrayList;
 
@@ -68,6 +69,8 @@ public class ActivityBuilder {
     public void init(Context context){
         if(this.application != null) return;
         this.application = (Application) context.getApplicationContext();
+        //Logger.isDebug = (0 != (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+
         this.application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
     }
 
@@ -75,7 +78,7 @@ public class ActivityBuilder {
         try {
             Class.forName(activity.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("inject", Activity.class, Bundle.class).invoke(null, activity, savedInstanceState);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.warn(e);
         }
     }
 
@@ -83,7 +86,7 @@ public class ActivityBuilder {
         try {
             Class.forName(activity.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("saveState", Activity.class, Bundle.class).invoke(null, activity, outState);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.warn(e);
         }
     }
 

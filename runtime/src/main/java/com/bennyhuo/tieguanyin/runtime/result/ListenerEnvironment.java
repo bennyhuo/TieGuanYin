@@ -9,6 +9,7 @@ import com.bennyhuo.tieguanyin.runtime.core.OnActivityResultListener;
 import com.bennyhuo.tieguanyin.runtime.result.fields.ActivityField;
 import com.bennyhuo.tieguanyin.runtime.result.fields.FragmentField;
 import com.bennyhuo.tieguanyin.runtime.result.fields.ViewField;
+import com.bennyhuo.tieguanyin.runtime.utils.Logger;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class ListenerEnvironment {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.warn(e);
         }
     }
 
