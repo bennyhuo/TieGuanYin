@@ -151,6 +151,10 @@ public class BuilderProcessor extends AbstractProcessor {
                 Logger.logParsingError(element, ActivityBuilder.class, e);
             }
         }
+
+        for (ActivityClass activityClass : activityClasses.values()) {
+            activityClass.setupSuperClass(activityClasses);
+        }
     }
 
     private void parseFragmentClass(RoundEnvironment env, HashMap<Element, FragmentClass> fragmentClasses) {
@@ -163,6 +167,10 @@ public class BuilderProcessor extends AbstractProcessor {
             } catch (Exception e) {
                 Logger.logParsingError(element, FragmentBuilder.class, e);
             }
+        }
+
+        for (FragmentClass fragmentClass : fragmentClasses.values()) {
+            fragmentClass.setupSuperClass(fragmentClasses);
         }
     }
 

@@ -3,22 +3,28 @@ package com.bennyhuo.tieguanyin.compiler.fragment;
 import com.bennyhuo.tieguanyin.annotations.FragmentBuilder;
 import com.bennyhuo.tieguanyin.annotations.GenerateMode;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
+import com.bennyhuo.tieguanyin.compiler.utils.Logger;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.kotlinpoet.FileSpec;
+import com.sun.tools.javac.code.Type;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.annotation.processing.Filer;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
@@ -43,10 +49,15 @@ public class FragmentClass {
     private TypeElement type;
     private TreeSet<RequiredField> optionalFields = new TreeSet<>();
     private TreeSet<RequiredField> requiredFields = new TreeSet<>();
+
+    private TreeSet<RequiredField> requiredFieldsRecursively = null;
+    private TreeSet<RequiredField> optionalFieldsRecursively = null;
+
     private GenerateMode generateMode;
 
     public final String simpleName;
     public final String packageName;
+    private FragmentClass superFragmentClass;
 
     public FragmentClass(TypeElement type) {
         this.type = type;
@@ -65,6 +76,16 @@ public class FragmentClass {
         }
     }
 
+    public void setupSuperClass(HashMap<Element, FragmentClass> fragmentClasses) {
+        TypeMirror typeMirror = type.getSuperclass();
+        if (typeMirror == null || typeMirror == Type.noType) {
+            Logger.debug(simpleName + "无 super class");
+        }
+        TypeElement superClassElement = (TypeElement) ((DeclaredType) typeMirror).asElement();
+        this.superFragmentClass = fragmentClasses.get(superClassElement);
+        Logger.debug(simpleName + "父类：" + superFragmentClass);
+    }
+
     public void addSymbol(RequiredField field) {
         if (field.isRequired()) {
             requiredFields.add(field);
@@ -73,12 +94,28 @@ public class FragmentClass {
         }
     }
 
-    public Set<RequiredField> getRequiredFields() {
-        return requiredFields;
+    private Set<RequiredField> getRequiredFieldsRecursively() {
+        if(superFragmentClass == null){
+            return requiredFields;
+        }
+        if(requiredFieldsRecursively == null){
+            requiredFieldsRecursively = new TreeSet<>();
+            requiredFieldsRecursively.addAll(requiredFields);
+            requiredFieldsRecursively.addAll(superFragmentClass.getRequiredFieldsRecursively());
+        }
+        return requiredFieldsRecursively;
     }
 
-    public Set<RequiredField> getOptionalFields() {
-        return optionalFields;
+    private Set<RequiredField> getOptionalFieldsRecursively() {
+        if(superFragmentClass == null){
+            return optionalFields;
+        }
+        if(optionalFieldsRecursively == null){
+            optionalFieldsRecursively = new TreeSet<>();
+            optionalFieldsRecursively.addAll(optionalFields);
+            optionalFieldsRecursively.addAll(superFragmentClass.getOptionalFieldsRecursively());
+        }
+        return optionalFieldsRecursively;
     }
 
     public TypeElement getType() {
@@ -86,14 +123,14 @@ public class FragmentClass {
     }
 
     private void buildConstants(TypeSpec.Builder typeBuilder) {
-        for (RequiredField field : requiredFields) {
+        for (RequiredField field : getRequiredFieldsRecursively()) {
             typeBuilder.addField(FieldSpec.builder(String.class,
                     CONSTS_REQUIRED_FIELD_PREFIX + Utils.camelToUnderline(field.getName()),
                     Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                     .initializer("$S", field.getName())
                     .build());
         }
-        for (RequiredField field : optionalFields) {
+        for (RequiredField field : getOptionalFieldsRecursively()) {
             typeBuilder.addField(FieldSpec.builder(String.class,
                     CONSTS_OPTIONAL_FIELD_PREFIX + Utils.camelToUnderline(field.getName()),
                     Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -104,19 +141,19 @@ public class FragmentClass {
 
     public void buildShowMethod(TypeSpec.Builder typeBuilder) {
         ShowMethod showMethod = new ShowMethod(this, METHOD_NAME);
-        for (RequiredField field : getRequiredFields()) {
+        for (RequiredField field : getRequiredFieldsRecursively()) {
             showMethod.visitField(field);
         }
 
         ShowMethod showMethodNoOptional = showMethod.copy(METHOD_NAME_NO_OPTIONAL);
 
-        for (RequiredField field : getOptionalFields()) {
+        for (RequiredField field : getOptionalFieldsRecursively()) {
             showMethod.visitField(field);
         }
         showMethod.end();
         typeBuilder.addMethod(showMethod.build());
 
-        ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalFields());
+        ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalFieldsRecursively());
         int size = optionalBindings.size();
         //选择长度为 i 的参数列表
         for (int step = 1; step < size; step++) {
@@ -143,11 +180,11 @@ public class FragmentClass {
     public void buildInjectMethod(TypeSpec.Builder typeBuilder) {
         InjectMethod injectMethod = new InjectMethod(this);
 
-        for (RequiredField field : getRequiredFields()) {
+        for (RequiredField field : getRequiredFieldsRecursively()) {
             injectMethod.visitField(field);
         }
 
-        for (RequiredField field : getOptionalFields()) {
+        for (RequiredField field : getOptionalFieldsRecursively()) {
             injectMethod.visitField(field);
         }
         injectMethod.end();
@@ -158,11 +195,11 @@ public class FragmentClass {
     public void buildShowFunKt(FileSpec.Builder fileSpecBuilder) {
         ShowFunctionKt showMethodKt = new ShowFunctionKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
 
-        for (RequiredField field : getRequiredFields()) {
+        for (RequiredField field : getRequiredFieldsRecursively()) {
             showMethodKt.visitField(field);
         }
 
-        for (RequiredField field : getOptionalFields()) {
+        for (RequiredField field : getOptionalFieldsRecursively()) {
             showMethodKt.visitField(field);
         }
 
@@ -173,6 +210,8 @@ public class FragmentClass {
     }
 
     public void brew(Filer filer) {
+        if(type.getModifiers().contains(Modifier.ABSTRACT)) return;
+
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName + POSIX)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 

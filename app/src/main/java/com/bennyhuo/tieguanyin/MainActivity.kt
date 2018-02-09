@@ -19,11 +19,11 @@ class MainActivity : AppCompatActivity() {
 
         openJavaActivity.setOnClickListener {
             x ++
-            JavaActivityBuilder.start(this@MainActivity, 1234, true){
-                java, kotlin ->
-                toast("Result From JavaActivity: java=$java, kotlin=$kotlin" )
-                textView.text = "Result From JavaActivity: java=$java, kotlin=$kotlin, x=$x"
-            }
+//            JavaActivityBuilder.start(this@MainActivity, 1234, true){
+//                java, kotlin ->
+//                toast("Result From JavaActivity: java=$java, kotlin=$kotlin" )
+//                textView.text = "Result From JavaActivity: java=$java, kotlin=$kotlin, x=$x"
+//            }
         }
 
         openKotlinActivity.setOnClickListener {

@@ -5,22 +5,28 @@ import com.bennyhuo.tieguanyin.annotations.GenerateMode;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
+import com.bennyhuo.tieguanyin.compiler.utils.Logger;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.kotlinpoet.FileSpec;
+import com.sun.tools.javac.code.Type;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.annotation.processing.Filer;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
@@ -45,11 +51,17 @@ public class ActivityClass {
     private TypeElement type;
     private TreeSet<RequiredField> optionalFields = new TreeSet<>();
     private TreeSet<RequiredField> requiredFields = new TreeSet<>();
+
+    private TreeSet<RequiredField> requiredFieldsRecursively = null;
+    private TreeSet<RequiredField> optionalFieldsRecursively = null;
+
     private ActivityResultClass activityResultClass;
     private GenerateMode generateMode;
 
     public final String simpleName;
     public final String packageName;
+
+    private ActivityClass superActivityClass;
 
     public ActivityClass(TypeElement type) {
         this.type = type;
@@ -71,6 +83,20 @@ public class ActivityClass {
         }
     }
 
+    public void setupSuperClass(HashMap<Element, ActivityClass> activityClasses){
+        TypeMirror typeMirror = type.getSuperclass();
+        if(typeMirror == null || typeMirror == Type.noType){
+            Logger.debug(simpleName + "无 super class");
+            return;
+        }
+        TypeElement superClassElement = (TypeElement) ((DeclaredType)typeMirror).asElement();
+        this.superActivityClass = activityClasses.get(superClassElement);
+        Logger.debug(simpleName + "父类："+superActivityClass);
+        if(this.superActivityClass != null && this.activityResultClass != null){
+            this.activityResultClass.setSuperActivityResultClass(this.superActivityClass.activityResultClass);
+        }
+    }
+
     public void addSymbol(RequiredField field) {
         if (field.isRequired()) {
             requiredFields.add(field);
@@ -79,12 +105,28 @@ public class ActivityClass {
         }
     }
 
-    public Set<RequiredField> getRequiredFields() {
-        return requiredFields;
+    private Set<RequiredField> getRequiredFieldsRecursively() {
+        if(superActivityClass == null){
+            return requiredFields;
+        }
+        if(requiredFieldsRecursively == null){
+            requiredFieldsRecursively = new TreeSet<>();
+            requiredFieldsRecursively.addAll(requiredFields);
+            requiredFieldsRecursively.addAll(superActivityClass.getRequiredFieldsRecursively());
+        }
+        return requiredFieldsRecursively;
     }
 
-    public Set<RequiredField> getOptionalFields() {
-        return optionalFields;
+    private Set<RequiredField> getOptionalFieldsRecursively() {
+        if(superActivityClass == null){
+            return optionalFields;
+        }
+        if(optionalFieldsRecursively == null){
+            optionalFieldsRecursively = new TreeSet<>();
+            optionalFieldsRecursively.addAll(optionalFields);
+            optionalFieldsRecursively.addAll(superActivityClass.getOptionalFieldsRecursively());
+        }
+        return optionalFieldsRecursively;
     }
 
     public TypeElement getType() {
@@ -92,14 +134,14 @@ public class ActivityClass {
     }
 
     private void buildConstants(TypeSpec.Builder typeBuilder){
-        for (RequiredField field : requiredFields) {
+        for (RequiredField field : getRequiredFieldsRecursively()) {
             typeBuilder.addField(FieldSpec.builder(String.class,
                     CONSTS_REQUIRED_FIELD_PREFIX + Utils.camelToUnderline(field.getName()),
                     Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                     .initializer("$S", field.getName())
                     .build());
         }
-        for (RequiredField field : optionalFields) {
+        for (RequiredField field : getOptionalFieldsRecursively()) {
             typeBuilder.addField(FieldSpec.builder(String.class,
                     CONSTS_OPTIONAL_FIELD_PREFIX + Utils.camelToUnderline(field.getName()),
                     Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -107,7 +149,7 @@ public class ActivityClass {
                     .build());
         }
         if(activityResultClass != null){
-            for (ResultEntity resultEntity : activityResultClass.getResultEntities()) {
+            for (ResultEntity resultEntity : activityResultClass.getResultEntitiesRecursively()) {
                 typeBuilder.addField(FieldSpec.builder(String.class,
                         CONSTS_RESULT_PREFIX + Utils.camelToUnderline(resultEntity.name()),
                         Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -117,21 +159,21 @@ public class ActivityClass {
         }
     }
 
-    public void buildStartMethod(TypeSpec.Builder typeBuilder) {
+    private void buildStartMethod(TypeSpec.Builder typeBuilder) {
         StartMethod startMethod = new StartMethod(this, METHOD_NAME);
-        for (RequiredField field : getRequiredFields()) {
+        for (RequiredField field : getRequiredFieldsRecursively()) {
             startMethod.visitField(field);
         }
 
         StartMethod startMethodNoOptional = startMethod.copy(METHOD_NAME_NO_OPTIONAL);
 
-        for (RequiredField field : getOptionalFields()) {
+        for (RequiredField field : getOptionalFieldsRecursively()) {
             startMethod.visitField(field);
         }
         startMethod.endWithResult(activityResultClass);
         typeBuilder.addMethod(startMethod.build());
 
-        ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalFields());
+        ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalFieldsRecursively());
         int size = optionalBindings.size();
         //选择长度为 i 的参数列表
         for (int step = 1; step < size; step++) {
@@ -155,14 +197,14 @@ public class ActivityClass {
         }
     }
 
-    public void buildInjectMethod(TypeSpec.Builder typeBuilder) {
+    private void buildInjectMethod(TypeSpec.Builder typeBuilder) {
         InjectMethod injectMethod = new InjectMethod(this);
 
-        for (RequiredField field : getRequiredFields()) {
+        for (RequiredField field : getRequiredFieldsRecursively()) {
             injectMethod.visitField(field);
         }
 
-        for (RequiredField field : getOptionalFields()) {
+        for (RequiredField field : getOptionalFieldsRecursively()) {
             injectMethod.visitField(field);
         }
         injectMethod.end();
@@ -173,11 +215,11 @@ public class ActivityClass {
     public void buildStartFunKt(FileSpec.Builder fileSpecBuilder) {
         StartFunctionKt startMethodKt = new StartFunctionKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
 
-        for (RequiredField field : getRequiredFields()) {
+        for (RequiredField field : getRequiredFieldsRecursively()) {
             startMethodKt.visitField(field);
         }
 
-        for (RequiredField field : getOptionalFields()) {
+        for (RequiredField field : getOptionalFieldsRecursively()) {
             startMethodKt.visitField(field);
         }
 
@@ -188,6 +230,7 @@ public class ActivityClass {
     }
 
     public void brew(Filer filer) {
+        if(type.getModifiers().contains(Modifier.ABSTRACT)) return;
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(simpleName + POSIX)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 

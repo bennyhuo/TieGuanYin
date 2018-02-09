@@ -15,6 +15,8 @@ import com.squareup.kotlinpoet.ParameterSpec;
 import com.squareup.kotlinpoet.TypeNames;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.MirroredTypeException;
@@ -27,13 +29,21 @@ import kotlin.Unit;
  */
 public class ActivityResultClass {
 
-    private ResultEntity[] resultEntities;
+    private List<ResultEntity> resultEntities = new ArrayList<>();
+    private List<ResultEntity> resultEntitiesRecursively = new ArrayList<>();
+
 
     private ActivityClass activityClass;
 
+    private ActivityResultClass superActivityResultClass;
+
     public ActivityResultClass(ActivityClass activityClass, ResultEntity[] resultEntities) {
         this.activityClass = activityClass;
-        this.resultEntities = resultEntities;
+        Collections.addAll(this.resultEntities, resultEntities);
+    }
+
+    public void setSuperActivityResultClass(ActivityResultClass superActivityResultClass) {
+        this.superActivityResultClass = superActivityResultClass;
     }
 
     /**
@@ -170,8 +180,15 @@ public class ActivityResultClass {
         return finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("activity.finish()").build();
     }
 
-    public ResultEntity[] getResultEntities(){
-        return resultEntities;
+    public List<ResultEntity> getResultEntitiesRecursively(){
+        if(superActivityResultClass == null){
+            return resultEntities;
+        }
+        if(resultEntitiesRecursively == null){
+            resultEntitiesRecursively = new ArrayList<>(resultEntities);
+            resultEntitiesRecursively.addAll(superActivityResultClass.getResultEntitiesRecursively());
+        }
+        return resultEntitiesRecursively;
     }
 
     public static TypeMirror getResultType(ResultEntity entity){

@@ -39,10 +39,10 @@ class GenerateBothActivity : AppCompatActivity() {
         setContentView(layout.activity_main)
         setTitle(this.javaClass.simpleName)
         openJavaActivity.setOnClickListener {
-            JavaActivityBuilder.start(this@GenerateBothActivity, 1234, true){
-                java, kotlin ->
-                toast("Result From JavaActivity: java=$java, kotlin=$kotlin")
-            }
+//            JavaActivityBuilder.start(this@GenerateBothActivity, 1234, true){
+//                java, kotlin ->
+//                toast("Result From JavaActivity: java=$java, kotlin=$kotlin")
+//            }
         }
 
         openKotlinActivity.setOnClickListener {
