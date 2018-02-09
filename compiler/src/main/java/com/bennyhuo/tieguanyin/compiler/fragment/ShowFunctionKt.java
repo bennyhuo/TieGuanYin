@@ -2,7 +2,6 @@ package com.bennyhuo.tieguanyin.compiler.fragment;
 
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
-import com.squareup.kotlinpoet.ClassName;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
 import com.squareup.kotlinpoet.ParameterSpec;
@@ -64,8 +63,7 @@ public class ShowFunctionKt {
         funBuilderForContext
                 .addStatement("val fragment = %T()", fragmentClass.getType())
                 .addStatement("fragment.arguments = intent.getExtras()")
-                .addStatement("supportFragmentManager.beginTransaction().replace(containerId, fragment).commit()")
-                .addStatement("%T.inject()", new ClassName(fragmentClass.packageName, builderClassName));
+                .addStatement("supportFragmentManager.beginTransaction().replace(containerId, fragment).commit()");
 
         StringBuilder paramBuilder = new StringBuilder();
         List<ParameterSpec> parameterSpecList = funBuilderForContext.getParameters$kotlinpoet();

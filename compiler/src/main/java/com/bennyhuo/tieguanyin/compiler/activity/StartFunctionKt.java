@@ -77,7 +77,6 @@ public class StartFunctionKt {
                 .addStatement("intent.addFlags(%T.FLAG_ACTIVITY_NEW_TASK)", KotlinTypes.INTENT)
                 .addStatement("startActivity(intent)")
                 .endControlFlow();
-        funBuilderForContext.addStatement("%T.inject()", new com.squareup.kotlinpoet.ClassName(activityClass.packageName, builderClassName));
 
         StringBuilder paramBuilder = new StringBuilder();
         for (ParameterSpec parameterSpec : funBuilderForContext.getParameters$kotlinpoet()) {

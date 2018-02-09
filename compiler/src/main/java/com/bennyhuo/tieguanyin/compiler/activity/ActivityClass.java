@@ -159,6 +159,19 @@ public class ActivityClass {
         }
     }
 
+    private void buildSaveStateMethod(TypeSpec.Builder typeBuilder){
+        SaveStateMethod saveStateMethod = new SaveStateMethod(this);
+        for (RequiredField field : getRequiredFieldsRecursively()) {
+            saveStateMethod.visitField(field);
+        }
+
+        for (RequiredField field : getOptionalFieldsRecursively()) {
+            saveStateMethod.visitField(field);
+        }
+        saveStateMethod.end();
+        typeBuilder.addMethod(saveStateMethod.build());
+    }
+
     private void buildStartMethod(TypeSpec.Builder typeBuilder) {
         StartMethod startMethod = new StartMethod(this, METHOD_NAME);
         for (RequiredField field : getRequiredFieldsRecursively()) {
@@ -237,6 +250,8 @@ public class ActivityClass {
         buildConstants(typeBuilder);
 
         buildInjectMethod(typeBuilder);
+
+        buildSaveStateMethod(typeBuilder);
 
         if(activityResultClass != null){
             typeBuilder.addType(activityResultClass.buildOnActivityResultListenerInterface());

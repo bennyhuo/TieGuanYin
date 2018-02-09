@@ -27,7 +27,9 @@ class KotlinFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         textView.text = text
         textView.setOnClickListener {
-            showJavaFragment("Java!!")
+            //showJavaFragment("Java!!")
+            text = System.currentTimeMillis().toString()
+            textView.text = text
         }
     }
 }

@@ -41,6 +41,9 @@ class KotlinActivity : AppCompatActivity() {
 
         openGenerateBothActivity.setOnClickListener {
 //            openGenerateBothActivity(30, "bennyhuo", num = 1234)
+            num++
         }
+
+        textView.text = "num=$num, java=$java"
     }
 }

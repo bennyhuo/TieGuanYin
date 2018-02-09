@@ -6,26 +6,44 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
-import java.util.ArrayList;
-
 /**
  * Created by benny on 2/7/18.
  */
 
 public class FragmentBuilder {
+    public static final String BUILDER_NAME_POSIX = "Builder";
+
     public static FragmentBuilder INSTANCE = new FragmentBuilder();
 
     private FragmentManager.FragmentLifecycleCallbacks callbacks = new FragmentManager.FragmentLifecycleCallbacks() {
         @Override
         public void onFragmentCreated(FragmentManager fm, Fragment f, Bundle savedInstanceState) {
             super.onFragmentCreated(fm, f, savedInstanceState);
-            for (OnFragmentCreateListener onFragmentCreatedListener : onFragmentCreatedListeners) {
-                onFragmentCreatedListener.onFragmentCreated(f, savedInstanceState);
-            }
+            performInject(f, savedInstanceState);
+        }
+
+        @Override
+        public void onFragmentSaveInstanceState(FragmentManager fm, Fragment f, Bundle outState) {
+            super.onFragmentSaveInstanceState(fm, f, outState);
+            performSaveState(f, outState);
         }
     };
 
-    private ArrayList<OnFragmentCreateListener> onFragmentCreatedListeners = new ArrayList<>();
+    private void performInject(Fragment fragment, Bundle savedInstanceState){
+        try {
+            Class.forName(fragment.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("inject", Fragment.class, Bundle.class).invoke(null, fragment, savedInstanceState);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void performSaveState(Fragment fragment, Bundle outState){
+        try {
+            Class.forName(fragment.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("saveState", Fragment.class, Bundle.class).invoke(null, fragment, outState);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     void onActivityCreated(Activity activity){
         if(activity instanceof FragmentActivity){
@@ -37,13 +55,5 @@ public class FragmentBuilder {
         if(activity instanceof FragmentActivity){
             ((FragmentActivity) activity).getSupportFragmentManager().unregisterFragmentLifecycleCallbacks(callbacks);
         }
-    }
-
-    public void addOnFragmentCreateListener(OnFragmentCreateListener onFragmentCreatedListener){
-        onFragmentCreatedListeners.add(onFragmentCreatedListener);
-    }
-
-    public void removeOnFragmentCreateListener(OnFragmentCreateListener onFragmentCreatedListener){
-        onFragmentCreatedListeners.remove(onFragmentCreatedListener);
     }
 }

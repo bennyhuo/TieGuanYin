@@ -68,7 +68,6 @@ public class StartMethod {
                 .addStatement("intent.addFlags($T.FLAG_ACTIVITY_NEW_TASK)", JavaTypes.INTENT)
                 .addStatement("context.startActivity(intent)")
                 .endControlFlow();
-        methodBuilder.addStatement("inject()");
     }
 
     public MethodSpec build() {

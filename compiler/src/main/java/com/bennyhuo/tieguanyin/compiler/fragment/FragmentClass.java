@@ -209,6 +209,19 @@ public class FragmentClass {
         fileSpecBuilder.addFunction(showMethodKt.buildForFragment());
     }
 
+    public void buildSaveStateMethod(TypeSpec.Builder typeBuilder){
+        SaveStateMethod saveStateMethod = new SaveStateMethod(this);
+        for (RequiredField field : getRequiredFieldsRecursively()) {
+            saveStateMethod.visitField(field);
+        }
+
+        for (RequiredField field : getOptionalFieldsRecursively()) {
+            saveStateMethod.visitField(field);
+        }
+        saveStateMethod.end();
+        typeBuilder.addMethod(saveStateMethod.build());
+    }
+
     public void brew(Filer filer) {
         if(type.getModifiers().contains(Modifier.ABSTRACT)) return;
 
@@ -218,6 +231,8 @@ public class FragmentClass {
         buildConstants(typeBuilder);
 
         buildInjectMethod(typeBuilder);
+
+        buildSaveStateMethod(typeBuilder);
 
         switch (generateMode) {
             case JavaOnly:

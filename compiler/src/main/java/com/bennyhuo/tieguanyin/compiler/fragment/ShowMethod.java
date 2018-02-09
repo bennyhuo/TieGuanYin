@@ -57,7 +57,6 @@ public class ShowMethod {
                 .addStatement("$T fragment = new $T()", fragmentClass.getType(), fragmentClass.getType())
                 .addStatement("fragment.setArguments(intent.getExtras())")
                 .addStatement("fragmentActivity.getSupportFragmentManager().beginTransaction().replace(containerId, fragment).commit()")
-                .addStatement("inject()")
                 .endControlFlow();
     }
 
