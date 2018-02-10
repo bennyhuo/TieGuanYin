@@ -76,8 +76,11 @@ public class ShowFunctionKt {
         if (paramBuilder.length() > 0) {
             paramBuilder.deleteCharAt(paramBuilder.length() - 1);
         }
-        funBuilderForViewGroup.addStatement("(context as? %T)?.%L(id, %L)", KotlinTypes.SUPPORT_ACTIVITY, funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
         funBuilderForFragment.addStatement("(view?.parent as? %T)?.%L(%L)", KotlinTypes.VIEW_GROUP, funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
+        if(paramBuilder.length() > 0){
+            paramBuilder.insert(0, ',');
+        }
+        funBuilderForViewGroup.addStatement("(context as? %T)?.%L(id %L)", KotlinTypes.SUPPORT_ACTIVITY, funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
     }
 
     public FunSpec buildForContext() {
