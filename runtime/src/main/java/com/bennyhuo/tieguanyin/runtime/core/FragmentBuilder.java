@@ -49,7 +49,7 @@ public class FragmentBuilder {
 
     void onActivityCreated(Activity activity){
         if(activity instanceof FragmentActivity){
-            ((FragmentActivity) activity).getSupportFragmentManager().registerFragmentLifecycleCallbacks(callbacks, false);
+            ((FragmentActivity) activity).getSupportFragmentManager().registerFragmentLifecycleCallbacks(callbacks, true);
         }
     }
 
