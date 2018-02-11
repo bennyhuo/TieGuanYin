@@ -7,7 +7,11 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.util.Log;
+import android.view.View;
 
 import com.bennyhuo.tieguanyin.runtime.result.ListenerEnvironment;
 import com.bennyhuo.tieguanyin.runtime.result.ResultFragment;
@@ -117,21 +121,50 @@ public class ActivityBuilder {
         return null;
     }
 
-    public void startActivityForResult(Activity activity, Intent intent, OnActivityResultListener onActivityResultListener) {
-        FragmentManager fragmentManager = activity.getFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(ResultFragment.TAG);
-        ResultFragment resultFragment;
-        if (fragment != null && fragment instanceof ResultFragment) {
-            resultFragment = (ResultFragment) fragment;
+    public void startActivityForResult(Context context, Intent intent, Bundle options,OnActivityResultListener onActivityResultListener) {
+        if(context instanceof Activity){
+            Activity activity = (Activity)context;
+            if(onActivityResultListener == null){
+                ActivityCompat.startActivityForResult(activity, intent, 1, options);
+            } else {
+                FragmentManager fragmentManager = activity.getFragmentManager();
+                Fragment fragment = fragmentManager.findFragmentByTag(ResultFragment.TAG);
+                ResultFragment resultFragment;
+                if (fragment != null && fragment instanceof ResultFragment) {
+                    resultFragment = (ResultFragment) fragment;
+                } else {
+                    resultFragment = new ResultFragment();
+                    fragmentManager.beginTransaction()
+                            .add(resultFragment, ResultFragment.TAG)
+                            .commitAllowingStateLoss();
+                    fragmentManager.executePendingTransactions();
+                }
+                resultFragment.setOnActivityResultListener(onActivityResultListener);
+                resultFragment.startActivityForResult(intent, 1, options);
+                addOnActivityResultListener(onActivityResultListener);
+            }
         } else {
-            resultFragment = new ResultFragment();
-            fragmentManager.beginTransaction()
-                    .add(resultFragment, ResultFragment.TAG)
-                    .commitAllowingStateLoss();
-            fragmentManager.executePendingTransactions();
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
         }
-        resultFragment.setOnActivityResultListener(onActivityResultListener);
-        resultFragment.startActivityForResult(intent, 1);
-        addOnActivityResultListener(onActivityResultListener);
+    }
+
+    public void startActivity(Context context, Intent intent, Bundle options){
+        if(context instanceof Activity) {
+            Activity activity = (Activity) context;
+            ActivityCompat.startActivity(activity, intent, options);
+        } else {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
+    }
+
+    public static Bundle makeSceneTransition(Context context, ArrayList<Pair<View, String>> sharedElements){
+        if(context instanceof Activity) {
+            Activity activity = (Activity) context;
+            return ActivityOptionsCompat.makeSceneTransitionAnimation(activity, sharedElements.toArray(new Pair[0])).toBundle();
+        } else {
+            return null;
+        }
     }
 }

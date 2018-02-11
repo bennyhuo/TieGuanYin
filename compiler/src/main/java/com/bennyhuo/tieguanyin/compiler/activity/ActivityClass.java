@@ -3,6 +3,7 @@ package com.bennyhuo.tieguanyin.compiler.activity;
 import com.bennyhuo.tieguanyin.annotations.ActivityBuilder;
 import com.bennyhuo.tieguanyin.annotations.GenerateMode;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
+import com.bennyhuo.tieguanyin.annotations.SharedElement;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
@@ -16,6 +17,7 @@ import com.sun.tools.javac.code.Type;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
@@ -54,6 +56,9 @@ public class ActivityClass {
     private TreeSet<RequiredField> requiredFieldsRecursively = null;
     private TreeSet<RequiredField> optionalFieldsRecursively = null;
 
+    private ArrayList<SharedElement> sharedElements = new ArrayList<>();
+    private ArrayList<SharedElement> sharedElementsRecursively = null;
+
     private ActivityResultClass activityResultClass;
     private GenerateMode generateMode;
 
@@ -80,6 +85,8 @@ public class ActivityClass {
             if(isKotlin) generateMode = GenerateMode.Both;
             else generateMode = GenerateMode.JavaOnly;
         }
+
+        Collections.addAll(sharedElements, generateBuilder.sharedElements());
     }
 
     public void setupSuperClass(HashMap<Element, ActivityClass> activityClasses){
@@ -112,6 +119,17 @@ public class ActivityClass {
             requiredFieldsRecursively.addAll(superActivityClass.getRequiredFieldsRecursively());
         }
         return requiredFieldsRecursively;
+    }
+
+    public ArrayList<SharedElement> getSharedElementsRecursively(){
+        if(superActivityClass == null){
+            return sharedElements;
+        }
+        if(sharedElementsRecursively == null){
+            sharedElementsRecursively = new ArrayList<>(sharedElements);
+            sharedElementsRecursively.addAll(superActivityClass.getSharedElementsRecursively());
+        }
+        return sharedElementsRecursively;
     }
 
     private Set<RequiredField> getOptionalFieldsRecursively() {
@@ -182,6 +200,7 @@ public class ActivityClass {
         }
         startMethod.endWithResult(activityResultClass);
         typeBuilder.addMethod(startMethod.build());
+        typeBuilder.addMethod(startMethod.buildForView());
 
         ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalFieldsRecursively());
         int size = optionalBindings.size();
@@ -198,12 +217,14 @@ public class ActivityClass {
                 method.endWithResult(activityResultClass);
                 method.renameTo(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPARATOR));
                 typeBuilder.addMethod(method.build());
+                typeBuilder.addMethod(method.buildForView());
             }
         }
 
         if (size > 0) {
             startMethodNoOptional.endWithResult(activityResultClass);
             typeBuilder.addMethod(startMethodNoOptional.build());
+            typeBuilder.addMethod(startMethodNoOptional.buildForView());
         }
     }
 

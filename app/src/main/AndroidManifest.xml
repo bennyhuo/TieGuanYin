@@ -22,6 +22,7 @@
         <activity android:name="com.bennyhuo.tieguanyin.JavaActivity"/>
         <activity android:name="com.bennyhuo.tieguanyin.KotlinActivity"/>
         <activity android:name="com.bennyhuo.tieguanyin.FragmentContainerActivity"/>
+        <activity android:name=".transitions.DetailsActivity"/>
     </application>
 
 </manifest>

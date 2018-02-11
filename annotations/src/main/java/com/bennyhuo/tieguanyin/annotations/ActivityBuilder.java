@@ -13,4 +13,5 @@ import java.lang.annotation.Target;
 public @interface ActivityBuilder {
     GenerateMode mode() default GenerateMode.Auto;
     ResultEntity[] resultTypes() default {};
+    SharedElement[] sharedElements() default {};
 }

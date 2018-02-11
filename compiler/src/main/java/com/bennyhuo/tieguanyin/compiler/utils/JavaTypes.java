@@ -24,4 +24,8 @@ public class JavaTypes {
     public static final ClassName ON_ACTIVITY_CREATE_LISTENER = ClassName.get("com.bennyhuo.tieguanyin.runtime.core", "OnActivityCreateListener");
     public static final ClassName ON_FRAGMENT_CREATE_LISTENER = ClassName.get("com.bennyhuo.tieguanyin.runtime.core", "OnFragmentCreateListener");
 
+    public static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
+    public static final ClassName SUPPORT_PAIR = ClassName.get("android.support.v4.util", "Pair");
+    public static final ClassName VIEW = ClassName.get("android.view", "View");
+    public static final ClassName ACTIVITY_COMPAT = ClassName.get("android.support.v4.app", "ActivityCompat");
 }
