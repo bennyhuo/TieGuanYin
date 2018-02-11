@@ -53,10 +53,7 @@ public class ShowMethod {
     }
 
     public void end() {
-        methodBuilder.addStatement("$T fragmentActivity = ($T) activity", JavaTypes.SUPPORT_ACTIVITY, JavaTypes.SUPPORT_ACTIVITY)
-                .addStatement("$T fragment = new $T()", fragmentClass.getType(), fragmentClass.getType())
-                .addStatement("fragment.setArguments(intent.getExtras())")
-                .addStatement("fragmentActivity.getSupportFragmentManager().beginTransaction().replace(containerId, fragment).commit()")
+        methodBuilder.addStatement("$T.showFragment(($T) activity, containerId, intent.getExtras(), $T.class)", JavaTypes.FRAGMENT_BUILDER,  JavaTypes.SUPPORT_ACTIVITY, fragmentClass.getType())
                 .endControlFlow();
     }
 

@@ -58,4 +58,14 @@ public class FragmentBuilder {
             ((FragmentActivity) activity).getSupportFragmentManager().unregisterFragmentLifecycleCallbacks(callbacks);
         }
     }
+
+    public static void showFragment(FragmentActivity activity, int containerId, Bundle args, Class<? extends Fragment> fragmentCls) {
+        try {
+            Fragment fragment = fragmentCls.newInstance();
+            fragment.setArguments(args);
+            activity.getSupportFragmentManager().beginTransaction().replace(containerId, fragment).commit();
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+    }
 }

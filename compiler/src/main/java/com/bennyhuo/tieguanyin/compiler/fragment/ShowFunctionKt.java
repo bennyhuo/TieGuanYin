@@ -60,10 +60,7 @@ public class ShowFunctionKt {
     }
 
     public void end() {
-        funBuilderForContext
-                .addStatement("val fragment = %T()", fragmentClass.getType())
-                .addStatement("fragment.arguments = intent.getExtras()")
-                .addStatement("supportFragmentManager.beginTransaction().replace(containerId, fragment).commit()");
+        funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java)", KotlinTypes.FRAGMENT_BUILDER,  fragmentClass.getType());
 
         StringBuilder paramBuilder = new StringBuilder();
         List<ParameterSpec> parameterSpecList = funBuilderForContext.getParameters$kotlinpoet();
