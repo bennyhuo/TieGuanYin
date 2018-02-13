@@ -76,8 +76,8 @@ public class StartMethod {
                     .addStatement("$T<$T<$T, $T>> sharedElements = new $T<>()", JavaTypes.ARRAY_LIST, JavaTypes.SUPPORT_PAIR, JavaTypes.VIEW, String.class, JavaTypes.ARRAY_LIST);
 
             for (SharedElement sharedElement : sharedElements) {
-                methodBuilder.addStatement("sharedElements.add(new Pair<>(activity.findViewById($L), $S))", sharedElement.viewId(), sharedElement.transitionName());
-                methodBuilderForView.addStatement("sharedElements.add(new Pair<>(view.findViewById($L), $S))", sharedElement.viewId(), sharedElement.transitionName());
+                methodBuilder.addStatement("sharedElements.add(new Pair<>(activity.findViewById($L), $S))", sharedElement.sourceId(), sharedElement.targetName());
+                methodBuilderForView.addStatement("sharedElements.add(new Pair<>(view.findViewById($L), $S))", sharedElement.sourceId(), sharedElement.targetName());
             }
             methodBuilderForView.addStatement("options = $T.makeSceneTransition(view.getContext(), sharedElements)", JavaTypes.ACTIVITY_BUILDER);
 

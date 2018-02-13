@@ -76,8 +76,8 @@ public class StartFunctionKt {
             funBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
             funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.VIEW, KotlinTypes.STRING);
             for (SharedElement sharedElement :sharedElements) {
-                funBuilderForContext.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.viewId(), sharedElement.transitionName());
-                funBuilderForView.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.viewId(), sharedElement.transitionName());
+                funBuilderForContext.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.sourceId(), sharedElement.targetName());
+                funBuilderForView.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.sourceId(), sharedElement.targetName());
             }
             funBuilderForContext.addStatement("options = %T.makeSceneTransition(this, sharedElements)", KotlinTypes.ACTIVITY_BUILDER);
             funBuilderForContext.endControlFlow();

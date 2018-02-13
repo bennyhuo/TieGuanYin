@@ -11,7 +11,7 @@ import com.bennyhuo.tieguanyin.sample.R
 import kotlinx.android.synthetic.main.activity_transitions.*
 
 @ActivityBuilder(
-        sharedElements = [SharedElement(viewId = R.id.openJavaActivity, transitionName = "hello")]
+        sharedElements = [SharedElement(sourceId = R.id.openJavaActivity, targetName = "hello")]
 )
 class DetailsActivity : AppCompatActivity() {
 

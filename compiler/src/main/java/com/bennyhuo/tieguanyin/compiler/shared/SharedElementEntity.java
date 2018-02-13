@@ -15,7 +15,7 @@ public class SharedElementEntity {
     public final String sourceName;
 
     public SharedElementEntity(SharedElement sharedElement) {
-        this(sharedElement.transitionName(), sharedElement.viewId());
+        this(sharedElement.targetName(), sharedElement.sourceId());
     }
 
     public SharedElementEntity(SharedElementWithName sharedElement) {

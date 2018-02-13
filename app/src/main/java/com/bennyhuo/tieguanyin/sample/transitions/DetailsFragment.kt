@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.fragment_transitions.*
  * Created by benny on 2/6/18.
  */
 @FragmentBuilder(
-        //sharedElements = [SharedElement(viewId = R.id.textView, transitionName = "fragment")]
+        //sharedElements = [SharedElement(sourceId = R.id.textView, targetName = "fragment")]
         sharedElementsWithName = [SharedElementWithName("fragment")]
 )
 class DetailsFragment : Fragment() {
