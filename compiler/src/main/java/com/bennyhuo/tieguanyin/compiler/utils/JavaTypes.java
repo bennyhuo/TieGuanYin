@@ -18,6 +18,7 @@ public class JavaTypes {
     public static final ClassName ON_ACTIVITY_RESULT_LISTENER = ClassName.get("com.bennyhuo.tieguanyin.runtime.core", "OnActivityResultListener");
 
     public static final ClassName RUNTIME_UTILS = ClassName.get("com.bennyhuo.tieguanyin.runtime.utils", "BundleUtils");
+    public static final ClassName VIEW_UTILS = ClassName.get("com.bennyhuo.tieguanyin.runtime.utils", "ViewUtils");
 
     public static final ClassName ACTIVITY_BUILDER = ClassName.get("com.bennyhuo.tieguanyin.runtime.core", "ActivityBuilder");
     public static final ClassName FRAGMENT_BUILDER = ClassName.get("com.bennyhuo.tieguanyin.runtime.core", "FragmentBuilder");
@@ -29,4 +30,6 @@ public class JavaTypes {
     public static final ClassName VIEW = ClassName.get("android.view", "View");
     public static final ClassName VIEW_COMPAT = ClassName.get("android.support.v4.view", "ViewCompat");
     public static final ClassName ACTIVITY_COMPAT = ClassName.get("android.support.v4.app", "ActivityCompat");
+
+    public static final ClassName HASH_MAP = ClassName.get("java.util", "HashMap");
 }

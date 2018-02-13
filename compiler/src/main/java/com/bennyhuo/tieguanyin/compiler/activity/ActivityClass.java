@@ -4,8 +4,11 @@ import com.bennyhuo.tieguanyin.annotations.ActivityBuilder;
 import com.bennyhuo.tieguanyin.annotations.GenerateMode;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
 import com.bennyhuo.tieguanyin.annotations.SharedElement;
+import com.bennyhuo.tieguanyin.annotations.SharedElementByNames;
+import com.bennyhuo.tieguanyin.annotations.SharedElementWithName;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
+import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
 import com.squareup.javapoet.FieldSpec;
@@ -17,7 +20,6 @@ import com.sun.tools.javac.code.Type;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
@@ -56,8 +58,8 @@ public class ActivityClass {
     private TreeSet<RequiredField> requiredFieldsRecursively = null;
     private TreeSet<RequiredField> optionalFieldsRecursively = null;
 
-    private ArrayList<SharedElement> sharedElements = new ArrayList<>();
-    private ArrayList<SharedElement> sharedElementsRecursively = null;
+    private ArrayList<SharedElementEntity> sharedElements = new ArrayList<>();
+    private ArrayList<SharedElementEntity> sharedElementsRecursively = null;
 
     private ActivityResultClass activityResultClass;
     private GenerateMode generateMode;
@@ -86,7 +88,17 @@ public class ActivityClass {
             else generateMode = GenerateMode.JavaOnly;
         }
 
-        Collections.addAll(sharedElements, generateBuilder.sharedElements());
+        for (SharedElement sharedElement : generateBuilder.sharedElements()) {
+            sharedElements.add(new SharedElementEntity(sharedElement));
+        }
+
+        for (SharedElementByNames sharedElementByNames : generateBuilder.sharedElementsByNames()) {
+            sharedElements.add(new SharedElementEntity(sharedElementByNames));
+        }
+
+        for (SharedElementWithName sharedElementWithName : generateBuilder.sharedElementsWithName()) {
+            sharedElements.add(new SharedElementEntity(sharedElementWithName));
+        }
     }
 
     public void setupSuperClass(HashMap<Element, ActivityClass> activityClasses){
@@ -121,7 +133,7 @@ public class ActivityClass {
         return requiredFieldsRecursively;
     }
 
-    public ArrayList<SharedElement> getSharedElementsRecursively(){
+    public ArrayList<SharedElementEntity> getSharedElementsRecursively(){
         if(superActivityClass == null){
             return sharedElements;
         }

@@ -1,8 +1,8 @@
 package com.bennyhuo.tieguanyin.compiler.activity;
 
-import com.bennyhuo.tieguanyin.annotations.SharedElement;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
+import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
@@ -69,15 +69,30 @@ public class StartFunctionKt {
         funBuilderForContext.addStatement("var options: %T? = null", KotlinTypes.BUNDLE);
         funBuilderForView.addStatement("var options: %T? = null", KotlinTypes.BUNDLE);
 
-        ArrayList<SharedElement> sharedElements = activityClass.getSharedElementsRecursively();
+        ArrayList<SharedElementEntity> sharedElements = activityClass.getSharedElementsRecursively();
         if (sharedElements.size() > 0) {
             funBuilderForView.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.VIEW, KotlinTypes.STRING);
 
             funBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
             funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.VIEW, KotlinTypes.STRING);
-            for (SharedElement sharedElement :sharedElements) {
-                funBuilderForContext.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.sourceId(), sharedElement.targetName());
-                funBuilderForView.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.sourceId(), sharedElement.targetName());
+
+            boolean firstNeedTransitionNameMap = true;
+            for (SharedElementEntity sharedElement :sharedElements) {
+                if(sharedElement.sourceId == 0){
+                    if(firstNeedTransitionNameMap){
+                        funBuilderForView.addStatement("val nameMap = %T<%T, %T>()", KotlinTypes.HASH_MAP, KotlinTypes.STRING, KotlinTypes.VIEW)
+                        .addStatement("%T.findNamedViews(this, nameMap)", KotlinTypes.VIEW_UTILS);
+                        funBuilderForContext.addStatement("val nameMap = %T<%T, %T>()", KotlinTypes.HASH_MAP, KotlinTypes.STRING, KotlinTypes.VIEW)
+                                .addStatement("%T.findNamedViews(window.decorView, nameMap)", KotlinTypes.VIEW_UTILS);
+                        firstNeedTransitionNameMap = false;
+                    }
+
+                    funBuilderForContext.addStatement("sharedElements.add(Pair(nameMap[%S]!!, %S))", sharedElement.sourceName, sharedElement.targetName);
+                    funBuilderForView.addStatement("sharedElements.add(Pair(nameMap[%S]!!, %S))", sharedElement.sourceName, sharedElement.targetName);
+                } else {
+                    funBuilderForContext.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.sourceId, sharedElement.targetName);
+                    funBuilderForView.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.sourceId, sharedElement.targetName);
+                }
             }
             funBuilderForContext.addStatement("options = %T.makeSceneTransition(this, sharedElements)", KotlinTypes.ACTIVITY_BUILDER);
             funBuilderForContext.endControlFlow();

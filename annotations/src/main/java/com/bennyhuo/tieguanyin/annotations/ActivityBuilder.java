@@ -14,4 +14,6 @@ public @interface ActivityBuilder {
     GenerateMode mode() default GenerateMode.Auto;
     ResultEntity[] resultTypes() default {};
     SharedElement[] sharedElements() default {};
+    SharedElementByNames[] sharedElementsByNames() default {};
+    SharedElementWithName[] sharedElementsWithName() default {};
 }

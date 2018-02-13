@@ -9,10 +9,26 @@
             android:id="@+id/openJavaActivity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scaleX="2"
-            android:scaleY="2"
             android:transformPivotX="0dp"
             android:text="openJavaActivity"
             android:textAllCaps="false"/>
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:transitionName="button2"
+        android:transformPivotX="0dp"
+        android:text="openJavaActivity"
+        android:textAllCaps="false"/>
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:transitionName="button3"
+        android:transformPivotX="0dp"
+        android:text="openJavaActivity"
+        android:textAllCaps="false"/>
 
 </LinearLayout>

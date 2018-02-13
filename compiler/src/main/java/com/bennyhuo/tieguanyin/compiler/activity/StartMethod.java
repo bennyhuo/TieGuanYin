@@ -1,8 +1,8 @@
 package com.bennyhuo.tieguanyin.compiler.activity;
 
-import com.bennyhuo.tieguanyin.annotations.SharedElement;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
+import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
@@ -67,7 +67,7 @@ public class StartMethod {
     public void endWithResult(ActivityResultClass activityResultClass){
         methodBuilder.addStatement("$T options = null", JavaTypes.BUNDLE);
         methodBuilderForView.addStatement("$T options = null", JavaTypes.BUNDLE);
-        ArrayList<SharedElement> sharedElements = activityClass.getSharedElementsRecursively();
+        ArrayList<SharedElementEntity> sharedElements = activityClass.getSharedElementsRecursively();
         if (sharedElements.size() > 0) {
             methodBuilderForView.addStatement("$T<$T<$T, $T>> sharedElements = new $T<>()", JavaTypes.ARRAY_LIST, JavaTypes.SUPPORT_PAIR, JavaTypes.VIEW, String.class, JavaTypes.ARRAY_LIST);
 
@@ -75,10 +75,25 @@ public class StartMethod {
                     .addStatement("$T activity = ($T) context", JavaTypes.ACTIVITY, JavaTypes.ACTIVITY)
                     .addStatement("$T<$T<$T, $T>> sharedElements = new $T<>()", JavaTypes.ARRAY_LIST, JavaTypes.SUPPORT_PAIR, JavaTypes.VIEW, String.class, JavaTypes.ARRAY_LIST);
 
-            for (SharedElement sharedElement : sharedElements) {
-                methodBuilder.addStatement("sharedElements.add(new Pair<>(activity.findViewById($L), $S))", sharedElement.sourceId(), sharedElement.targetName());
-                methodBuilderForView.addStatement("sharedElements.add(new Pair<>(view.findViewById($L), $S))", sharedElement.sourceId(), sharedElement.targetName());
+            boolean firstNeedTransitionNameMap = true;
+            for (SharedElementEntity sharedElement : sharedElements) {
+                if(sharedElement.sourceId == 0){
+                    if(firstNeedTransitionNameMap){
+                        methodBuilderForView.addStatement("$T<$T, $T> nameMap = new $T<>()", JavaTypes.HASH_MAP, String.class, JavaTypes.VIEW, JavaTypes.HASH_MAP)
+                                .addStatement("$T.findNamedViews(view, nameMap)", JavaTypes.VIEW_UTILS);
+                        methodBuilder.addStatement("$T<$T, $T> nameMap = new $T<>()", JavaTypes.HASH_MAP, String.class, JavaTypes.VIEW, JavaTypes.HASH_MAP)
+                                .addStatement("$T.findNamedViews(activity.getWindow().getDecorView(), nameMap)", JavaTypes.VIEW_UTILS);
+                        firstNeedTransitionNameMap = false;
+                    }
+
+                    methodBuilder.addStatement("sharedElements.add(new Pair<>(nameMap.get($S), $S))", sharedElement.sourceName, sharedElement.targetName);
+                    methodBuilderForView.addStatement("sharedElements.add(new Pair<>(nameMap.get($S), $S))", sharedElement.sourceName, sharedElement.targetName);
+                } else {
+                    methodBuilder.addStatement("sharedElements.add(new Pair<>(activity.findViewById($L), $S))", sharedElement.sourceId, sharedElement.targetName);
+                    methodBuilderForView.addStatement("sharedElements.add(new Pair<>(view.findViewById($L), $S))", sharedElement.sourceId, sharedElement.targetName);
+                }
             }
+
             methodBuilderForView.addStatement("options = $T.makeSceneTransition(view.getContext(), sharedElements)", JavaTypes.ACTIVITY_BUILDER);
 
             methodBuilder.addStatement("options = $T.makeSceneTransition(context, sharedElements)", JavaTypes.ACTIVITY_BUILDER)
