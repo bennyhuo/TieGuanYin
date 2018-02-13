@@ -7,9 +7,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentUtils;
 import android.support.v4.util.Pair;
 import android.transition.AutoTransition;
-import android.view.View;
 
 import com.bennyhuo.tieguanyin.runtime.utils.Logger;
 
@@ -66,7 +66,7 @@ public class FragmentBuilder {
         }
     }
 
-    public static void showFragment(FragmentActivity activity, int containerId, Bundle args, Class<? extends Fragment> fragmentCls, ArrayList<Pair<View, String>> sharedElements) {
+    public static void showFragment(FragmentActivity activity, int containerId, Bundle args, Class<? extends Fragment> fragmentCls, ArrayList<Pair<String, String>> sharedElements) {
         try {
             Fragment fragment = fragmentCls.newInstance();
             if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
@@ -75,9 +75,9 @@ public class FragmentBuilder {
             fragment.setArguments(args);
             FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction().replace(containerId, fragment);
             if(sharedElements != null){
-                for (Pair<View, String> sharedElement : sharedElements) {
+                for (Pair<String, String> sharedElement : sharedElements) {
                     if(sharedElement.first != null) {
-                        transaction.addSharedElement(sharedElement.first, sharedElement.second);
+                        FragmentUtils.addSharedElement(transaction, sharedElement.first, sharedElement.second);
                     }
                 }
             }

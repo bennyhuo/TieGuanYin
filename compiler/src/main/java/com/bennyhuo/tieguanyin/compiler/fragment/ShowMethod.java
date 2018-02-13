@@ -1,7 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.fragment;
 
-import com.bennyhuo.tieguanyin.annotations.SharedElement;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
+import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
@@ -54,14 +54,18 @@ public class ShowMethod {
     }
 
     public void end() {
-        ArrayList<SharedElement> sharedElements = fragmentClass.getSharedElementsRecursively();
+        ArrayList<SharedElementEntity> sharedElements = fragmentClass.getSharedElementsRecursively();
         if(sharedElements.isEmpty()){
             methodBuilder.addStatement("$T.showFragment(($T) activity, containerId, intent.getExtras(), $T.class, null)", JavaTypes.FRAGMENT_BUILDER,  JavaTypes.SUPPORT_ACTIVITY, fragmentClass.getType());
         } else {
-            methodBuilder.addStatement("$T<$T<$T, $T>> sharedElements = new $T<>()", JavaTypes.ARRAY_LIST, JavaTypes.SUPPORT_PAIR, JavaTypes.VIEW, String.class, JavaTypes.ARRAY_LIST)
+            methodBuilder.addStatement("$T<$T<$T, $T>> sharedElements = new $T<>()", JavaTypes.ARRAY_LIST, JavaTypes.SUPPORT_PAIR, String.class, String.class, JavaTypes.ARRAY_LIST)
                     .addStatement("$T container = activity.findViewById(containerId)", JavaTypes.VIEW);
-            for (SharedElement sharedElement : sharedElements) {
-                methodBuilder.addStatement("sharedElements.add(new Pair<>(container.findViewById($L), $S))", sharedElement.viewId(), sharedElement.transitionName());
+            for (SharedElementEntity sharedElement : sharedElements) {
+                if(sharedElement.sourceId == 0){
+                    methodBuilder.addStatement("sharedElements.add(new Pair<>($S, $S))", sharedElement.sourceName, sharedElement.targetName);
+                } else {
+                    methodBuilder.addStatement("sharedElements.add(new Pair<>($T.getTransitionName(container.findViewById($L)), $S))", JavaTypes.VIEW_COMPAT, sharedElement.sourceId, sharedElement.targetName);
+                }
             }
             methodBuilder.addStatement("$T.showFragment(($T) activity, containerId, intent.getExtras(), $T.class, sharedElements)", JavaTypes.FRAGMENT_BUILDER,  JavaTypes.SUPPORT_ACTIVITY, fragmentClass.getType());
         }

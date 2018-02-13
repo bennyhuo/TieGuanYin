@@ -1,5 +1,7 @@
 package android.support.v4.app;
 
+import android.os.Build;
+
 import java.util.ArrayList;
 
 /**
@@ -9,7 +11,7 @@ import java.util.ArrayList;
 public class FragmentUtils {
     public static void addSharedElement(FragmentTransaction fragmentTransaction, String sourceName, String targetName) {
         if (fragmentTransaction instanceof BackStackRecord) {
-            if (FragmentTransition.supportsTransition()) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
                 BackStackRecord backStackRecord = (BackStackRecord) fragmentTransaction;
                 if (sourceName == null) {
                     throw new IllegalArgumentException("Unique transitionNames are required for all" +

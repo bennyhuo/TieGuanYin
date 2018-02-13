@@ -1,7 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.fragment;
 
-import com.bennyhuo.tieguanyin.annotations.SharedElement;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
+import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
@@ -62,15 +62,18 @@ public class ShowFunctionKt {
     }
 
     public void end() {
-
-        ArrayList<SharedElement> sharedElements = fragmentClass.getSharedElementsRecursively();
+        ArrayList<SharedElementEntity> sharedElements = fragmentClass.getSharedElementsRecursively();
         if(sharedElements.isEmpty()) {
             funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, null)", KotlinTypes.FRAGMENT_BUILDER, fragmentClass.getType());
         } else {
-            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.VIEW, KotlinTypes.STRING)
-                    .addStatement("val container: View = findViewById(containerId)", KotlinTypes.VIEW);
-            for (SharedElement sharedElement : sharedElements) {
-                funBuilderForContext.addStatement("sharedElements.add(Pair(container.findViewById(%L), %S))", sharedElement.viewId(), sharedElement.transitionName());
+            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.STRING, KotlinTypes.STRING)
+                    .addStatement("val container: %T = findViewById(containerId)", KotlinTypes.VIEW);
+            for (SharedElementEntity sharedElement : sharedElements) {
+                if(sharedElement.sourceId == 0){
+                    funBuilderForContext.addStatement("sharedElements.add(Pair(%S, %S))", sharedElement.sourceName, sharedElement.targetName);
+                } else {
+                    funBuilderForContext.addStatement("sharedElements.add(Pair(%T.getTransitionName(container.findViewById(%L)), %S))", KotlinTypes.VIEW_COMPAT, sharedElement.sourceId, sharedElement.targetName);
+                }
             }
             funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, sharedElements)", KotlinTypes.FRAGMENT_BUILDER,  fragmentClass.getType());
         }

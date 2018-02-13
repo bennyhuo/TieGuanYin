@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.bennyhuo.tieguanyin.annotations.FragmentBuilder
 import com.bennyhuo.tieguanyin.annotations.Required
-import com.bennyhuo.tieguanyin.annotations.SharedElement
+import com.bennyhuo.tieguanyin.annotations.SharedElementWithName
 import com.bennyhuo.tieguanyin.sample.R
 import kotlinx.android.synthetic.main.fragment_transitions.*
 
@@ -16,7 +16,8 @@ import kotlinx.android.synthetic.main.fragment_transitions.*
  * Created by benny on 2/6/18.
  */
 @FragmentBuilder(
-        sharedElements = [SharedElement(viewId = R.id.textView, transitionName = "fragment")]
+        //sharedElements = [SharedElement(viewId = R.id.textView, transitionName = "fragment")]
+        sharedElementsWithName = [SharedElementWithName("fragment")]
 )
 class DetailsFragment : Fragment() {
 
