@@ -17,7 +17,7 @@ public class JavaTypes {
 
     public static final ClassName ON_ACTIVITY_RESULT_LISTENER = ClassName.get("com.bennyhuo.tieguanyin.runtime.core", "OnActivityResultListener");
 
-    public static final ClassName RUNTIME_UTILS = ClassName.get("com.bennyhuo.tieguanyin.runtime.utils", "Utils");
+    public static final ClassName RUNTIME_UTILS = ClassName.get("com.bennyhuo.tieguanyin.runtime.utils", "BundleUtils");
 
     public static final ClassName ACTIVITY_BUILDER = ClassName.get("com.bennyhuo.tieguanyin.runtime.core", "ActivityBuilder");
     public static final ClassName FRAGMENT_BUILDER = ClassName.get("com.bennyhuo.tieguanyin.runtime.core", "FragmentBuilder");

@@ -23,7 +23,7 @@ public class KotlinTypes {
     public static final ClassName SUPPORT_FRAGMENT = new ClassName("android.support.v4.app", "Fragment");
     public static final ClassName SUPPORT_ACTIVITY = new ClassName("android.support.v4.app", "FragmentActivity");
 
-    public static final ClassName RUNTIME_UTILS = new ClassName("com.bennyhuo.tieguanyin.runtime.utils", "Utils");
+    public static final ClassName RUNTIME_UTILS = new ClassName("com.bennyhuo.tieguanyin.runtime.utils", "BundleUtils");
     public static final ClassName ON_ACTIVITY_RESULT_LISTENER = new ClassName("com.bennyhuo.tieguanyin.runtime.core", "OnActivityResultListener");
     public static final ClassName ACTIVITY_BUILDER = new ClassName("com.bennyhuo.tieguanyin.runtime.core", "ActivityBuilder");
     public static final ClassName FRAGMENT_BUILDER = new ClassName("com.bennyhuo.tieguanyin.runtime.core", "FragmentBuilder");
