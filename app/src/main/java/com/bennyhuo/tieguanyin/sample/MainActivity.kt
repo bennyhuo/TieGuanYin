@@ -1,9 +1,16 @@
-package com.bennyhuo.tieguanyin
+package com.bennyhuo.tieguanyin.sample
 
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.transition.ChangeBounds
+import android.transition.ChangeTransform
+import android.transition.TransitionSet
 import android.util.Log
+import com.bennyhuo.tieguanyin.R.layout
+import com.bennyhuo.tieguanyin.startFragmentContainerActivity
+import com.bennyhuo.tieguanyin.startGenerateBothActivity
+import com.bennyhuo.tieguanyin.startKotlinActivity
 import com.bennyhuo.tieguanyin.transitions.startDetailsActivity
 import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
@@ -12,7 +19,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        window.sharedElementExitTransition = TransitionSet().addTransition(ChangeBounds()).addTransition(ChangeTransform())
+        setContentView(layout.activity_main)
         setTitle(this.javaClass.simpleName)
 
         openJavaActivity.setOnClickListener {

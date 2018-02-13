@@ -9,7 +9,7 @@ apply plugin: "kotlin-kapt"
 android {
     compileSdkVersion 26
     defaultConfig {
-        applicationId "com.bennyhuo.tieguanyin"
+        applicationId "com.bennyhuo.tieguanyin.sample"
         minSdkVersion 21
         targetSdkVersion 26
         versionCode 1

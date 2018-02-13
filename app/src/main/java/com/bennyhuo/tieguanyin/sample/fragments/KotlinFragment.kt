@@ -1,13 +1,15 @@
-package com.bennyhuo.tieguanyin.fragments
+package com.bennyhuo.tieguanyin.sample.fragments
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.view.ViewCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.bennyhuo.tieguanyin.R
 import com.bennyhuo.tieguanyin.annotations.FragmentBuilder
 import com.bennyhuo.tieguanyin.annotations.Required
+import com.bennyhuo.tieguanyin.transitions.showDetailsFragment
 import kotlinx.android.synthetic.main.fragment_main.*
 
 /**
@@ -25,11 +27,10 @@ class KotlinFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        ViewCompat.setTransitionName(textView, "fragment")
         textView.text = text
         textView.setOnClickListener {
-            //showJavaFragment("Java!!")
-            text = System.currentTimeMillis().toString()
-            textView.text = text
+            showDetailsFragment("Kotlin Fragment")
         }
     }
 }

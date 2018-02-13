@@ -1,5 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.fragment;
 
+import com.bennyhuo.tieguanyin.annotations.SharedElement;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
 import com.squareup.kotlinpoet.FunSpec;
@@ -8,6 +9,7 @@ import com.squareup.kotlinpoet.ParameterSpec;
 import com.squareup.kotlinpoet.TypeName;
 import com.squareup.kotlinpoet.TypeNames;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kotlin.Unit;
@@ -60,8 +62,18 @@ public class ShowFunctionKt {
     }
 
     public void end() {
-        funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java)", KotlinTypes.FRAGMENT_BUILDER,  fragmentClass.getType());
 
+        ArrayList<SharedElement> sharedElements = fragmentClass.getSharedElementsRecursively();
+        if(sharedElements.isEmpty()) {
+            funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, null)", KotlinTypes.FRAGMENT_BUILDER, fragmentClass.getType());
+        } else {
+            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.VIEW, KotlinTypes.STRING)
+                    .addStatement("val container: View = findViewById(containerId)", KotlinTypes.VIEW);
+            for (SharedElement sharedElement : sharedElements) {
+                funBuilderForContext.addStatement("sharedElements.add(Pair(container.findViewById(%L), %S))", sharedElement.viewId(), sharedElement.transitionName());
+            }
+            funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, sharedElements)", KotlinTypes.FRAGMENT_BUILDER,  fragmentClass.getType());
+        }
         StringBuilder paramBuilder = new StringBuilder();
         List<ParameterSpec> parameterSpecList = funBuilderForContext.getParameters$kotlinpoet();
         for (int i = 1; i < parameterSpecList.size(); i++) {

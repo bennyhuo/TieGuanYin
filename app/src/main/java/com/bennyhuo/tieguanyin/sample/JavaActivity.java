@@ -1,15 +1,19 @@
-package com.bennyhuo.tieguanyin;
+package com.bennyhuo.tieguanyin.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 
+import com.bennyhuo.tieguanyin.GenerateBothActivityBuilder;
+import com.bennyhuo.tieguanyin.JavaActivityBuilder;
+import com.bennyhuo.tieguanyin.KotlinActivityBuilderKt;
+import com.bennyhuo.tieguanyin.R;
 import com.bennyhuo.tieguanyin.annotations.ActivityBuilder;
 import com.bennyhuo.tieguanyin.annotations.Optional;
 import com.bennyhuo.tieguanyin.annotations.Required;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
-import com.bennyhuo.tieguanyin.inherited.AbsActivity;
+import com.bennyhuo.tieguanyin.sample.inherited.AbsActivity;
 import com.bennyhuo.tieguanyin.utils.ActivityUtils;
 
 import kotlin.Unit;

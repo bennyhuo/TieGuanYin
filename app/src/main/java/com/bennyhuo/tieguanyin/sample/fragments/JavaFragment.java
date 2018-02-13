@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.fragments;
+package com.bennyhuo.tieguanyin.sample.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

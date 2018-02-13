@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.childfragment
+package com.bennyhuo.tieguanyin.sample.childfragment
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -7,13 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import com.bennyhuo.tieguanyin.R
 import com.bennyhuo.tieguanyin.annotations.FragmentBuilder
+import com.bennyhuo.tieguanyin.annotations.Required
 import kotlinx.android.synthetic.main.fragment_main.*
 
 /**
  * Created by benny on 2/6/18.
  */
 @FragmentBuilder
-class ParentFragment : Fragment() {
+class ChildFragment : Fragment() {
+
+    @Required
+    lateinit var text: String
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_main, container, false)
@@ -21,9 +25,11 @@ class ParentFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        textView.text = "show child fragment."
+        textView.text = text
         textView.setOnClickListener {
-            showChildFragment("ChildFragment.")
+            //showJavaFragment("Java!!")
+            text = System.currentTimeMillis().toString()
+            textView.text = text
         }
     }
 }

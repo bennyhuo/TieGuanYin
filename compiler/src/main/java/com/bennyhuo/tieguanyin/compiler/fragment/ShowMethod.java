@@ -1,5 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.fragment;
 
+import com.bennyhuo.tieguanyin.annotations.SharedElement;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;
@@ -53,8 +54,18 @@ public class ShowMethod {
     }
 
     public void end() {
-        methodBuilder.addStatement("$T.showFragment(($T) activity, containerId, intent.getExtras(), $T.class)", JavaTypes.FRAGMENT_BUILDER,  JavaTypes.SUPPORT_ACTIVITY, fragmentClass.getType())
-                .endControlFlow();
+        ArrayList<SharedElement> sharedElements = fragmentClass.getSharedElementsRecursively();
+        if(sharedElements.isEmpty()){
+            methodBuilder.addStatement("$T.showFragment(($T) activity, containerId, intent.getExtras(), $T.class, null)", JavaTypes.FRAGMENT_BUILDER,  JavaTypes.SUPPORT_ACTIVITY, fragmentClass.getType());
+        } else {
+            methodBuilder.addStatement("$T<$T<$T, $T>> sharedElements = new $T<>()", JavaTypes.ARRAY_LIST, JavaTypes.SUPPORT_PAIR, JavaTypes.VIEW, String.class, JavaTypes.ARRAY_LIST)
+                    .addStatement("$T container = activity.findViewById(containerId)", JavaTypes.VIEW);
+            for (SharedElement sharedElement : sharedElements) {
+                methodBuilder.addStatement("sharedElements.add(new Pair<>(container.findViewById($L), $S))", sharedElement.viewId(), sharedElement.transitionName());
+            }
+            methodBuilder.addStatement("$T.showFragment(($T) activity, containerId, intent.getExtras(), $T.class, sharedElements)", JavaTypes.FRAGMENT_BUILDER,  JavaTypes.SUPPORT_ACTIVITY, fragmentClass.getType());
+        }
+        methodBuilder.endControlFlow();
     }
 
     public MethodSpec build() {

@@ -1,12 +1,19 @@
 package com.bennyhuo.tieguanyin.runtime.core;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.util.Pair;
+import android.transition.AutoTransition;
+import android.view.View;
 
 import com.bennyhuo.tieguanyin.runtime.utils.Logger;
+
+import java.util.ArrayList;
 
 /**
  * Created by benny on 2/7/18.
@@ -59,11 +66,22 @@ public class FragmentBuilder {
         }
     }
 
-    public static void showFragment(FragmentActivity activity, int containerId, Bundle args, Class<? extends Fragment> fragmentCls) {
+    public static void showFragment(FragmentActivity activity, int containerId, Bundle args, Class<? extends Fragment> fragmentCls, ArrayList<Pair<View, String>> sharedElements) {
         try {
             Fragment fragment = fragmentCls.newInstance();
+            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
+                fragment.setSharedElementEnterTransition(new AutoTransition());
+            }
             fragment.setArguments(args);
-            activity.getSupportFragmentManager().beginTransaction().replace(containerId, fragment).commit();
+            FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction().replace(containerId, fragment);
+            if(sharedElements != null){
+                for (Pair<View, String> sharedElement : sharedElements) {
+                    if(sharedElement.first != null) {
+                        transaction.addSharedElement(sharedElement.first, sharedElement.second);
+                    }
+                }
+            }
+            transaction.commit();
         } catch (Exception e) {
             Logger.error(e);
         }

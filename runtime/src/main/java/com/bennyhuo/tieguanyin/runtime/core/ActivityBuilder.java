@@ -18,6 +18,7 @@ import com.bennyhuo.tieguanyin.runtime.result.ResultFragment;
 import com.bennyhuo.tieguanyin.runtime.utils.Logger;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by benny on 1/30/18.
@@ -162,6 +163,13 @@ public class ActivityBuilder {
     public static Bundle makeSceneTransition(Context context, ArrayList<Pair<View, String>> sharedElements){
         if(context instanceof Activity) {
             Activity activity = (Activity) context;
+            Iterator<Pair<View, String>> iterator = sharedElements.iterator();
+            while (iterator.hasNext()){
+                if(iterator.next().first == null) iterator.remove();
+            }
+            if(sharedElements.isEmpty()) {
+                return null;
+            }
             return ActivityOptionsCompat.makeSceneTransitionAnimation(activity, sharedElements.toArray(new Pair[0])).toBundle();
         } else {
             return null;
