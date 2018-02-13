@@ -2,11 +2,9 @@ package com.bennyhuo.tieguanyin.sample
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.bennyhuo.tieguanyin.R.layout
 import com.bennyhuo.tieguanyin.annotations.ActivityBuilder
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.annotations.Required
-import com.bennyhuo.tieguanyin.startKotlinActivity
 import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.Serializable
@@ -37,7 +35,7 @@ class GenerateBothActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout.activity_main)
+        setContentView(R.layout.activity_main)
         setTitle(this.javaClass.simpleName)
         openJavaActivity.setOnClickListener {
 //            JavaActivityBuilder.start(this@GenerateBothActivity, 1234, true){

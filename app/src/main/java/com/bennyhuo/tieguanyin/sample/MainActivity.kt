@@ -7,11 +7,7 @@ import android.transition.ChangeBounds
 import android.transition.ChangeTransform
 import android.transition.TransitionSet
 import android.util.Log
-import com.bennyhuo.tieguanyin.R.layout
-import com.bennyhuo.tieguanyin.startFragmentContainerActivity
-import com.bennyhuo.tieguanyin.startGenerateBothActivity
-import com.bennyhuo.tieguanyin.startKotlinActivity
-import com.bennyhuo.tieguanyin.transitions.startDetailsActivity
+import com.bennyhuo.tieguanyin.sample.transitions.startDetailsActivity
 import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -20,7 +16,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.sharedElementExitTransition = TransitionSet().addTransition(ChangeBounds()).addTransition(ChangeTransform())
-        setContentView(layout.activity_main)
+        setContentView(R.layout.activity_main)
         setTitle(this.javaClass.simpleName)
 
         openJavaActivity.setOnClickListener {

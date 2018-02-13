@@ -8,9 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.bennyhuo.tieguanyin.R;
 import com.bennyhuo.tieguanyin.annotations.FragmentBuilder;
 import com.bennyhuo.tieguanyin.annotations.Required;
+import com.bennyhuo.tieguanyin.sample.R;
 
 /**
  * Created by benny on 2/6/18.

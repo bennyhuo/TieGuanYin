@@ -2,13 +2,11 @@ package com.bennyhuo.tieguanyin.sample
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.bennyhuo.tieguanyin.R.layout
 import com.bennyhuo.tieguanyin.annotations.ActivityBuilder
 import com.bennyhuo.tieguanyin.annotations.GenerateMode.KotlinOnly
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.annotations.ResultEntity
-import com.bennyhuo.tieguanyin.finishWithResult
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
@@ -26,7 +24,7 @@ class KotlinActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout.activity_main)
+        setContentView(R.layout.activity_main)
         setTitle(this.javaClass.simpleName)
         openJavaActivity.setOnClickListener {
 //            JavaActivityBuilder.open(this@KotlinActivity, 1234, true){

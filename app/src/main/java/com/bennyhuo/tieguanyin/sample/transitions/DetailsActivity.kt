@@ -5,9 +5,9 @@ import android.support.v7.app.AppCompatActivity
 import android.transition.ChangeBounds
 import android.transition.ChangeTransform
 import android.transition.TransitionSet
-import com.bennyhuo.tieguanyin.R
 import com.bennyhuo.tieguanyin.annotations.ActivityBuilder
 import com.bennyhuo.tieguanyin.annotations.SharedElement
+import com.bennyhuo.tieguanyin.sample.R
 import kotlinx.android.synthetic.main.activity_transitions.*
 
 @ActivityBuilder(
