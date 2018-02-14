@@ -15,20 +15,20 @@
 
     <Button
         android:id="@+id/button1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:transitionName="button2"
         android:transformPivotX="0dp"
-        android:text="openJavaActivity"
+        android:text="openGenerateBothActivity"
         android:textAllCaps="false"/>
 
     <Button
         android:id="@+id/button2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:transitionName="button3"
         android:transformPivotX="0dp"
-        android:text="openJavaActivity"
+        android:text="openFragmentContainerActivity"
         android:textAllCaps="false"/>
 
 </LinearLayout>

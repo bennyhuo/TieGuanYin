@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.activity_transitions.*
 @ActivityBuilder(
         sharedElements = [SharedElement(sourceId = R.id.openJavaActivity, targetName = "hello")],
         sharedElementsWithName = [(SharedElementWithName("button2"))],
-         sharedElementsByNames= [(SharedElementByNames(source = "button1",target = "button2"))]
+         sharedElementsByNames= [(SharedElementByNames(source = "button1",target = "button3"))]
 )
 class DetailsActivity : AppCompatActivity() {
 
