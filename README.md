@@ -112,8 +112,8 @@ repositories {
 依赖配置：
 
 ```
-compile 'com.bennyhuo.tieguanyin:tieguanyin-runtime:0.2-rc3'
-kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:0.2-rc3'
+compile 'com.bennyhuo.tieguanyin:tieguanyin-runtime:0.2'
+kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:0.2'
 ```
 如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
 
