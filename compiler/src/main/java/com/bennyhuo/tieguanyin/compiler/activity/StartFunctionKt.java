@@ -48,6 +48,15 @@ public class StartFunctionKt {
                 .receiver(KotlinTypes.FRAGMENT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
+
+        for (String category : activityClass.getCategoriesRecursively()) {
+            funBuilderForContext.addStatement("intent.addCategory(%S)", category);
+            funBuilderForView.addStatement("intent.addCategory(%S)", category);
+        }
+        for (int flag: activityClass.getFlagsRecursively()) {
+            funBuilderForContext.addStatement("intent.addFlags(%L)", flag);
+            funBuilderForView.addStatement("intent.addFlags(%L)", flag);
+        }
     }
 
     public void visitField(RequiredField binding){

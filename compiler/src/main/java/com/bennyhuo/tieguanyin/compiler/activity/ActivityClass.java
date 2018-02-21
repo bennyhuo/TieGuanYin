@@ -20,6 +20,7 @@ import com.sun.tools.javac.code.Type;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
@@ -69,6 +70,11 @@ public class ActivityClass {
 
     private ActivityClass superActivityClass;
 
+    private ArrayList<String> categories = new ArrayList<>();
+    private ArrayList<String> categoriesRecursively = null;
+    private ArrayList<Integer> flags = new ArrayList<>();
+    private ArrayList<Integer> flagsRecursively = null;
+
     public ActivityClass(TypeElement type) {
         this.type = type;
         simpleName = TypeUtils.simpleName(type.asType());
@@ -99,6 +105,12 @@ public class ActivityClass {
         for (SharedElementWithName sharedElementWithName : generateBuilder.sharedElementsWithName()) {
             sharedElements.add(new SharedElementEntity(sharedElementWithName));
         }
+
+        for (int flag : generateBuilder.flags()) {
+            flags.add(flag);
+        }
+
+        Collections.addAll(categories, generateBuilder.categories());
     }
 
     public void setupSuperClass(HashMap<Element, ActivityClass> activityClasses){
@@ -119,6 +131,32 @@ public class ActivityClass {
         } else {
             optionalFields.add(field);
         }
+    }
+
+    public ArrayList<String> getCategoriesRecursively(){
+        if(superActivityClass == null){
+            return categories;
+        }
+
+        if(categoriesRecursively == null){
+            categoriesRecursively = new ArrayList<>();
+            categoriesRecursively.addAll(categories);
+            categoriesRecursively.addAll(superActivityClass.getCategoriesRecursively());
+        }
+        return categoriesRecursively;
+    }
+
+    public ArrayList<Integer> getFlagsRecursively(){
+        if(superActivityClass == null){
+            return flags;
+        }
+
+        if(flagsRecursively == null){
+            flagsRecursively = new ArrayList<>();
+            flagsRecursively.addAll(flags);
+            flagsRecursively.addAll(superActivityClass.getFlagsRecursively());
+        }
+        return flagsRecursively;
     }
 
     private Set<RequiredField> getRequiredFieldsRecursively() {

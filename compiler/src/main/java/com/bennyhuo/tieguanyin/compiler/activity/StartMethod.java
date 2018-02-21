@@ -51,6 +51,14 @@ public class StartMethod {
                 .addStatement("$T.INSTANCE.init(view.getContext())", JavaTypes.ACTIVITY_BUILDER);
 
         methodBuilderForView.addStatement("$T intent = new $T(view.getContext(), $T.class)", JavaTypes.INTENT, JavaTypes.INTENT, activityClass.getType());
+        for (String category : activityClass.getCategoriesRecursively()) {
+            methodBuilder.addStatement("intent.addCategory($S)", category);
+            methodBuilderForView.addStatement("intent.addCategory($S)", category);
+        }
+        for (int flag: activityClass.getFlagsRecursively()) {
+            methodBuilder.addStatement("intent.addFlags($L)", flag);
+            methodBuilderForView.addStatement("intent.addFlags($L)", flag);
+        }
     }
 
     public void visitField(RequiredField requiredField){

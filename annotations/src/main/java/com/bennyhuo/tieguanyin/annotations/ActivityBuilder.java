@@ -16,4 +16,7 @@ public @interface ActivityBuilder {
     SharedElement[] sharedElements() default {};
     SharedElementByNames[] sharedElementsByNames() default {};
     SharedElementWithName[] sharedElementsWithName() default {};
+
+    String[] categories() default {};
+    int[] flags() default {};
 }
