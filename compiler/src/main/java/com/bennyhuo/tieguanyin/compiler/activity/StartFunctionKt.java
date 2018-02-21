@@ -2,11 +2,14 @@ package com.bennyhuo.tieguanyin.compiler.activity;
 
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
+import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
 import com.squareup.kotlinpoet.ParameterSpec;
 import com.squareup.kotlinpoet.TypeName;
+
+import java.util.ArrayList;
 
 import kotlin.Unit;
 
@@ -36,7 +39,10 @@ public class StartFunctionKt {
         funBuilderForView = FunSpec.builder(name)
                 .receiver(KotlinTypes.VIEW)
                 .addModifiers(KModifier.PUBLIC)
-                .returns(Unit.class);
+                .returns(Unit.class)
+                .addStatement("%T.INSTANCE.init(context)", KotlinTypes.ACTIVITY_BUILDER)
+                .addStatement("val intent = %T(context, %T::class.java)", KotlinTypes.INTENT, activityClass.getType());
+
 
         funBuilderForFragment = FunSpec.builder(name)
                 .receiver(KotlinTypes.FRAGMENT)
@@ -50,45 +56,78 @@ public class StartFunctionKt {
         if(!binding.isRequired()){
             className = className.asNullable();
             funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
+            funBuilderForView.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
         } else {
             funBuilderForContext.addParameter(name, className);
+            funBuilderForView.addParameter(name, className);
         }
         funBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
+        funBuilderForView.addStatement("intent.putExtra(%S, %L)", name, name);
     }
 
     public void endWithResult(ActivityResultClass activityResultClass){
-        funBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
+        funBuilderForContext.addStatement("var options: %T? = null", KotlinTypes.BUNDLE);
+        funBuilderForView.addStatement("var options: %T? = null", KotlinTypes.BUNDLE);
+
+        ArrayList<SharedElementEntity> sharedElements = activityClass.getSharedElementsRecursively();
+        if (sharedElements.size() > 0) {
+            funBuilderForView.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.VIEW, KotlinTypes.STRING);
+
+            funBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY);
+            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.VIEW, KotlinTypes.STRING);
+
+            boolean firstNeedTransitionNameMap = true;
+            for (SharedElementEntity sharedElement :sharedElements) {
+                if(sharedElement.sourceId == 0){
+                    if(firstNeedTransitionNameMap){
+                        funBuilderForView.addStatement("val nameMap = %T<%T, %T>()", KotlinTypes.HASH_MAP, KotlinTypes.STRING, KotlinTypes.VIEW)
+                        .addStatement("%T.findNamedViews(this, nameMap)", KotlinTypes.VIEW_UTILS);
+                        funBuilderForContext.addStatement("val nameMap = %T<%T, %T>()", KotlinTypes.HASH_MAP, KotlinTypes.STRING, KotlinTypes.VIEW)
+                                .addStatement("%T.findNamedViews(window.decorView, nameMap)", KotlinTypes.VIEW_UTILS);
+                        firstNeedTransitionNameMap = false;
+                    }
+
+                    funBuilderForContext.addStatement("sharedElements.add(Pair(nameMap[%S]!!, %S))", sharedElement.sourceName, sharedElement.targetName);
+                    funBuilderForView.addStatement("sharedElements.add(Pair(nameMap[%S]!!, %S))", sharedElement.sourceName, sharedElement.targetName);
+                } else {
+                    funBuilderForContext.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.sourceId, sharedElement.targetName);
+                    funBuilderForView.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.sourceId, sharedElement.targetName);
+                }
+            }
+            funBuilderForContext.addStatement("options = %T.makeSceneTransition(this, sharedElements)", KotlinTypes.ACTIVITY_BUILDER);
+            funBuilderForContext.endControlFlow();
+
+            funBuilderForView.addStatement("options = %T.makeSceneTransition(context, sharedElements)", KotlinTypes.ACTIVITY_BUILDER);
+        }
         if(activityResultClass != null){
             funBuilderForContext
-                    .beginControlFlow("if(%N == null)", activityResultClass.getListenerName())
-                    .addStatement("startActivityForResult(intent, 1)")
-                    .endControlFlow()
-                    .beginControlFlow("else")
-                    .addStatement("%T.INSTANCE.startActivityForResult(this, intent, %L)", KotlinTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObjectKt())
-                    .endControlFlow()
+                    .addStatement("%T.INSTANCE.startActivityForResult(this, intent, options, %L)", KotlinTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObjectKt())
                     .addParameter(
                             ParameterSpec.builder(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable())
                                     .defaultValue("null").build());
         } else {
-            funBuilderForContext.addStatement("startActivity(intent)");
+            funBuilderForContext.addStatement("%T.INSTANCE.startActivity(this, intent, options)", KotlinTypes.ACTIVITY_BUILDER);
         }
-        funBuilderForContext.endControlFlow()
-                .beginControlFlow("else")
-                .addStatement("intent.addFlags(%T.FLAG_ACTIVITY_NEW_TASK)", KotlinTypes.INTENT)
-                .addStatement("startActivity(intent)")
-                .endControlFlow();
+
+        if(activityResultClass != null){
+            funBuilderForView
+                    .addStatement("%T.INSTANCE.startActivityForResult(context, intent, options, %L)", KotlinTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObjectKt())
+                    .addParameter(
+                            ParameterSpec.builder(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable())
+                                    .defaultValue("null").build());
+        } else {
+            funBuilderForView.addStatement("%T.INSTANCE.startActivity(context, intent, options)", KotlinTypes.ACTIVITY_BUILDER);
+        }
 
         StringBuilder paramBuilder = new StringBuilder();
         for (ParameterSpec parameterSpec : funBuilderForContext.getParameters$kotlinpoet()) {
             paramBuilder.append(parameterSpec.getName()).append(",");
-            funBuilderForView.addParameter(parameterSpec);
             funBuilderForFragment.addParameter(parameterSpec);
         }
         if(paramBuilder.length() > 0) {
             paramBuilder.deleteCharAt(paramBuilder.length() - 1);
         }
-        funBuilderForView.addStatement("context.%L(%L)", funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
-        funBuilderForFragment.addStatement("activity?.%L(%L)", funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
+        funBuilderForFragment.addStatement("view?.%L(%L)", funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
     }
 
     public FunSpec buildForContext() {

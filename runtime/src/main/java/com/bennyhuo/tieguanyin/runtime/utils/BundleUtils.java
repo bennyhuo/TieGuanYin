@@ -6,7 +6,7 @@ import android.os.Bundle;
  * Created by benny on 1/30/18.
  */
 
-public class Utils {
+public class BundleUtils {
     public static <T> T get(Bundle bundle, String key){
         return (T) bundle.get(key);
     }

@@ -2,6 +2,7 @@ package com.bennyhuo.tieguanyin.compiler.activity;
 
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
+import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
@@ -29,6 +30,7 @@ public class StartMethod {
     }
 
     private MethodSpec.Builder methodBuilder;
+    private MethodSpec.Builder methodBuilderForView;
     private ActivityClass activityClass;
     private ArrayList<RequiredField> visitedBindings = new ArrayList<>();
 
@@ -41,42 +43,89 @@ public class StartMethod {
                 .addStatement("$T.INSTANCE.init(context)", JavaTypes.ACTIVITY_BUILDER);
 
         methodBuilder.addStatement("$T intent = new $T(context, $T.class)", JavaTypes.INTENT, JavaTypes.INTENT, activityClass.getType());
+
+        methodBuilderForView = MethodSpec.methodBuilder(name)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(TypeName.VOID)
+                .addParameter(JavaTypes.VIEW, "view")
+                .addStatement("$T.INSTANCE.init(view.getContext())", JavaTypes.ACTIVITY_BUILDER);
+
+        methodBuilderForView.addStatement("$T intent = new $T(view.getContext(), $T.class)", JavaTypes.INTENT, JavaTypes.INTENT, activityClass.getType());
     }
 
     public void visitField(RequiredField requiredField){
         String name = requiredField.getName();
         methodBuilder.addParameter(ClassName.get(requiredField.getSymbol().type), name);
         methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
+
+        methodBuilderForView.addParameter(ClassName.get(requiredField.getSymbol().type), name);
+        methodBuilderForView.addStatement("intent.putExtra($S, $L)", name, name);
+
         visitedBindings.add(requiredField);
     }
 
     public void endWithResult(ActivityResultClass activityResultClass){
-        methodBuilder.beginControlFlow("if(context instanceof $T)", JavaTypes.ACTIVITY);
+        methodBuilder.addStatement("$T options = null", JavaTypes.BUNDLE);
+        methodBuilderForView.addStatement("$T options = null", JavaTypes.BUNDLE);
+        ArrayList<SharedElementEntity> sharedElements = activityClass.getSharedElementsRecursively();
+        if (sharedElements.size() > 0) {
+            methodBuilderForView.addStatement("$T<$T<$T, $T>> sharedElements = new $T<>()", JavaTypes.ARRAY_LIST, JavaTypes.SUPPORT_PAIR, JavaTypes.VIEW, String.class, JavaTypes.ARRAY_LIST);
+
+            methodBuilder.beginControlFlow("if(context instanceof $T)", JavaTypes.ACTIVITY)
+                    .addStatement("$T activity = ($T) context", JavaTypes.ACTIVITY, JavaTypes.ACTIVITY)
+                    .addStatement("$T<$T<$T, $T>> sharedElements = new $T<>()", JavaTypes.ARRAY_LIST, JavaTypes.SUPPORT_PAIR, JavaTypes.VIEW, String.class, JavaTypes.ARRAY_LIST);
+
+            boolean firstNeedTransitionNameMap = true;
+            for (SharedElementEntity sharedElement : sharedElements) {
+                if(sharedElement.sourceId == 0){
+                    if(firstNeedTransitionNameMap){
+                        methodBuilderForView.addStatement("$T<$T, $T> nameMap = new $T<>()", JavaTypes.HASH_MAP, String.class, JavaTypes.VIEW, JavaTypes.HASH_MAP)
+                                .addStatement("$T.findNamedViews(view, nameMap)", JavaTypes.VIEW_UTILS);
+                        methodBuilder.addStatement("$T<$T, $T> nameMap = new $T<>()", JavaTypes.HASH_MAP, String.class, JavaTypes.VIEW, JavaTypes.HASH_MAP)
+                                .addStatement("$T.findNamedViews(activity.getWindow().getDecorView(), nameMap)", JavaTypes.VIEW_UTILS);
+                        firstNeedTransitionNameMap = false;
+                    }
+
+                    methodBuilder.addStatement("sharedElements.add(new Pair<>(nameMap.get($S), $S))", sharedElement.sourceName, sharedElement.targetName);
+                    methodBuilderForView.addStatement("sharedElements.add(new Pair<>(nameMap.get($S), $S))", sharedElement.sourceName, sharedElement.targetName);
+                } else {
+                    methodBuilder.addStatement("sharedElements.add(new Pair<>(activity.findViewById($L), $S))", sharedElement.sourceId, sharedElement.targetName);
+                    methodBuilderForView.addStatement("sharedElements.add(new Pair<>(view.findViewById($L), $S))", sharedElement.sourceId, sharedElement.targetName);
+                }
+            }
+
+            methodBuilderForView.addStatement("options = $T.makeSceneTransition(view.getContext(), sharedElements)", JavaTypes.ACTIVITY_BUILDER);
+
+            methodBuilder.addStatement("options = $T.makeSceneTransition(context, sharedElements)", JavaTypes.ACTIVITY_BUILDER)
+                    .endControlFlow();
+        }
         if(activityResultClass != null){
-            methodBuilder.beginControlFlow("if($N == null)", activityResultClass.getListenerName())
-                    .addStatement("(($T)context).startActivityForResult(intent, 1)", JavaTypes.ACTIVITY)
-                    .endControlFlow()
-                    .beginControlFlow("else")
-                    .addStatement("$T.INSTANCE.startActivityForResult(($T) context, intent, $L)", JavaTypes.ACTIVITY_BUILDER, JavaTypes.ACTIVITY, activityResultClass.createOnResultListenerObject())
-                    .endControlFlow()
+            methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(context, intent, options, $L)", JavaTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObject())
                     .addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
         } else {
-            methodBuilder.addStatement("context.startActivity(intent)");
+            methodBuilder.addStatement("$T.INSTANCE.startActivity(context, intent, options)", JavaTypes.ACTIVITY_BUILDER);
         }
-        methodBuilder.endControlFlow()
-                .beginControlFlow("else")
-                .addStatement("intent.addFlags($T.FLAG_ACTIVITY_NEW_TASK)", JavaTypes.INTENT)
-                .addStatement("context.startActivity(intent)")
-                .endControlFlow();
+
+        if (activityResultClass != null) {
+            methodBuilderForView.addStatement("$T.INSTANCE.startActivityForResult(view.getContext(), intent, options, $L)", JavaTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObject())
+                    .addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
+        } else {
+            methodBuilderForView.addStatement("$T.INSTANCE.startActivity(view.getContext(), intent, options)", JavaTypes.ACTIVITY_BUILDER);
+        }
     }
 
     public MethodSpec build() {
         return methodBuilder.build();
     }
 
+    public MethodSpec buildForView() {
+        return methodBuilderForView.build();
+    }
+
     public void renameTo(String newName){
         try {
             field.set(methodBuilder, newName);
+            field.set(methodBuilderForView, newName);
         } catch (Exception e) {
             e.printStackTrace();
         }

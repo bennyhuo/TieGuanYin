@@ -22,14 +22,16 @@ public class KotlinTypes {
     public static final ClassName FRAGMENT = new ClassName("android.app", "Fragment");
     public static final ClassName SUPPORT_FRAGMENT = new ClassName("android.support.v4.app", "Fragment");
     public static final ClassName SUPPORT_ACTIVITY = new ClassName("android.support.v4.app", "FragmentActivity");
+    public static final ClassName VIEW_COMPAT = new ClassName("android.support.v4.view", "ViewCompat");
 
-    public static final ClassName RUNTIME_UTILS = new ClassName("com.bennyhuo.tieguanyin.runtime.utils", "Utils");
+    public static final ClassName RUNTIME_UTILS = new ClassName("com.bennyhuo.tieguanyin.runtime.utils", "BundleUtils");
+    public static final ClassName VIEW_UTILS = new ClassName("com.bennyhuo.tieguanyin.runtime.utils", "ViewUtils");
+
     public static final ClassName ON_ACTIVITY_RESULT_LISTENER = new ClassName("com.bennyhuo.tieguanyin.runtime.core", "OnActivityResultListener");
     public static final ClassName ACTIVITY_BUILDER = new ClassName("com.bennyhuo.tieguanyin.runtime.core", "ActivityBuilder");
     public static final ClassName FRAGMENT_BUILDER = new ClassName("com.bennyhuo.tieguanyin.runtime.core", "FragmentBuilder");
     public static final ClassName ON_ACTIVITY_CREATE_LISTENER = new ClassName("com.bennyhuo.tieguanyin.runtime.core", "OnActivityCreateListener");
     public static final ClassName ON_FRAGMENT_CREATE_LISTENER = new ClassName("com.bennyhuo.tieguanyin.runtime.core", "OnFragmentCreateListener");
-
 
     public static final ClassName STRING = new com.squareup.kotlinpoet.ClassName("kotlin", "String");
     public static final ClassName LONG_ARRAY = new com.squareup.kotlinpoet.ClassName("kotlin", "LongArray");
@@ -40,6 +42,12 @@ public class KotlinTypes {
     public static final ClassName BOOLEAN_ARRAY = new com.squareup.kotlinpoet.ClassName("kotlin", "BooleanArray");
     public static final ClassName FLOAT_ARRAY = new com.squareup.kotlinpoet.ClassName("kotlin", "FloatArray");
     public static final ClassName DOUBLE_ARRAY = new com.squareup.kotlinpoet.ClassName("kotlin", "DoubleArray");
+    public static final ClassName ARRAY_LIST = new ClassName("java.util", "ArrayList");
+    public static final ClassName HASH_MAP = new ClassName("java.util", "HashMap");
+    public static final ClassName SUPPORT_PAIR = new ClassName("android.support.v4.util", "Pair");
+    public static final ClassName ACTIVITY_COMPAT = new ClassName("android.support.v4.app", "ActivityCompat");
+
+
 
     public static TypeName toKotlinType(TypeMirror typeMirror){
         switch (typeMirror.getKind()){

@@ -161,7 +161,7 @@ public class ActivityResultClass {
             funBuilder.addStatement("intent.putExtra(%S, %L)", resultEntity.name(), resultEntity.name());
         }
         funBuilder.addStatement("setResult(1, intent)");
-        funBuilder.addStatement("finish()");
+        funBuilder.addStatement("%T.finishAfterTransition(this)", KotlinTypes.ACTIVITY_COMPAT);
         return funBuilder.build();
     }
 
@@ -176,7 +176,7 @@ public class ActivityResultClass {
             finishWithResultMethodBuilder.addParameter(ClassName.get(getResultType(resultEntity)), resultEntity.name());
             finishWithResultMethodBuilder.addStatement("intent.putExtra($S, $L)", resultEntity.name(), resultEntity.name());
         }
-        return finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("activity.finish()").build();
+        return finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("$T.finishAfterTransition(activity)", JavaTypes.ACTIVITY_COMPAT).build();
     }
 
     public List<ResultEntity> getResultEntitiesRecursively(){

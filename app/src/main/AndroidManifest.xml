@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.bennyhuo.tieguanyin">
+          package="com.bennyhuo.tieguanyin.sample">
 
     <application
         android:allowBackup="true"
@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.bennyhuo.tieguanyin.MainActivity">
+        <activity android:name="com.bennyhuo.tieguanyin.sample.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -17,11 +17,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bennyhuo.tieguanyin.GenerateBothActivity"
+            android:name=".GenerateBothActivity"
             android:theme="@style/AppTheme"/>
-        <activity android:name="com.bennyhuo.tieguanyin.JavaActivity"/>
-        <activity android:name="com.bennyhuo.tieguanyin.KotlinActivity"/>
-        <activity android:name="com.bennyhuo.tieguanyin.FragmentContainerActivity"/>
+        <activity android:name=".JavaActivity"/>
+        <activity android:name=".KotlinActivity"/>
+        <activity android:name=".FragmentContainerActivity"/>
+        <activity android:name=".transitions.DetailsActivity"/>
     </application>
 
 </manifest>

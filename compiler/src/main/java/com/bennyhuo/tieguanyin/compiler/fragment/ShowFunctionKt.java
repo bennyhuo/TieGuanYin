@@ -1,6 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.fragment;
 
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
+import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
@@ -8,6 +9,7 @@ import com.squareup.kotlinpoet.ParameterSpec;
 import com.squareup.kotlinpoet.TypeName;
 import com.squareup.kotlinpoet.TypeNames;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kotlin.Unit;
@@ -60,11 +62,21 @@ public class ShowFunctionKt {
     }
 
     public void end() {
-        funBuilderForContext
-                .addStatement("val fragment = %T()", fragmentClass.getType())
-                .addStatement("fragment.arguments = intent.getExtras()")
-                .addStatement("supportFragmentManager.beginTransaction().replace(containerId, fragment).commit()");
-
+        ArrayList<SharedElementEntity> sharedElements = fragmentClass.getSharedElementsRecursively();
+        if(sharedElements.isEmpty()) {
+            funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, null)", KotlinTypes.FRAGMENT_BUILDER, fragmentClass.getType());
+        } else {
+            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.STRING, KotlinTypes.STRING)
+                    .addStatement("val container: %T = findViewById(containerId)", KotlinTypes.VIEW);
+            for (SharedElementEntity sharedElement : sharedElements) {
+                if(sharedElement.sourceId == 0){
+                    funBuilderForContext.addStatement("sharedElements.add(Pair(%S, %S))", sharedElement.sourceName, sharedElement.targetName);
+                } else {
+                    funBuilderForContext.addStatement("sharedElements.add(Pair(%T.getTransitionName(container.findViewById(%L)), %S))", KotlinTypes.VIEW_COMPAT, sharedElement.sourceId, sharedElement.targetName);
+                }
+            }
+            funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, sharedElements)", KotlinTypes.FRAGMENT_BUILDER,  fragmentClass.getType());
+        }
         StringBuilder paramBuilder = new StringBuilder();
         List<ParameterSpec> parameterSpecList = funBuilderForContext.getParameters$kotlinpoet();
         for (int i = 1; i < parameterSpecList.size(); i++) {

@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.inherited;
+package com.bennyhuo.tieguanyin.sample.inherited;
 
 import android.support.v7.app.AppCompatActivity;
 
