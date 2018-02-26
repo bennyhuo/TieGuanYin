@@ -117,6 +117,15 @@ kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:0.2'
 ```
 如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
 
+如果你想要尝试最新版本：
+
+```
+compile 'com.bennyhuo.tieguanyin:tieguanyin-runtime:0.3-beta'
+kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:0.3-beta'
+```
+
+0.3 增加了对 Transition 、flags、category 的支持。
+
 ## 项目状态
 
 1. 当前项目还在迭代中，难免有些使用场景没有考虑到或者暂时没有顾及，如果你发现了问题，请任性的开 issue。
