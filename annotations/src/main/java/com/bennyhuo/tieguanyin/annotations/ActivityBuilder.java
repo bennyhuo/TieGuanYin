@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 public @interface ActivityBuilder {
     GenerateMode mode() default GenerateMode.Auto;
     ResultEntity[] resultTypes() default {};
+    PendingTransition pendingTransition() default @PendingTransition;
     SharedElement[] sharedElements() default {};
     SharedElementByNames[] sharedElementsByNames() default {};
     SharedElementWithName[] sharedElementsWithName() default {};

@@ -108,17 +108,17 @@ public class StartMethod {
                     .endControlFlow();
         }
         if(activityResultClass != null){
-            methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(context, intent, options, $L)", JavaTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObject())
+            methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(context, intent, options, $L, $L, $L)", JavaTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObject())
                     .addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
         } else {
-            methodBuilder.addStatement("$T.INSTANCE.startActivity(context, intent, options)", JavaTypes.ACTIVITY_BUILDER);
+            methodBuilder.addStatement("$T.INSTANCE.startActivity(context, intent, options, $L, $L)", JavaTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim());
         }
 
         if (activityResultClass != null) {
-            methodBuilderForView.addStatement("$T.INSTANCE.startActivityForResult(view.getContext(), intent, options, $L)", JavaTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObject())
+            methodBuilderForView.addStatement("$T.INSTANCE.startActivityForResult(view.getContext(), intent, options, $L, $L, $L)", JavaTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObject())
                     .addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
         } else {
-            methodBuilderForView.addStatement("$T.INSTANCE.startActivity(view.getContext(), intent, options)", JavaTypes.ACTIVITY_BUILDER);
+            methodBuilderForView.addStatement("$T.INSTANCE.startActivity(view.getContext(), intent, options, $L, $L)", JavaTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim());
         }
     }
 

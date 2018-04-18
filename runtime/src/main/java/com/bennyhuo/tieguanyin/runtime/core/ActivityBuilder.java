@@ -13,6 +13,7 @@ import android.support.v4.util.Pair;
 import android.util.Log;
 import android.view.View;
 
+import com.bennyhuo.tieguanyin.annotations.PendingTransition;
 import com.bennyhuo.tieguanyin.runtime.result.ListenerEnvironment;
 import com.bennyhuo.tieguanyin.runtime.result.ResultFragment;
 import com.bennyhuo.tieguanyin.runtime.utils.Logger;
@@ -122,7 +123,7 @@ public class ActivityBuilder {
         return null;
     }
 
-    public void startActivityForResult(Context context, Intent intent, Bundle options,OnActivityResultListener onActivityResultListener) {
+    public void startActivityForResult(Context context, Intent intent, Bundle options, int enterAnim, int exitAnim, OnActivityResultListener onActivityResultListener) {
         if(context instanceof Activity){
             Activity activity = (Activity)context;
             if(onActivityResultListener == null){
@@ -144,16 +145,22 @@ public class ActivityBuilder {
                 resultFragment.startActivityForResult(intent, 1, options);
                 addOnActivityResultListener(onActivityResultListener);
             }
+            if(enterAnim != PendingTransition.DEFAULT || exitAnim != PendingTransition.DEFAULT){
+                activity.overridePendingTransition(enterAnim, exitAnim);
+            }
         } else {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }
     }
 
-    public void startActivity(Context context, Intent intent, Bundle options){
+    public void startActivity(Context context, Intent intent, Bundle options, int enterAnim, int exitAnim){
         if(context instanceof Activity) {
             Activity activity = (Activity) context;
             ActivityCompat.startActivity(activity, intent, options);
+            if(enterAnim != PendingTransition.DEFAULT || exitAnim != PendingTransition.DEFAULT){
+                activity.overridePendingTransition(enterAnim, exitAnim);
+            }
         } else {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);

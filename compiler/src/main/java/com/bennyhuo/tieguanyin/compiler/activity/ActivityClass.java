@@ -2,6 +2,7 @@ package com.bennyhuo.tieguanyin.compiler.activity;
 
 import com.bennyhuo.tieguanyin.annotations.ActivityBuilder;
 import com.bennyhuo.tieguanyin.annotations.GenerateMode;
+import com.bennyhuo.tieguanyin.annotations.PendingTransition;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
 import com.bennyhuo.tieguanyin.annotations.SharedElement;
 import com.bennyhuo.tieguanyin.annotations.SharedElementByNames;
@@ -67,6 +68,7 @@ public class ActivityClass {
 
     public final String simpleName;
     public final String packageName;
+    public final PendingTransition pendingTransition;
 
     private ActivityClass superActivityClass;
 
@@ -74,6 +76,7 @@ public class ActivityClass {
     private ArrayList<String> categoriesRecursively = null;
     private ArrayList<Integer> flags = new ArrayList<>();
     private ArrayList<Integer> flagsRecursively = null;
+
 
     public ActivityClass(TypeElement type) {
         this.type = type;
@@ -111,6 +114,14 @@ public class ActivityClass {
         }
 
         Collections.addAll(categories, generateBuilder.categories());
+
+        PendingTransition pendingTransition = generateBuilder.pendingTransition();
+        ActivityClass activityClass = this;
+        while ((pendingTransition.enterAnim() == PendingTransition.DEFAULT && pendingTransition.exitAnim() == PendingTransition.DEFAULT) && activityClass.superActivityClass != null){
+            activityClass = activityClass.superActivityClass;
+            pendingTransition = activityClass.pendingTransition;
+        }
+        this.pendingTransition = pendingTransition;
     }
 
     public void setupSuperClass(HashMap<Element, ActivityClass> activityClasses){

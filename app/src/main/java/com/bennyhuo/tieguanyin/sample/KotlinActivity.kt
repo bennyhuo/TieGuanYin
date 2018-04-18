@@ -3,17 +3,15 @@ package com.bennyhuo.tieguanyin.sample
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.bennyhuo.tieguanyin.annotations.ActivityBuilder
+import com.bennyhuo.tieguanyin.annotations.*
 import com.bennyhuo.tieguanyin.annotations.GenerateMode.KotlinOnly
-import com.bennyhuo.tieguanyin.annotations.Optional
-import com.bennyhuo.tieguanyin.annotations.Required
-import com.bennyhuo.tieguanyin.annotations.ResultEntity
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * Created by benny on 1/29/18.
  */
 @ActivityBuilder(mode = KotlinOnly,
+        pendingTransition = PendingTransition(enterAnim = 0, exitAnim = 2),
         resultTypes = [(ResultEntity(name = "java", type = String::class)), (ResultEntity(name = "kotlin", type = Int::class))],
         flags = [Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT, Intent.FLAG_ACTIVITY_CLEAR_TOP],
         categories = [Intent.CATEGORY_APP_BROWSER, Intent.CATEGORY_APP_CALENDAR]

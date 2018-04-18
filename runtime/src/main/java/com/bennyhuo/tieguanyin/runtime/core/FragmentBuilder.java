@@ -41,16 +41,18 @@ public class FragmentBuilder {
     private void performInject(Fragment fragment, Bundle savedInstanceState){
         try {
             Class.forName(fragment.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("inject", Fragment.class, Bundle.class).invoke(null, fragment, savedInstanceState);
+            Logger.debug("inject success: fragment=" + fragment + ", state=" + savedInstanceState);
         } catch (Exception e) {
-            Logger.warn(e);
+            Logger.warn("inject failed: fragment=" + fragment + ", state=" + savedInstanceState + ", e=" + e);
         }
     }
 
     private void performSaveState(Fragment fragment, Bundle outState){
         try {
             Class.forName(fragment.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("saveState", Fragment.class, Bundle.class).invoke(null, fragment, outState);
+            Logger.debug("save success: fragment=" + fragment + ", state=" + outState);
         } catch (Exception e) {
-            Logger.warn(e);
+            Logger.warn("save failed: fragment=" + fragment + ", state=" + outState + ", e=" + e);
         }
     }
 

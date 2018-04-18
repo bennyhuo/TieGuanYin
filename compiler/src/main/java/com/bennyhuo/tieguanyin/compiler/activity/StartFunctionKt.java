@@ -110,22 +110,22 @@ public class StartFunctionKt {
         }
         if(activityResultClass != null){
             funBuilderForContext
-                    .addStatement("%T.INSTANCE.startActivityForResult(this, intent, options, %L)", KotlinTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObjectKt())
+                    .addStatement("%T.INSTANCE.startActivityForResult(this, intent, options, %L, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObjectKt())
                     .addParameter(
                             ParameterSpec.builder(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable())
                                     .defaultValue("null").build());
         } else {
-            funBuilderForContext.addStatement("%T.INSTANCE.startActivity(this, intent, options)", KotlinTypes.ACTIVITY_BUILDER);
+            funBuilderForContext.addStatement("%T.INSTANCE.startActivity(this, intent, options, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim());
         }
 
         if(activityResultClass != null){
             funBuilderForView
-                    .addStatement("%T.INSTANCE.startActivityForResult(context, intent, options, %L)", KotlinTypes.ACTIVITY_BUILDER, activityResultClass.createOnResultListenerObjectKt())
+                    .addStatement("%T.INSTANCE.startActivityForResult(context, intent, options, %L, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObjectKt())
                     .addParameter(
                             ParameterSpec.builder(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable())
                                     .defaultValue("null").build());
         } else {
-            funBuilderForView.addStatement("%T.INSTANCE.startActivity(context, intent, options)", KotlinTypes.ACTIVITY_BUILDER);
+            funBuilderForView.addStatement("%T.INSTANCE.startActivity(context, intent, options, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim());
         }
 
         StringBuilder paramBuilder = new StringBuilder();
