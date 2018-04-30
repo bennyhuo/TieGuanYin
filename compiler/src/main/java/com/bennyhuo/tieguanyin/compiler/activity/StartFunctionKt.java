@@ -1,5 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.activity;
 
+import com.bennyhuo.tieguanyin.annotations.PendingTransition;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
@@ -108,24 +109,25 @@ public class StartFunctionKt {
 
             funBuilderForView.addStatement("options = %T.makeSceneTransition(context, sharedElements)", KotlinTypes.ACTIVITY_BUILDER);
         }
+        PendingTransition pendingTransition = activityClass.getPendingTransitionRecursively();
         if(activityResultClass != null){
             funBuilderForContext
-                    .addStatement("%T.INSTANCE.startActivityForResult(this, intent, options, %L, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObjectKt())
+                    .addStatement("%T.INSTANCE.startActivityForResult(this, intent, options, %L, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObjectKt())
                     .addParameter(
                             ParameterSpec.builder(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable())
                                     .defaultValue("null").build());
         } else {
-            funBuilderForContext.addStatement("%T.INSTANCE.startActivity(this, intent, options, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim());
+            funBuilderForContext.addStatement("%T.INSTANCE.startActivity(this, intent, options, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim());
         }
 
         if(activityResultClass != null){
             funBuilderForView
-                    .addStatement("%T.INSTANCE.startActivityForResult(context, intent, options, %L, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObjectKt())
+                    .addStatement("%T.INSTANCE.startActivityForResult(context, intent, options, %L, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObjectKt())
                     .addParameter(
                             ParameterSpec.builder(activityResultClass.getListenerName(), activityResultClass.getListenerClassKt().asNullable())
                                     .defaultValue("null").build());
         } else {
-            funBuilderForView.addStatement("%T.INSTANCE.startActivity(context, intent, options, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim());
+            funBuilderForView.addStatement("%T.INSTANCE.startActivity(context, intent, options, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim());
         }
 
         StringBuilder paramBuilder = new StringBuilder();

@@ -68,7 +68,8 @@ public class ActivityClass {
 
     public final String simpleName;
     public final String packageName;
-    public final PendingTransition pendingTransition;
+    private final PendingTransition pendingTransition;
+    private PendingTransition pendingTransitionRecursively = null;
 
     private ActivityClass superActivityClass;
 
@@ -115,13 +116,20 @@ public class ActivityClass {
 
         Collections.addAll(categories, generateBuilder.categories());
 
-        PendingTransition pendingTransition = generateBuilder.pendingTransition();
-        ActivityClass activityClass = this;
-        while ((pendingTransition.enterAnim() == PendingTransition.DEFAULT && pendingTransition.exitAnim() == PendingTransition.DEFAULT) && activityClass.superActivityClass != null){
-            activityClass = activityClass.superActivityClass;
-            pendingTransition = activityClass.pendingTransition;
+        pendingTransition = generateBuilder.pendingTransition();
+    }
+
+    public PendingTransition getPendingTransitionRecursively(){
+        if(pendingTransitionRecursively == null) {
+            PendingTransition pendingTransition = this.pendingTransition;
+            ActivityClass activityClass = this;
+            while ((pendingTransition.enterAnim() == PendingTransition.DEFAULT && pendingTransition.exitAnim() == PendingTransition.DEFAULT) && activityClass.superActivityClass != null) {
+                activityClass = activityClass.superActivityClass;
+                pendingTransition = activityClass.pendingTransition;
+            }
+            pendingTransitionRecursively = pendingTransition;
         }
-        this.pendingTransition = pendingTransition;
+        return pendingTransitionRecursively;
     }
 
     public void setupSuperClass(HashMap<Element, ActivityClass> activityClasses){

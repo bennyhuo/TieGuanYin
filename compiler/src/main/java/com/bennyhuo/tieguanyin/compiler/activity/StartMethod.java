@@ -1,5 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.activity;
 
+import com.bennyhuo.tieguanyin.annotations.PendingTransition;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
@@ -107,18 +108,19 @@ public class StartMethod {
             methodBuilder.addStatement("options = $T.makeSceneTransition(context, sharedElements)", JavaTypes.ACTIVITY_BUILDER)
                     .endControlFlow();
         }
+        PendingTransition  pendingTransition = activityClass.getPendingTransitionRecursively();
         if(activityResultClass != null){
-            methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(context, intent, options, $L, $L, $L)", JavaTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObject())
+            methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(context, intent, options, $L, $L, $L)", JavaTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObject())
                     .addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
         } else {
-            methodBuilder.addStatement("$T.INSTANCE.startActivity(context, intent, options, $L, $L)", JavaTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim());
+            methodBuilder.addStatement("$T.INSTANCE.startActivity(context, intent, options, $L, $L)", JavaTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim());
         }
 
         if (activityResultClass != null) {
-            methodBuilderForView.addStatement("$T.INSTANCE.startActivityForResult(view.getContext(), intent, options, $L, $L, $L)", JavaTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObject())
+            methodBuilderForView.addStatement("$T.INSTANCE.startActivityForResult(view.getContext(), intent, options, $L, $L, $L)", JavaTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObject())
                     .addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
         } else {
-            methodBuilderForView.addStatement("$T.INSTANCE.startActivity(view.getContext(), intent, options, $L, $L)", JavaTypes.ACTIVITY_BUILDER, activityClass.pendingTransition.enterAnim(), activityClass.pendingTransition.exitAnim());
+            methodBuilderForView.addStatement("$T.INSTANCE.startActivity(view.getContext(), intent, options, $L, $L)", JavaTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim());
         }
     }
 
