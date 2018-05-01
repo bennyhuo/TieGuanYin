@@ -10,12 +10,19 @@ import com.bennyhuo.tieguanyin.annotations.SharedElementWithName;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
+import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
+import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.kotlinpoet.FileSpec;
+import com.squareup.kotlinpoet.FunSpec;
+import com.squareup.kotlinpoet.TypeNames;
 import com.sun.tools.javac.code.Type;
 
 import java.io.IOException;
@@ -71,6 +78,9 @@ public class ActivityClass {
     private final PendingTransition pendingTransition;
     private PendingTransition pendingTransitionRecursively = null;
 
+    private final PendingTransition pendingTransitionOnFinish;
+    private PendingTransition pendingTransitionOnFinishRecursively = null;
+
     private ActivityClass superActivityClass;
 
     private ArrayList<String> categories = new ArrayList<>();
@@ -117,6 +127,7 @@ public class ActivityClass {
         Collections.addAll(categories, generateBuilder.categories());
 
         pendingTransition = generateBuilder.pendingTransition();
+        pendingTransitionOnFinish = generateBuilder.pendingTransitionOnFinish();
     }
 
     public PendingTransition getPendingTransitionRecursively(){
@@ -131,6 +142,20 @@ public class ActivityClass {
         }
         return pendingTransitionRecursively;
     }
+
+    public PendingTransition getPendingTransitionOnFinishRecursively(){
+        if(pendingTransitionOnFinishRecursively == null) {
+            PendingTransition pendingTransition = this.pendingTransitionOnFinish;
+            ActivityClass activityClass = this;
+            while ((pendingTransition.enterAnim() == PendingTransition.DEFAULT && pendingTransition.exitAnim() == PendingTransition.DEFAULT) && activityClass.superActivityClass != null) {
+                activityClass = activityClass.superActivityClass;
+                pendingTransition = activityClass.pendingTransition;
+            }
+            pendingTransitionOnFinishRecursively = pendingTransition;
+        }
+        return pendingTransitionOnFinishRecursively;
+    }
+
 
     public void setupSuperClass(HashMap<Element, ActivityClass> activityClasses){
         TypeMirror typeMirror = type.getSuperclass();
@@ -256,6 +281,31 @@ public class ActivityClass {
         typeBuilder.addMethod(saveStateMethod.build());
     }
 
+    private void buildFinishMethod(TypeSpec.Builder typeBuilder){
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("finishWithTransition")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(TypeName.VOID)
+                .addParameter(ClassName.get(getType()), "activity")
+                .addStatement("$T.finishAfterTransition(activity)", JavaTypes.ACTIVITY_COMPAT);
+        PendingTransition pendingTransitionOnFinish = getPendingTransitionOnFinishRecursively();
+        if (pendingTransitionOnFinish.exitAnim() != PendingTransition.DEFAULT || pendingTransitionOnFinish.enterAnim() != PendingTransition.DEFAULT) {
+            methodBuilder.addStatement("activity.overridePendingTransition($L, $L)", pendingTransitionOnFinish.enterAnim(), pendingTransitionOnFinish.exitAnim());
+        }
+        typeBuilder.addMethod(methodBuilder.build());
+    }
+
+    private void buildFinishFuncKt(FileSpec.Builder fileSpecBuilder){
+        FunSpec.Builder funBuilder = FunSpec.builder("finishWithTransition")
+                .receiver(TypeNames.get(getType().asType()))
+                .addStatement("%T.finishAfterTransition(this)", KotlinTypes.ACTIVITY_COMPAT);
+
+        PendingTransition pendingTransitionOnFinish = getPendingTransitionOnFinishRecursively();
+        if (pendingTransitionOnFinish.exitAnim() != PendingTransition.DEFAULT || pendingTransitionOnFinish.enterAnim() != PendingTransition.DEFAULT) {
+            funBuilder.addStatement("overridePendingTransition(%L, %L)", pendingTransitionOnFinish.enterAnim(), pendingTransitionOnFinish.exitAnim());
+        }
+        fileSpecBuilder.addFunction(funBuilder.build());
+    }
+
     private void buildStartMethod(TypeSpec.Builder typeBuilder) {
         StartMethod startMethod = new StartMethod(this, METHOD_NAME);
         for (RequiredField field : getRequiredFieldsRecursively()) {
@@ -347,12 +397,14 @@ public class ActivityClass {
         switch (generateMode) {
             case JavaOnly:
                 buildStartMethod(typeBuilder);
+                buildFinishMethod(typeBuilder);
                 if(activityResultClass != null){
                     typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
                 }
                 break;
             case Both:
                 buildStartMethod(typeBuilder);
+                buildFinishMethod(typeBuilder);
                 if(activityResultClass != null){
                     typeBuilder.addMethod(activityResultClass.buildFinishWithResultMethod());
                 }
@@ -360,6 +412,7 @@ public class ActivityClass {
                 //region kotlin
                 FileSpec.Builder fileSpecBuilder = FileSpec.builder(packageName, simpleName + POSIX);
                 buildStartFunKt(fileSpecBuilder);
+                buildFinishFuncKt(fileSpecBuilder);
                 if (activityResultClass != null) {
                     fileSpecBuilder.addFunction(activityResultClass.buildFinishWithResultKt());
                 }

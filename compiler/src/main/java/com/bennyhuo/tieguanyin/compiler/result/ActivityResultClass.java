@@ -1,5 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.result;
 
+import com.bennyhuo.tieguanyin.annotations.PendingTransition;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
@@ -162,6 +163,10 @@ public class ActivityResultClass {
         }
         funBuilder.addStatement("setResult(1, intent)");
         funBuilder.addStatement("%T.finishAfterTransition(this)", KotlinTypes.ACTIVITY_COMPAT);
+        PendingTransition pendingTransitionOnFinish = activityClass.getPendingTransitionOnFinishRecursively();
+        if (pendingTransitionOnFinish.exitAnim() != PendingTransition.DEFAULT || pendingTransitionOnFinish.enterAnim() != PendingTransition.DEFAULT) {
+            funBuilder.addStatement("overridePendingTransition(%L, %L)", pendingTransitionOnFinish.enterAnim(), pendingTransitionOnFinish.exitAnim());
+        }
         return funBuilder.build();
     }
 
@@ -176,7 +181,14 @@ public class ActivityResultClass {
             finishWithResultMethodBuilder.addParameter(ClassName.get(getResultType(resultEntity)), resultEntity.name());
             finishWithResultMethodBuilder.addStatement("intent.putExtra($S, $L)", resultEntity.name(), resultEntity.name());
         }
-        return finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("$T.finishAfterTransition(activity)", JavaTypes.ACTIVITY_COMPAT).build();
+        finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("$T.finishAfterTransition(activity)", JavaTypes.ACTIVITY_COMPAT);
+
+        PendingTransition pendingTransitionOnFinish = activityClass.getPendingTransitionOnFinishRecursively();
+        if (pendingTransitionOnFinish.exitAnim() != PendingTransition.DEFAULT || pendingTransitionOnFinish.enterAnim() != PendingTransition.DEFAULT) {
+            finishWithResultMethodBuilder.addStatement("activity.overridePendingTransition($L, $L)", pendingTransitionOnFinish.enterAnim(), pendingTransitionOnFinish.exitAnim());
+        }
+
+        return finishWithResultMethodBuilder.build();
     }
 
     public List<ResultEntity> getResultEntitiesRecursively(){

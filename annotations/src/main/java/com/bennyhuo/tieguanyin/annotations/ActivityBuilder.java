@@ -14,6 +14,7 @@ public @interface ActivityBuilder {
     GenerateMode mode() default GenerateMode.Auto;
     ResultEntity[] resultTypes() default {};
     PendingTransition pendingTransition() default @PendingTransition;
+    PendingTransition pendingTransitionOnFinish() default @PendingTransition;
     SharedElement[] sharedElements() default {};
     SharedElementByNames[] sharedElementsByNames() default {};
     SharedElementWithName[] sharedElementsWithName() default {};
