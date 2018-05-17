@@ -10,7 +10,6 @@ import com.bennyhuo.tieguanyin.annotations.Optional;
 import com.bennyhuo.tieguanyin.annotations.Required;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
 import com.bennyhuo.tieguanyin.sample.inherited.AbsActivity;
-import com.bennyhuo.tieguanyin.utils.ActivityUtils;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
@@ -44,11 +43,10 @@ public class JavaActivity extends AbsActivity {
         findViewById(R.id.openKotlinActivity).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                KotlinActivityBuilderKt.startKotlinActivity(JavaActivity.this, 1234, null, new Function2<String, Integer, Unit>() {
+                KotlinActivityBuilderKt.startKotlinActivity(JavaActivity.this, 1234, null, new Function2<String[], int[], Unit>() {
                     @Override
-                    public Unit invoke(String s, Integer integer) {
-                        ActivityUtils.toast(JavaActivity.this, "Result from KotlinActivity: s=" + s + "; integer=" + integer);
-                        return Unit.INSTANCE;
+                    public Unit invoke(String[] strings, int[] ints) {
+                        return null;
                     }
                 });
             }

@@ -1,9 +1,13 @@
 package com.bennyhuo.tieguanyin.compiler.utils;
 
 
+import com.squareup.kotlinpoet.AnnotationSpec;
 import com.squareup.kotlinpoet.ClassName;
+import com.squareup.kotlinpoet.ParameterizedTypeName;
 import com.squareup.kotlinpoet.TypeName;
 import com.squareup.kotlinpoet.TypeNames;
+
+import java.util.Collections;
 
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeMirror;
@@ -34,6 +38,7 @@ public class KotlinTypes {
     public static final ClassName ON_FRAGMENT_CREATE_LISTENER = new ClassName("com.bennyhuo.tieguanyin.runtime.core", "OnFragmentCreateListener");
 
     public static final ClassName STRING = new com.squareup.kotlinpoet.ClassName("kotlin", "String");
+    public static final ParameterizedTypeName STRING_ARRAY = new ParameterizedTypeName(null, new com.squareup.kotlinpoet.ClassName("kotlin", "Array"), Collections.<TypeName>singletonList(STRING), false, Collections.<AnnotationSpec>emptyList());
     public static final ClassName LONG_ARRAY = new com.squareup.kotlinpoet.ClassName("kotlin", "LongArray");
     public static final ClassName INT_ARRAY = new com.squareup.kotlinpoet.ClassName("kotlin", "IntArray");
     public static final ClassName SHORT_ARRAY = new com.squareup.kotlinpoet.ClassName("kotlin", "ShortArray");
@@ -91,6 +96,10 @@ public class KotlinTypes {
                         return KotlinTypes.FLOAT_ARRAY;
                     case DOUBLE:
                         return KotlinTypes.DOUBLE_ARRAY;
+                    case DECLARED:
+                        if(typeMirror.toString().equals("java.lang.String[]")){
+                            return KotlinTypes.STRING_ARRAY;
+                        }
                 }
         }
         return TypeNames.get(typeMirror);
