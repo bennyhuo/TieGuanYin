@@ -112,25 +112,15 @@ repositories {
 依赖配置：
 
 ```
-compile 'com.bennyhuo.tieguanyin:tieguanyin-runtime:0.2'
-kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:0.2'
+api 'com.bennyhuo.tieguanyin:tieguanyin-runtime:1.0-rc'
+kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:1.0-rc'
 ```
 如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
-
-如果你想要尝试最新版本：
-
-```
-compile 'com.bennyhuo.tieguanyin:tieguanyin-runtime:0.3-beta'
-kapt 'com.bennyhuo.tieguanyin:tieguanyin-compiler:0.3-beta'
-```
-
-0.3 增加了对 Transition 、flags、category 的支持。
 
 ## 项目状态
 
 1. 当前项目还在迭代中，难免有些使用场景没有考虑到或者暂时没有顾及，如果你发现了问题，请任性的开 issue。
-2. 目前我也已经开始在我的项目中集成使用，框架的 api 基本稳定基本不再进行调整。
-3. 后续以优化为主。
+2. 接下来我将使用 Kotlin 对 compiler 进行重写，请参见 `kotlin-version` 分支。
 	
 ## License
 
