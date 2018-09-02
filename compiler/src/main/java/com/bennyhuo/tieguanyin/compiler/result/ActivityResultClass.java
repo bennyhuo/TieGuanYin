@@ -67,7 +67,7 @@ public class ActivityResultClass {
     }
 
     public ClassName getListenerClass(){
-        return ClassName.get(activityClass.packageName + "." +activityClass.simpleName + "Builder", "On" + activityClass.simpleName + "ResultListener");
+        return ClassName.get(activityClass.getPackageName() + "." + activityClass.getSimpleName() + "Builder", "On" + activityClass.getSimpleName() + "ResultListener");
     }
 
     public com.squareup.kotlinpoet.LambdaTypeName getListenerClassKt() {
@@ -82,7 +82,7 @@ public class ActivityResultClass {
      * @return onSampleActivityResultListener
      */
     public String getListenerName(){
-        return "on" + activityClass.simpleName + "ResultListener";
+        return "on" + activityClass.getSimpleName() + "ResultListener";
     }
 
     public TypeSpec createOnResultListenerObject() {

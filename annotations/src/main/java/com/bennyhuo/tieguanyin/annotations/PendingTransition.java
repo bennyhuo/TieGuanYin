@@ -8,4 +8,5 @@ public @interface PendingTransition {
 
     int enterAnim() default DEFAULT;
     int exitAnim() default DEFAULT;
+
 }

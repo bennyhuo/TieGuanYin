@@ -52,8 +52,6 @@ public class KotlinTypes {
     public static final ClassName SUPPORT_PAIR = new ClassName("android.support.v4.util", "Pair");
     public static final ClassName ACTIVITY_COMPAT = new ClassName("android.support.v4.app", "ActivityCompat");
 
-
-
     public static TypeName toKotlinType(TypeMirror typeMirror){
         switch (typeMirror.getKind()){
             case BOOLEAN:

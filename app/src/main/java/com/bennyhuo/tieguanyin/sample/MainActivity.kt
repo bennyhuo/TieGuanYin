@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("Main", "leave: "+this@MainActivity.toString())
             startKotlinActivity(1234){
                 java, kotlin ->
-                toast("Result From JavaActivity: java=$java, kotlin=$kotlin" )
+                toast("Result From JavaActivity: java=${java.contentToString()}, kotlin=${kotlin.contentToString()}" )
             }
         }
 
