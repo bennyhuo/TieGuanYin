@@ -1,14 +1,14 @@
 import org.gradle.internal.jvm.Jvm
 
 apply plugin: 'java'
+apply plugin: 'kotlin'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':annotations')
-    implementation 'com.google.auto.service:auto-service:1.0-rc4'
     implementation 'com.google.auto:auto-common:0.8'
     implementation 'com.squareup:javapoet:1.9.0'
-    //implementation 'com.squareup:kotlinpoet:0.6.0'
+    implementation 'com.squareup:kotlinpoet:1.0.0-RC1'
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compileOnly files(Jvm.current().getToolsJar())
 }

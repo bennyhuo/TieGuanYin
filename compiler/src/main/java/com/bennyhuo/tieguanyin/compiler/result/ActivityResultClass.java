@@ -9,6 +9,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.kotlinpoet.CodeBlock;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
 import com.squareup.kotlinpoet.LambdaTypeName;
@@ -140,8 +141,8 @@ public class ActivityResultClass {
         onResultFunBuilderKt.addStatement("%L(" + statementBuilderKt.toString() + ")", argsKt.toArray());
         onResultFunBuilderKt.endControlFlow();
 
-        return com.squareup.kotlinpoet.TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(KotlinTypes.ON_ACTIVITY_RESULT_LISTENER)
+        return com.squareup.kotlinpoet.TypeSpec.anonymousClassBuilder()
+                .addSuperinterface(KotlinTypes.ON_ACTIVITY_RESULT_LISTENER, CodeBlock.of(""))
                 .addFunction(onResultFunBuilderKt.build())
                 .build();
     }

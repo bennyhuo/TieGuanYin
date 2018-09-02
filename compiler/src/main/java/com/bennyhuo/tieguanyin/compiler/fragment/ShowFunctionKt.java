@@ -78,7 +78,7 @@ public class ShowFunctionKt {
             funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, sharedElements)", KotlinTypes.FRAGMENT_BUILDER,  fragmentClass.getType());
         }
         StringBuilder paramBuilder = new StringBuilder();
-        List<ParameterSpec> parameterSpecList = funBuilderForContext.getParameters$kotlinpoet();
+        List<ParameterSpec> parameterSpecList = funBuilderForContext.getParameters();
         for (int i = 1; i < parameterSpecList.size(); i++) {
             ParameterSpec parameterSpec = parameterSpecList.get(i);
             paramBuilder.append(parameterSpec.getName()).append(",");

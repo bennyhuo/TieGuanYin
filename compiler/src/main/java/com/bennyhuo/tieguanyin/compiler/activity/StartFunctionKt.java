@@ -131,7 +131,7 @@ public class StartFunctionKt {
         }
 
         StringBuilder paramBuilder = new StringBuilder();
-        for (ParameterSpec parameterSpec : funBuilderForContext.getParameters$kotlinpoet()) {
+        for (ParameterSpec parameterSpec : funBuilderForContext.getParameters()) {
             paramBuilder.append(parameterSpec.getName()).append(",");
             funBuilderForFragment.addParameter(parameterSpec);
         }
