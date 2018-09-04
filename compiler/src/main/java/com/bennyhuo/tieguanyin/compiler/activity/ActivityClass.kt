@@ -256,15 +256,10 @@ class ActivityClass(val type: TypeElement) {
     }
 
     fun buildStartFunKt(fileSpecBuilder: FileSpec.Builder) {
-        val startMethodKt = StartFunctionKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName)
-
+        val startMethodKt = StartFunctionKt(this, EXT_FUN_NAME_PREFIX + simpleName)
         requiredFieldsRecursively.forEach(startMethodKt::visitField)
         optionalFieldsRecursively.forEach(startMethodKt::visitField)
-
-        startMethodKt.endWithResult(activityResultClass)
-        fileSpecBuilder.addFunction(startMethodKt.buildForContext())
-        fileSpecBuilder.addFunction(startMethodKt.buildForView())
-        fileSpecBuilder.addFunction(startMethodKt.buildForFragment())
+        startMethodKt.brew(fileSpecBuilder);
     }
 
     fun brew(filer: Filer) {

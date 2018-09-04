@@ -5,6 +5,7 @@ import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
+import com.squareup.kotlinpoet.FileSpec;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
 import com.squareup.kotlinpoet.ParameterSpec;
@@ -20,32 +21,35 @@ import kotlin.Unit;
 
 public class StartFunctionKt {
 
-    private String builderClassName;
-    private FunSpec.Builder funBuilderForContext;
-    private FunSpec.Builder funBuilderForView;
-    private FunSpec.Builder funBuilderForFragment;
     private ActivityClass activityClass;
+    private String name;
+    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
 
-    public StartFunctionKt(ActivityClass activityClass, String builderClassName, String name) {
-
+    public StartFunctionKt(ActivityClass activityClass, String name) {
         this.activityClass = activityClass;
-        this.builderClassName = builderClassName;
-        funBuilderForContext = FunSpec.builder(name)
+        this.name = name;
+    }
+
+    public void visitField(RequiredField requiredField){
+        requiredFields.add(requiredField);
+    }
+
+    public void brew(FileSpec.Builder fileBuilder){
+        FunSpec.Builder funBuilderForContext = FunSpec.builder(name)
                 .receiver(KotlinTypes.CONTEXT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class)
                 .addStatement("%T.INSTANCE.init(this)", KotlinTypes.ACTIVITY_BUILDER)
                 .addStatement("val intent = %T(this, %T::class.java)", KotlinTypes.INTENT, activityClass.getType());
 
-        funBuilderForView = FunSpec.builder(name)
+        FunSpec.Builder funBuilderForView = FunSpec.builder(name)
                 .receiver(KotlinTypes.VIEW)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class)
                 .addStatement("%T.INSTANCE.init(context)", KotlinTypes.ACTIVITY_BUILDER)
                 .addStatement("val intent = %T(context, %T::class.java)", KotlinTypes.INTENT, activityClass.getType());
 
-
-        funBuilderForFragment = FunSpec.builder(name)
+        FunSpec.Builder funBuilderForFragment = FunSpec.builder(name)
                 .receiver(KotlinTypes.FRAGMENT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
@@ -58,24 +62,22 @@ public class StartFunctionKt {
             funBuilderForContext.addStatement("intent.addFlags(%L)", flag);
             funBuilderForView.addStatement("intent.addFlags(%L)", flag);
         }
-    }
 
-    public void visitField(RequiredField binding){
-        String name = binding.getName();
-        TypeName className = KotlinTypes.toKotlinType(binding.getSymbol().type);
-        if(!binding.isRequired()){
-            className = className.asNullable();
-            funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
-            funBuilderForView.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
-        } else {
-            funBuilderForContext.addParameter(name, className);
-            funBuilderForView.addParameter(name, className);
+        for (RequiredField requiredField : requiredFields) {
+            String name = requiredField.getName();
+            TypeName className = KotlinTypes.toKotlinType(requiredField.getSymbol().type);
+            if(!requiredField.isRequired()){
+                className = className.asNullable();
+                funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
+                funBuilderForView.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
+            } else {
+                funBuilderForContext.addParameter(name, className);
+                funBuilderForView.addParameter(name, className);
+            }
+            funBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
+            funBuilderForView.addStatement("intent.putExtra(%S, %L)", name, name);
         }
-        funBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
-        funBuilderForView.addStatement("intent.putExtra(%S, %L)", name, name);
-    }
 
-    public void endWithResult(ActivityResultClass activityResultClass){
         funBuilderForContext.addStatement("var options: %T? = null", KotlinTypes.BUNDLE);
         funBuilderForView.addStatement("var options: %T? = null", KotlinTypes.BUNDLE);
 
@@ -91,7 +93,7 @@ public class StartFunctionKt {
                 if(sharedElement.sourceId == 0){
                     if(firstNeedTransitionNameMap){
                         funBuilderForView.addStatement("val nameMap = %T<%T, %T>()", KotlinTypes.HASH_MAP, KotlinTypes.STRING, KotlinTypes.VIEW)
-                        .addStatement("%T.findNamedViews(this, nameMap)", KotlinTypes.VIEW_UTILS);
+                                .addStatement("%T.findNamedViews(this, nameMap)", KotlinTypes.VIEW_UTILS);
                         funBuilderForContext.addStatement("val nameMap = %T<%T, %T>()", KotlinTypes.HASH_MAP, KotlinTypes.STRING, KotlinTypes.VIEW)
                                 .addStatement("%T.findNamedViews(window.decorView, nameMap)", KotlinTypes.VIEW_UTILS);
                         firstNeedTransitionNameMap = false;
@@ -110,6 +112,7 @@ public class StartFunctionKt {
             funBuilderForView.addStatement("options = %T.makeSceneTransition(context, sharedElements)", KotlinTypes.ACTIVITY_BUILDER);
         }
         PendingTransition pendingTransition = activityClass.getPendingTransitionRecursively();
+        ActivityResultClass activityResultClass = activityClass.getActivityResultClass();
         if(activityResultClass != null){
             funBuilderForContext
                     .addStatement("%T.INSTANCE.startActivityForResult(this, intent, options, %L, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObjectKt())
@@ -138,18 +141,10 @@ public class StartFunctionKt {
         if(paramBuilder.length() > 0) {
             paramBuilder.deleteCharAt(paramBuilder.length() - 1);
         }
-        funBuilderForFragment.addStatement("view?.%L(%L)", funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
-    }
+        funBuilderForFragment.addStatement("view?.%L(%L)", name, paramBuilder.toString());
 
-    public FunSpec buildForContext() {
-        return funBuilderForContext.build();
-    }
-
-    public FunSpec buildForView() {
-        return funBuilderForView.build();
-    }
-
-    public FunSpec buildForFragment() {
-        return funBuilderForFragment.build();
+        fileBuilder.addFunction(funBuilderForContext.build());
+        fileBuilder.addFunction(funBuilderForView.build());
+        fileBuilder.addFunction(funBuilderForFragment.build());
     }
 }
