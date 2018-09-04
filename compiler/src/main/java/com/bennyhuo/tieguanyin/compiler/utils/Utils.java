@@ -63,8 +63,4 @@ public class Utils {
         }
         return sb.toString();
     }
-
-//    public static boolean isKotlinClass(){
-//
-//    }
 }

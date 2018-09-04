@@ -8,8 +8,8 @@ import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import javax.lang.model.element.Modifier;
@@ -19,25 +19,31 @@ import javax.lang.model.element.Modifier;
  */
 
 public class StartMethod {
-
-    private static Field field;
-    static {
-        try {
-            field = MethodSpec.Builder.class.getDeclaredField("name");
-            field.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private MethodSpec.Builder methodBuilder;
-    private MethodSpec.Builder methodBuilderForView;
     private ActivityClass activityClass;
-    private ArrayList<RequiredField> visitedBindings = new ArrayList<>();
+    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
+    private String name;
 
     public StartMethod(ActivityClass activityClass, String name) {
         this.activityClass = activityClass;
-        methodBuilder = MethodSpec.methodBuilder(name)
+        this.name = name;
+    }
+
+    public void visitField(RequiredField requiredField){
+        requiredFields.add(requiredField);
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public StartMethod copy(String name){
+        StartMethod openMethod = new StartMethod(activityClass, name);
+        openMethod.requiredFields.addAll(this.requiredFields);
+        return openMethod;
+    }
+
+    public void brew(TypeSpec.Builder typeBuilder) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
                 .addParameter(JavaTypes.CONTEXT, "context")
@@ -45,7 +51,7 @@ public class StartMethod {
 
         methodBuilder.addStatement("$T intent = new $T(context, $T.class)", JavaTypes.INTENT, JavaTypes.INTENT, activityClass.getType());
 
-        methodBuilderForView = MethodSpec.methodBuilder(name)
+        MethodSpec.Builder methodBuilderForView = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
                 .addParameter(JavaTypes.VIEW, "view")
@@ -56,24 +62,20 @@ public class StartMethod {
             methodBuilder.addStatement("intent.addCategory($S)", category);
             methodBuilderForView.addStatement("intent.addCategory($S)", category);
         }
-        for (int flag: activityClass.getFlagsRecursively()) {
+        for (int flag : activityClass.getFlagsRecursively()) {
             methodBuilder.addStatement("intent.addFlags($L)", flag);
             methodBuilderForView.addStatement("intent.addFlags($L)", flag);
         }
-    }
 
-    public void visitField(RequiredField requiredField){
-        String name = requiredField.getName();
-        methodBuilder.addParameter(ClassName.get(requiredField.getSymbol().type), name);
-        methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
+        for (RequiredField requiredField : requiredFields) {
+            String name = requiredField.getName();
+            methodBuilder.addParameter(ClassName.get(requiredField.getSymbol().type), name);
+            methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
 
-        methodBuilderForView.addParameter(ClassName.get(requiredField.getSymbol().type), name);
-        methodBuilderForView.addStatement("intent.putExtra($S, $L)", name, name);
+            methodBuilderForView.addParameter(ClassName.get(requiredField.getSymbol().type), name);
+            methodBuilderForView.addStatement("intent.putExtra($S, $L)", name, name);
+        }
 
-        visitedBindings.add(requiredField);
-    }
-
-    public void endWithResult(ActivityResultClass activityResultClass){
         methodBuilder.addStatement("$T options = null", JavaTypes.BUNDLE);
         methodBuilderForView.addStatement("$T options = null", JavaTypes.BUNDLE);
         ArrayList<SharedElementEntity> sharedElements = activityClass.getSharedElementsRecursively();
@@ -86,8 +88,8 @@ public class StartMethod {
 
             boolean firstNeedTransitionNameMap = true;
             for (SharedElementEntity sharedElement : sharedElements) {
-                if(sharedElement.sourceId == 0){
-                    if(firstNeedTransitionNameMap){
+                if (sharedElement.sourceId == 0) {
+                    if (firstNeedTransitionNameMap) {
                         methodBuilderForView.addStatement("$T<$T, $T> nameMap = new $T<>()", JavaTypes.HASH_MAP, String.class, JavaTypes.VIEW, JavaTypes.HASH_MAP)
                                 .addStatement("$T.findNamedViews(view, nameMap)", JavaTypes.VIEW_UTILS);
                         methodBuilder.addStatement("$T<$T, $T> nameMap = new $T<>()", JavaTypes.HASH_MAP, String.class, JavaTypes.VIEW, JavaTypes.HASH_MAP)
@@ -108,8 +110,10 @@ public class StartMethod {
             methodBuilder.addStatement("options = $T.makeSceneTransition(context, sharedElements)", JavaTypes.ACTIVITY_BUILDER)
                     .endControlFlow();
         }
-        PendingTransition  pendingTransition = activityClass.getPendingTransitionRecursively();
-        if(activityResultClass != null){
+
+        PendingTransition pendingTransition = activityClass.getPendingTransitionRecursively();
+        ActivityResultClass activityResultClass = activityClass.getActivityResultClass();
+        if (activityResultClass != null) {
             methodBuilder.addStatement("$T.INSTANCE.startActivityForResult(context, intent, options, $L, $L, $L)", JavaTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim(), activityResultClass.createOnResultListenerObject())
                     .addParameter(activityResultClass.getListenerClass(), activityResultClass.getListenerName(), Modifier.FINAL);
         } else {
@@ -122,30 +126,9 @@ public class StartMethod {
         } else {
             methodBuilderForView.addStatement("$T.INSTANCE.startActivity(view.getContext(), intent, options, $L, $L)", JavaTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim(), pendingTransition.exitAnim());
         }
-    }
 
-    public MethodSpec build() {
-        return methodBuilder.build();
-    }
 
-    public MethodSpec buildForView() {
-        return methodBuilderForView.build();
-    }
-
-    public void renameTo(String newName){
-        try {
-            field.set(methodBuilder, newName);
-            field.set(methodBuilderForView, newName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public StartMethod copy(String name){
-        StartMethod openMethod = new StartMethod(activityClass, name);
-        for (RequiredField visitedBinding : visitedBindings) {
-            openMethod.visitField(visitedBinding);
-        }
-        return openMethod;
+        typeBuilder.addMethod(methodBuilder.build());
+        typeBuilder.addMethod(methodBuilderForView.build());
     }
 }

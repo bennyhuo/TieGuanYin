@@ -44,7 +44,7 @@ class ActivityClass(val type: TypeElement) {
     private val flags = ArrayList<Int>()
 
     private var superActivityClass: ActivityClass? = null
-    private var activityResultClass: ActivityResultClass? = null
+    var activityResultClass: ActivityResultClass? = null
     private var generateMode: GenerateMode
 
     init {
@@ -223,9 +223,7 @@ class ActivityClass(val type: TypeElement) {
 
         optionalFieldsRecursively.forEach(startMethod::visitField)
 
-        startMethod.endWithResult(activityResultClass)
-        typeBuilder.addMethod(startMethod.build())
-        typeBuilder.addMethod(startMethod.buildForView())
+        startMethod.brew(typeBuilder)
 
         val optionalBindings = ArrayList(optionalFieldsRecursively)
         val size = optionalBindings.size
@@ -239,17 +237,13 @@ class ActivityClass(val type: TypeElement) {
                     method.visitField(binding)
                     names.add(Utils.capitalize(binding.name))
                 }
-                method.endWithResult(activityResultClass)
-                method.renameTo(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPARATOR))
-                typeBuilder.addMethod(method.build())
-                typeBuilder.addMethod(method.buildForView())
+                method.setName(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPARATOR))
+                method.brew(typeBuilder)
             }
         }
 
         if (size > 0) {
-            startMethodNoOptional.endWithResult(activityResultClass)
-            typeBuilder.addMethod(startMethodNoOptional.build())
-            typeBuilder.addMethod(startMethodNoOptional.buildForView())
+            startMethodNoOptional.brew(typeBuilder)
         }
     }
 
