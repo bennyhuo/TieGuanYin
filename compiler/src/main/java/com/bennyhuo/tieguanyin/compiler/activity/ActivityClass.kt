@@ -185,8 +185,7 @@ class ActivityClass(val type: TypeElement) {
         val saveStateMethod = SaveStateMethod(this)
         requiredFieldsRecursively.forEach(saveStateMethod::visitField)
         optionalFieldsRecursively.forEach(saveStateMethod::visitField)
-        saveStateMethod.end()
-        typeBuilder.addMethod(saveStateMethod.build())
+        saveStateMethod.brew(typeBuilder)
     }
 
     private fun buildFinishMethod(typeBuilder: TypeSpec.Builder) {
@@ -251,8 +250,7 @@ class ActivityClass(val type: TypeElement) {
         val injectMethod = InjectMethod(this)
         requiredFieldsRecursively.forEach(injectMethod::visitField)
         optionalFieldsRecursively.forEach(injectMethod::visitField)
-        injectMethod.end()
-        typeBuilder.addMethod(injectMethod.build())
+        injectMethod.brew(typeBuilder)
     }
 
     fun buildStartFunKt(fileSpecBuilder: FileSpec.Builder) {

@@ -3,6 +3,7 @@ package com.bennyhuo.tieguanyin.compiler.fragment;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
+import com.squareup.kotlinpoet.FileSpec;
 import com.squareup.kotlinpoet.FunSpec;
 import com.squareup.kotlinpoet.KModifier;
 import com.squareup.kotlinpoet.ParameterSpec;
@@ -20,17 +21,22 @@ import kotlin.Unit;
 
 public class ShowFunctionKt {
 
-    private String builderClassName;
-    private FunSpec.Builder funBuilderForContext;
-    private FunSpec.Builder funBuilderForViewGroup;
-    private FunSpec.Builder funBuilderForFragment;
     private FragmentClass fragmentClass;
+    private String name;
 
-    public ShowFunctionKt(FragmentClass fragmentClass, String builderClassName, String name) {
+    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
 
+    public ShowFunctionKt(FragmentClass fragmentClass, String name) {
         this.fragmentClass = fragmentClass;
-        this.builderClassName = builderClassName;
-        funBuilderForContext = FunSpec.builder(name)
+        this.name = name;
+    }
+
+    public void visitField(RequiredField requiredField) {
+        requiredFields.add(requiredField);
+    }
+
+    public void brew(FileSpec.Builder fileBuilder){
+        FunSpec.Builder funBuilderForContext = FunSpec.builder(name)
                 .receiver(KotlinTypes.SUPPORT_ACTIVITY)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class)
@@ -38,30 +44,28 @@ public class ShowFunctionKt {
                 .addStatement("%T.INSTANCE.init(this)", KotlinTypes.ACTIVITY_BUILDER)
                 .addStatement("val intent = %T()", KotlinTypes.INTENT);
 
-        funBuilderForViewGroup = FunSpec.builder(name)
+        FunSpec.Builder funBuilderForViewGroup = FunSpec.builder(name)
                 .receiver(KotlinTypes.VIEW_GROUP)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
 
-        funBuilderForFragment = FunSpec.builder(name)
+        FunSpec.Builder funBuilderForFragment = FunSpec.builder(name)
                 .receiver(KotlinTypes.SUPPORT_FRAGMENT)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
-    }
 
-    public void visitField(RequiredField binding) {
-        String name = binding.getName();
-        TypeName className = KotlinTypes.toKotlinType(binding.getSymbol().type);
-        if (!binding.isRequired()) {
-            className = className.asNullable();
-            funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
-        } else {
-            funBuilderForContext.addParameter(name, className);
+        for (RequiredField requiredField : requiredFields) {
+            String name = requiredField.getName();
+            TypeName className = KotlinTypes.toKotlinType(requiredField.getSymbol().type);
+            if (!requiredField.isRequired()) {
+                className = className.asNullable();
+                funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
+            } else {
+                funBuilderForContext.addParameter(name, className);
+            }
+            funBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
         }
-        funBuilderForContext.addStatement("intent.putExtra(%S, %L)", name, name);
-    }
 
-    public void end() {
         ArrayList<SharedElementEntity> sharedElements = fragmentClass.getSharedElementsRecursively();
         if(sharedElements.isEmpty()) {
             funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, null)", KotlinTypes.FRAGMENT_BUILDER, fragmentClass.getType());
@@ -88,22 +92,14 @@ public class ShowFunctionKt {
         if (paramBuilder.length() > 0) {
             paramBuilder.deleteCharAt(paramBuilder.length() - 1);
         }
-        funBuilderForFragment.addStatement("(view?.parent as? %T)?.%L(%L)", KotlinTypes.VIEW_GROUP, funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
+        funBuilderForFragment.addStatement("(view?.parent as? %T)?.%L(%L)", KotlinTypes.VIEW_GROUP, name, paramBuilder.toString());
         if(paramBuilder.length() > 0){
             paramBuilder.insert(0, ',');
         }
-        funBuilderForViewGroup.addStatement("(context as? %T)?.%L(id %L)", KotlinTypes.SUPPORT_ACTIVITY, funBuilderForContext.getName$kotlinpoet(), paramBuilder.toString());
-    }
+        funBuilderForViewGroup.addStatement("(context as? %T)?.%L(id %L)", KotlinTypes.SUPPORT_ACTIVITY, name, paramBuilder.toString());
 
-    public FunSpec buildForContext() {
-        return funBuilderForContext.build();
-    }
-
-    public FunSpec buildForView() {
-        return funBuilderForViewGroup.build();
-    }
-
-    public FunSpec buildForFragment() {
-        return funBuilderForFragment.build();
+        fileBuilder.addFunction(funBuilderForContext.build());
+        fileBuilder.addFunction(funBuilderForViewGroup.build());
+        fileBuilder.addFunction(funBuilderForFragment.build());
     }
 }

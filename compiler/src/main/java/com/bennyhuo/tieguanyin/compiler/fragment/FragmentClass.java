@@ -178,8 +178,7 @@ public class FragmentClass {
         for (RequiredField field : getOptionalFieldsRecursively()) {
             showMethod.visitField(field);
         }
-        showMethod.end();
-        typeBuilder.addMethod(showMethod.build());
+        showMethod.brew(typeBuilder);
 
         ArrayList<RequiredField> optionalBindings = new ArrayList<>(getOptionalFieldsRecursively());
         int size = optionalBindings.size();
@@ -193,15 +192,13 @@ public class FragmentClass {
                     method.visitField(binding);
                     names.add(Utils.capitalize(binding.getName()));
                 }
-                method.end();
-                method.renameTo(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPARATOR));
-                typeBuilder.addMethod(method.build());
+                method.setName(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPARATOR));
+                method.brew(typeBuilder);
             }
         }
 
         if (size > 0) {
-            showMethodNoOptional.end();
-            typeBuilder.addMethod(showMethodNoOptional.build());
+            showMethodNoOptional.brew(typeBuilder);
         }
     }
 
@@ -215,13 +212,11 @@ public class FragmentClass {
         for (RequiredField field : getOptionalFieldsRecursively()) {
             injectMethod.visitField(field);
         }
-        injectMethod.end();
-
-        typeBuilder.addMethod(injectMethod.build());
+        injectMethod.brew(typeBuilder);
     }
 
     public void buildShowFunKt(FileSpec.Builder fileSpecBuilder) {
-        ShowFunctionKt showMethodKt = new ShowFunctionKt(this, simpleName + POSIX, EXT_FUN_NAME_PREFIX + simpleName);
+        ShowFunctionKt showMethodKt = new ShowFunctionKt(this, EXT_FUN_NAME_PREFIX + simpleName);
 
         for (RequiredField field : getRequiredFieldsRecursively()) {
             showMethodKt.visitField(field);
@@ -230,11 +225,7 @@ public class FragmentClass {
         for (RequiredField field : getOptionalFieldsRecursively()) {
             showMethodKt.visitField(field);
         }
-
-        showMethodKt.end();
-        fileSpecBuilder.addFunction(showMethodKt.buildForContext());
-        fileSpecBuilder.addFunction(showMethodKt.buildForView());
-        fileSpecBuilder.addFunction(showMethodKt.buildForFragment());
+        showMethodKt.brew(fileSpecBuilder);
     }
 
     public void buildSaveStateMethod(TypeSpec.Builder typeBuilder){
@@ -246,8 +237,7 @@ public class FragmentClass {
         for (RequiredField field : getOptionalFieldsRecursively()) {
             saveStateMethod.visitField(field);
         }
-        saveStateMethod.end();
-        typeBuilder.addMethod(saveStateMethod.build());
+        saveStateMethod.brew(typeBuilder);
     }
 
     public void brew(Filer filer) {

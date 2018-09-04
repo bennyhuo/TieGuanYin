@@ -6,8 +6,10 @@ import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import com.sun.tools.javac.code.Type;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import javax.lang.model.element.Modifier;
@@ -18,10 +20,19 @@ import javax.lang.model.element.Modifier;
 
 public class InjectMethod {
 
-    private MethodSpec.Builder injectMethodBuilder;
+    private FragmentClass fragmentClass;
+    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
 
     public InjectMethod(FragmentClass fragmentClass) {
-        injectMethodBuilder = MethodSpec.methodBuilder("inject")
+        this.fragmentClass = fragmentClass;
+    }
+
+    public void visitField(RequiredField requiredField){
+        requiredFields.add(requiredField);
+    }
+
+    public void brew(TypeSpec.Builder typeBuilder){
+        MethodSpec.Builder injectMethodBuilder = MethodSpec.methodBuilder("inject")
                 .addParameter(JavaTypes.SUPPORT_FRAGMENT, "fragment")
                 .addParameter(JavaTypes.BUNDLE, "savedInstanceState")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -30,32 +41,27 @@ public class InjectMethod {
                 .addStatement("$T typedFragment = ($T) fragment", fragmentClass.getType(), fragmentClass.getType())
                 .addStatement("$T args = savedInstanceState == null ? typedFragment.getArguments() : savedInstanceState", JavaTypes.BUNDLE)
                 .beginControlFlow("if(args != null)");
-    }
 
-    public void visitField(RequiredField binding){
-        String name = binding.getName();
-        Set<Modifier> modifiers = binding.getSymbol().getModifiers();
-        Type type = binding.getSymbol().type;
-        TypeName typeName = TypeName.get(type).box();
+        for (RequiredField requiredField : requiredFields) {
+            String name = requiredField.getName();
+            Set<Modifier> modifiers = requiredField.getSymbol().getModifiers();
+            Type type = requiredField.getSymbol().type;
+            TypeName typeName = TypeName.get(type).box();
 
-        if(!binding.isRequired()) {
-            OptionalField optionalField = ((OptionalField)binding);
-            injectMethodBuilder.addStatement("$T $LValue = $T.<$T>get(args, $S, $L)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name, optionalField.getValue());
-        } else {
-            injectMethodBuilder.addStatement("$T $LValue = $T.<$T>get(args, $S)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name);
+            if(!requiredField.isRequired()) {
+                OptionalField optionalField = ((OptionalField)requiredField);
+                injectMethodBuilder.addStatement("$T $LValue = $T.<$T>get(args, $S, $L)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name, optionalField.getValue());
+            } else {
+                injectMethodBuilder.addStatement("$T $LValue = $T.<$T>get(args, $S)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name);
+            }
+            if (modifiers.contains(Modifier.PRIVATE)) {
+                injectMethodBuilder.addStatement("typedFragment.set$L($LValue)", Utils.capitalize(name), name);
+            } else {
+                injectMethodBuilder.addStatement("typedFragment.$L = $LValue", name, name);
+            }
         }
-        if (modifiers.contains(Modifier.PRIVATE)) {
-            injectMethodBuilder.addStatement("typedFragment.set$L($LValue)", Utils.capitalize(name), name);
-        } else {
-            injectMethodBuilder.addStatement("typedFragment.$L = $LValue", name, name);
-        }
-    }
 
-    public void end(){
         injectMethodBuilder.endControlFlow().endControlFlow();
-    }
-
-    public MethodSpec build() {
-        return injectMethodBuilder.build();
+        typeBuilder.addMethod(injectMethodBuilder.build());
     }
 }

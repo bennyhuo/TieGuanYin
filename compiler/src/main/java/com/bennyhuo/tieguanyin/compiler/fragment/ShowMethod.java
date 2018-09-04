@@ -6,8 +6,8 @@ import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import javax.lang.model.element.Modifier;
@@ -18,24 +18,33 @@ import javax.lang.model.element.Modifier;
 
 public class ShowMethod {
 
-    private static Field field;
-
-    static {
-        try {
-            field = MethodSpec.Builder.class.getDeclaredField("name");
-            field.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private MethodSpec.Builder methodBuilder;
     private FragmentClass fragmentClass;
-    private ArrayList<RequiredField> visitedBindings = new ArrayList<>();
+    private String name;
+    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
 
     public ShowMethod(FragmentClass fragmentClass, String name) {
         this.fragmentClass = fragmentClass;
-        methodBuilder = MethodSpec.methodBuilder(name)
+        this.name = name;
+    }
+
+    public void visitField(RequiredField binding) {
+        requiredFields.add(binding);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public ShowMethod copy(String name) {
+        ShowMethod openMethod = new ShowMethod(fragmentClass, name);
+        for (RequiredField visitedBinding : requiredFields) {
+            openMethod.visitField(visitedBinding);
+        }
+        return openMethod;
+    }
+
+    public void brew(TypeSpec.Builder typeBuilder){
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
                 .addParameter(JavaTypes.ACTIVITY, "activity")
@@ -44,16 +53,13 @@ public class ShowMethod {
                 .addStatement("$T.INSTANCE.init(activity)", JavaTypes.ACTIVITY_BUILDER);
 
         methodBuilder.addStatement("$T intent = new $T()", JavaTypes.INTENT, JavaTypes.INTENT);
-    }
 
-    public void visitField(RequiredField binding) {
-        String name = binding.getName();
-        methodBuilder.addParameter(ClassName.get(binding.getSymbol().type), name);
-        methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
-        visitedBindings.add(binding);
-    }
+        for (RequiredField requiredField : requiredFields) {
+            String name = requiredField.getName();
+            methodBuilder.addParameter(ClassName.get(requiredField.getSymbol().type), name);
+            methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
+        }
 
-    public void end() {
         ArrayList<SharedElementEntity> sharedElements = fragmentClass.getSharedElementsRecursively();
         if(sharedElements.isEmpty()){
             methodBuilder.addStatement("$T.showFragment(($T) activity, containerId, intent.getExtras(), $T.class, null)", JavaTypes.FRAGMENT_BUILDER,  JavaTypes.SUPPORT_ACTIVITY, fragmentClass.getType());
@@ -70,25 +76,7 @@ public class ShowMethod {
             methodBuilder.addStatement("$T.showFragment(($T) activity, containerId, intent.getExtras(), $T.class, sharedElements)", JavaTypes.FRAGMENT_BUILDER,  JavaTypes.SUPPORT_ACTIVITY, fragmentClass.getType());
         }
         methodBuilder.endControlFlow();
-    }
 
-    public MethodSpec build() {
-        return methodBuilder.build();
-    }
-
-    public void renameTo(String newName) {
-        try {
-            field.set(methodBuilder, newName);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public ShowMethod copy(String name) {
-        ShowMethod openMethod = new ShowMethod(fragmentClass, name);
-        for (RequiredField visitedBinding : visitedBindings) {
-            openMethod.visitField(visitedBinding);
-        }
-        return openMethod;
+        typeBuilder.addMethod(methodBuilder.build());
     }
 }
