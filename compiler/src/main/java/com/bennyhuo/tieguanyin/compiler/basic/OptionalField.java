@@ -47,4 +47,14 @@ public class OptionalField extends RequiredField {
     public Object getValue() {
         return value;
     }
+
+    @Override
+    public int compareTo(RequiredField requiredField) {
+        if(requiredField instanceof OptionalField){
+            return super.compareTo(requiredField);
+        } else {
+            //如果与 RequiredField 比较，Optional 永远排在后面
+            return 1;
+        }
+    }
 }

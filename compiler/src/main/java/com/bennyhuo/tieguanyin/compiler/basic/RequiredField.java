@@ -34,7 +34,7 @@ public class RequiredField implements Comparable<RequiredField>{
     }
 
     @Override
-    public int compareTo(RequiredField paramBinding) {
-        return name.compareTo(paramBinding.name);
+    public int compareTo(RequiredField requiredField) {
+        return name.compareTo(requiredField.name);
     }
 }
