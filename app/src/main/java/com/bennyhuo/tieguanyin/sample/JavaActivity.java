@@ -55,7 +55,7 @@ public class JavaActivity extends AbsActivity {
         findViewById(R.id.openGenerateBothActivity).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GenerateBothActivityBuilder.startWithOptionalNum(JavaActivity.this, 30, "bennyhuo", 1234);
+                //GenerateBothActivityBuilder.startWithOptionalNum(JavaActivity.this, 30, "bennyhuo", 1234);
             }
         });
     }

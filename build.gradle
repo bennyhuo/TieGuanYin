@@ -36,7 +36,7 @@ ext {
     apiKey = props.getProperty("bintray.key")
     repoName = "bennyhuo"
     groupId = 'com.bennyhuo.tieguanyin'
-    publishVersion = '1.0-rc'
+    publishVersion = '2.0-SNAPSHOT'
     desc = "Generate methods/functions to help start Activities or Fragments."
     website = 'https://github.com/enbandari/tieguanyin'
     dryRun = "false"

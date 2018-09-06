@@ -21,6 +21,8 @@ import java.util.*
 import javax.annotation.processing.Filer
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.lang.model.element.Modifier.PRIVATE
+import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.tools.StandardLocation
@@ -224,26 +226,77 @@ class ActivityClass(val type: TypeElement) {
 
         startMethod.brew(typeBuilder)
 
-        val optionalBindings = ArrayList(optionalFieldsRecursively)
-        val size = optionalBindings.size
-        //选择长度为 i 的参数列表
-        for (step in 1 until size) {
-            for (start in 0 until size) {
-                val names = ArrayList<String>()
-                val method = startMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL)
-                for (index in start until step + start) {
-                    val binding = optionalBindings[index % size]
-                    method.visitField(binding)
-                    names.add(Utils.capitalize(binding.name))
-                }
-                method.setName(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPARATOR))
-                method.brew(typeBuilder)
-            }
+        //有optional，先来个没有optional的方法
+        if(optionalFieldsRecursively.isNotEmpty()){
+            startMethodNoOptional.brew(typeBuilder);
         }
 
-        if (size > 0) {
-            startMethodNoOptional.brew(typeBuilder)
+        //小于3的情况，只需要每一个参数加一个重载就好
+        if(optionalFieldsRecursively.size < 3){
+            optionalFieldsRecursively.forEach { requiredField ->
+                startMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL + requiredField.name.capitalize())
+                        .also { it.visitField(requiredField) }
+                        .brew(typeBuilder)
+            }
+        } else {
+            //大于等于3的情况，生成参数 OptionalBuilder
+
+            val optionalsName = simpleName + "Optionals"
+            val builderName = simpleName + POSIX
+            val optionalsBuilder = TypeSpec.classBuilder(optionalsName)
+            val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
+                    .addParameter(JavaTypes.INTENT, "intent")
+            val optionalsClassName = ClassName.get(packageName, builderName,optionalsName)
+            optionalFieldsRecursively.forEach {
+                requiredField ->
+                optionalsBuilder.addField(FieldSpec.builder(ClassName.get(requiredField.symbol.type), requiredField.name, PRIVATE).build())
+                optionalsBuilder.addMethod(MethodSpec.methodBuilder(requiredField.name)
+                        .addModifiers(PUBLIC)
+                        .addParameter(ClassName.get(requiredField.symbol.type), requiredField.name)
+                        .addStatement("this.${requiredField.name} = ${requiredField.name}")
+                        .addStatement("return this")
+                        .returns(optionalsClassName)
+                        .build())
+                if(requiredField.symbol.type.isPrimitive){
+                    fillIntentMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", requiredField.name, requiredField.name)
+                } else {
+                    fillIntentMethodBuilder
+                            .beginControlFlow("if(\$L != null)", requiredField.name)
+                            .addStatement("intent.putExtra(\$S, \$L)", requiredField.name, requiredField.name)
+                            .endControlFlow()
+                }
+            }
+            optionalsBuilder.addMethod(fillIntentMethodBuilder.build())
+
+            typeBuilder.addType(optionalsBuilder.build())
+
+            startMethodNoOptional.copy("startWithOptionals")
+                    .optionalsType(optionalsClassName)
+                    .brew(typeBuilder)
         }
+
+//        val optionalBindings = ArrayList(optionalFieldsRecursively)
+//        val size = optionalBindings.size
+//        //选择长度为 i 的参数列表
+//        for (step in 1 until size) {
+//            for (start in 0 until size) {
+//                val names = ArrayList<String>()
+//                val method = startMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL)
+//                for (index in start until step + start) {
+//                    val binding = optionalBindings[index % size]
+//                    method.visitField(binding)
+//                    names.add(binding.name.capitalize())
+//                }
+//                method.setName(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPARATOR))
+//                method.brew(typeBuilder)
+//            }
+//        }
+//
+//        if (size > 0) {
+//            startMethodNoOptional.brew(typeBuilder)
+//        }
+
+
     }
 
     private fun buildInjectMethod(typeBuilder: TypeSpec.Builder) {

@@ -22,6 +22,7 @@ public class StartMethod {
     private ActivityClass activityClass;
     private ArrayList<RequiredField> requiredFields = new ArrayList<>();
     private String name;
+    private ClassName optionalsType;
 
     public StartMethod(ActivityClass activityClass, String name) {
         this.activityClass = activityClass;
@@ -34,6 +35,11 @@ public class StartMethod {
 
     public void setName(String name){
         this.name = name;
+    }
+
+    public StartMethod optionalsType(ClassName optionalsType){
+        this.optionalsType = optionalsType;
+        return this;
     }
 
     public StartMethod copy(String name){
@@ -74,6 +80,17 @@ public class StartMethod {
 
             methodBuilderForView.addParameter(ClassName.get(requiredField.getSymbol().type), name);
             methodBuilderForView.addStatement("intent.putExtra($S, $L)", name, name);
+        }
+
+        if (optionalsType != null) {
+            methodBuilder.addParameter(optionalsType, "optionals")
+                    .beginControlFlow("if(optionals != null)")
+                    .addStatement("optionals.fillIntent(intent)")
+                    .endControlFlow();
+            methodBuilderForView.addParameter(optionalsType, "optionals")
+                    .beginControlFlow("if(optionals != null)")
+                    .addStatement("optionals.fillIntent(intent)")
+                    .endControlFlow();
         }
 
         methodBuilder.addStatement("$T options = null", JavaTypes.BUNDLE);
