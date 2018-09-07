@@ -22,7 +22,7 @@ public class StartMethod {
     private ActivityClass activityClass;
     private ArrayList<RequiredField> requiredFields = new ArrayList<>();
     private String name;
-    private ClassName optionalsType;
+    private boolean isStaticMethod = true;
 
     public StartMethod(ActivityClass activityClass, String name) {
         this.activityClass = activityClass;
@@ -33,12 +33,8 @@ public class StartMethod {
         requiredFields.add(requiredField);
     }
 
-    public void setName(String name){
-        this.name = name;
-    }
-
-    public StartMethod optionalsType(ClassName optionalsType){
-        this.optionalsType = optionalsType;
+    public StartMethod staticMethod(boolean staticMethod) {
+        isStaticMethod = staticMethod;
         return this;
     }
 
@@ -50,7 +46,7 @@ public class StartMethod {
 
     public void brew(TypeSpec.Builder typeBuilder) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(name)
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID)
                 .addParameter(JavaTypes.CONTEXT, "context")
                 .addStatement("$T.INSTANCE.init(context)", JavaTypes.ACTIVITY_BUILDER);
@@ -58,7 +54,7 @@ public class StartMethod {
         methodBuilder.addStatement("$T intent = new $T(context, $T.class)", JavaTypes.INTENT, JavaTypes.INTENT, activityClass.getType());
 
         MethodSpec.Builder methodBuilderForView = MethodSpec.methodBuilder(name)
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID)
                 .addParameter(JavaTypes.VIEW, "view")
                 .addStatement("$T.INSTANCE.init(view.getContext())", JavaTypes.ACTIVITY_BUILDER);
@@ -82,15 +78,13 @@ public class StartMethod {
             methodBuilderForView.addStatement("intent.putExtra($S, $L)", name, name);
         }
 
-        if (optionalsType != null) {
-            methodBuilder.addParameter(optionalsType, "optionals")
-                    .beginControlFlow("if(optionals != null)")
-                    .addStatement("optionals.fillIntent(intent)")
-                    .endControlFlow();
-            methodBuilderForView.addParameter(optionalsType, "optionals")
-                    .beginControlFlow("if(optionals != null)")
-                    .addStatement("optionals.fillIntent(intent)")
-                    .endControlFlow();
+        if(isStaticMethod){
+            methodBuilder.addModifiers(Modifier.STATIC);
+            methodBuilderForView.addModifiers(Modifier.STATIC);
+        } else {
+            //非静态则需要填充 optional 成员
+            methodBuilder.addStatement("fillIntent(intent)");
+            methodBuilderForView.addStatement("fillIntent(intent)");
         }
 
         methodBuilder.addStatement("$T options = null", JavaTypes.BUNDLE);

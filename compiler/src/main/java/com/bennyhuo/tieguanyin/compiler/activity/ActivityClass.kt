@@ -243,14 +243,16 @@ class ActivityClass(val type: TypeElement) {
 
             val optionalsName = simpleName + "Optionals"
             val builderName = simpleName + POSIX
-            val optionalsBuilder = TypeSpec.classBuilder(optionalsName)
+//            val typeBuilder = TypeSpec.classBuilder(optionalsName)
+//                    .addModifiers(PUBLIC, STATIC)
             val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
+                    .addModifiers(PRIVATE)
                     .addParameter(JavaTypes.INTENT, "intent")
-            val optionalsClassName = ClassName.get(packageName, builderName,optionalsName)
+            val optionalsClassName = ClassName.get(packageName, builderName)
             optionalFieldsRecursively.forEach {
                 requiredField ->
-                optionalsBuilder.addField(FieldSpec.builder(ClassName.get(requiredField.symbol.type), requiredField.name, PRIVATE).build())
-                optionalsBuilder.addMethod(MethodSpec.methodBuilder(requiredField.name)
+                typeBuilder.addField(FieldSpec.builder(ClassName.get(requiredField.symbol.type), requiredField.name, PRIVATE).build())
+                typeBuilder.addMethod(MethodSpec.methodBuilder(requiredField.name)
                         .addModifiers(PUBLIC)
                         .addParameter(ClassName.get(requiredField.symbol.type), requiredField.name)
                         .addStatement("this.${requiredField.name} = ${requiredField.name}")
@@ -266,12 +268,12 @@ class ActivityClass(val type: TypeElement) {
                             .endControlFlow()
                 }
             }
-            optionalsBuilder.addMethod(fillIntentMethodBuilder.build())
+            typeBuilder.addMethod(fillIntentMethodBuilder.build())
 
-            typeBuilder.addType(optionalsBuilder.build())
+            //typeBuilder.addType(optionalsBuilder.build())
 
             startMethodNoOptional.copy("startWithOptionals")
-                    .optionalsType(optionalsClassName)
+                    .staticMethod(false)
                     .brew(typeBuilder)
         }
 
