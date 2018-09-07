@@ -4,6 +4,10 @@ import com.bennyhuo.tieguanyin.annotations.ActivityBuilder
 import com.bennyhuo.tieguanyin.annotations.GenerateMode
 import com.bennyhuo.tieguanyin.annotations.GenerateMode.Auto
 import com.bennyhuo.tieguanyin.annotations.PendingTransition
+import com.bennyhuo.tieguanyin.compiler.activity.methods.InjectMethod
+import com.bennyhuo.tieguanyin.compiler.activity.methods.MethodsBuilder
+import com.bennyhuo.tieguanyin.compiler.activity.methods.SaveStateMethod
+import com.bennyhuo.tieguanyin.compiler.activity.methods.StartFunctionKt
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField
 import com.bennyhuo.tieguanyin.compiler.extensions.isDefault
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass
@@ -21,8 +25,6 @@ import java.util.*
 import javax.annotation.processing.Filer
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
-import javax.lang.model.element.Modifier.PRIVATE
-import javax.lang.model.element.Modifier.PUBLIC
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.tools.StandardLocation
@@ -36,7 +38,6 @@ class ActivityClass(val type: TypeElement) {
     val simpleName: String = TypeUtils.simpleName(type.asType())
     val packageName: String = TypeUtils.getPackageName(type)
 
-    private val optionalFields = TreeSet<RequiredField>()
     private val requiredFields = TreeSet<RequiredField>()
 
     private val pendingTransition: PendingTransition
@@ -74,22 +75,13 @@ class ActivityClass(val type: TypeElement) {
     }
 
 
-    private val requiredFieldsRecursively: TreeSet<RequiredField> by lazy {
+    val requiredFieldsRecursively: TreeSet<RequiredField> by lazy {
         superActivityClass?.let {
             TreeSet<RequiredField>(requiredFields)
                     .apply {
                         addAll(it.requiredFieldsRecursively)
                     }
         } ?: requiredFields
-    }
-
-    private val optionalFieldsRecursively: TreeSet<RequiredField> by lazy {
-        superActivityClass?.let {
-            TreeSet<RequiredField>(optionalFields)
-                    .apply {
-                        addAll(it.optionalFieldsRecursively)
-                    }
-        } ?: optionalFields
     }
 
     private var sharedElementsRecursively: ArrayList<SharedElementEntity>? = null
@@ -150,24 +142,13 @@ class ActivityClass(val type: TypeElement) {
     }
 
     fun addSymbol(field: RequiredField) {
-        if (field.isRequired) {
-            requiredFields.add(field)
-        } else {
-            optionalFields.add(field)
-        }
+        requiredFields.add(field)
     }
 
     private fun buildConstants(typeBuilder: TypeSpec.Builder) {
         for (field in requiredFieldsRecursively) {
             typeBuilder.addField(FieldSpec.builder(String::class.java,
-                    CONSTS_REQUIRED_FIELD_PREFIX + Utils.camelToUnderline(field.name),
-                    Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                    .initializer("\$S", field.name)
-                    .build())
-        }
-        for (field in optionalFieldsRecursively) {
-            typeBuilder.addField(FieldSpec.builder(String::class.java,
-                    CONSTS_OPTIONAL_FIELD_PREFIX + Utils.camelToUnderline(field.name),
+                    field.prefix + Utils.camelToUnderline(field.name),
                     Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                     .initializer("\$S", field.name)
                     .build())
@@ -181,13 +162,6 @@ class ActivityClass(val type: TypeElement) {
                         .build())
             }
         }
-    }
-
-    private fun buildSaveStateMethod(typeBuilder: TypeSpec.Builder) {
-        val saveStateMethod = SaveStateMethod(this)
-        requiredFieldsRecursively.forEach(saveStateMethod::visitField)
-        optionalFieldsRecursively.forEach(saveStateMethod::visitField)
-        saveStateMethod.brew(typeBuilder)
     }
 
     private fun buildFinishMethod(typeBuilder: TypeSpec.Builder) {
@@ -215,104 +189,8 @@ class ActivityClass(val type: TypeElement) {
         fileSpecBuilder.addFunction(funBuilder.build())
     }
 
-    private fun buildStartMethod(typeBuilder: TypeSpec.Builder) {
-        val startMethod = StartMethod(this, METHOD_NAME)
-
-        requiredFieldsRecursively.forEach(startMethod::visitField)
-
-        val startMethodNoOptional = startMethod.copy(METHOD_NAME_NO_OPTIONAL)
-
-        optionalFieldsRecursively.forEach(startMethod::visitField)
-
-        startMethod.brew(typeBuilder)
-
-        //有optional，先来个没有optional的方法
-        if(optionalFieldsRecursively.isNotEmpty()){
-            startMethodNoOptional.brew(typeBuilder);
-        }
-
-        //小于3的情况，只需要每一个参数加一个重载就好
-        if(optionalFieldsRecursively.size < 3){
-            optionalFieldsRecursively.forEach { requiredField ->
-                startMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL + requiredField.name.capitalize())
-                        .also { it.visitField(requiredField) }
-                        .brew(typeBuilder)
-            }
-        } else {
-            //大于等于3的情况，生成参数 OptionalBuilder
-
-            val optionalsName = simpleName + "Optionals"
-            val builderName = simpleName + POSIX
-//            val typeBuilder = TypeSpec.classBuilder(optionalsName)
-//                    .addModifiers(PUBLIC, STATIC)
-            val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
-                    .addModifiers(PRIVATE)
-                    .addParameter(JavaTypes.INTENT, "intent")
-            val optionalsClassName = ClassName.get(packageName, builderName)
-            optionalFieldsRecursively.forEach {
-                requiredField ->
-                typeBuilder.addField(FieldSpec.builder(ClassName.get(requiredField.symbol.type), requiredField.name, PRIVATE).build())
-                typeBuilder.addMethod(MethodSpec.methodBuilder(requiredField.name)
-                        .addModifiers(PUBLIC)
-                        .addParameter(ClassName.get(requiredField.symbol.type), requiredField.name)
-                        .addStatement("this.${requiredField.name} = ${requiredField.name}")
-                        .addStatement("return this")
-                        .returns(optionalsClassName)
-                        .build())
-                if(requiredField.symbol.type.isPrimitive){
-                    fillIntentMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", requiredField.name, requiredField.name)
-                } else {
-                    fillIntentMethodBuilder
-                            .beginControlFlow("if(\$L != null)", requiredField.name)
-                            .addStatement("intent.putExtra(\$S, \$L)", requiredField.name, requiredField.name)
-                            .endControlFlow()
-                }
-            }
-            typeBuilder.addMethod(fillIntentMethodBuilder.build())
-
-            //typeBuilder.addType(optionalsBuilder.build())
-
-            startMethodNoOptional.copy("startWithOptionals")
-                    .staticMethod(false)
-                    .brew(typeBuilder)
-        }
-
-//        val optionalBindings = ArrayList(optionalFieldsRecursively)
-//        val size = optionalBindings.size
-//        //选择长度为 i 的参数列表
-//        for (step in 1 until size) {
-//            for (start in 0 until size) {
-//                val names = ArrayList<String>()
-//                val method = startMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONAL)
-//                for (index in start until step + start) {
-//                    val binding = optionalBindings[index % size]
-//                    method.visitField(binding)
-//                    names.add(binding.name.capitalize())
-//                }
-//                method.setName(METHOD_NAME_FOR_OPTIONAL + Utils.joinString(names, METHOD_NAME_SEPARATOR))
-//                method.brew(typeBuilder)
-//            }
-//        }
-//
-//        if (size > 0) {
-//            startMethodNoOptional.brew(typeBuilder)
-//        }
-
-
-    }
-
-    private fun buildInjectMethod(typeBuilder: TypeSpec.Builder) {
-        val injectMethod = InjectMethod(this)
-        requiredFieldsRecursively.forEach(injectMethod::visitField)
-        optionalFieldsRecursively.forEach(injectMethod::visitField)
-        injectMethod.brew(typeBuilder)
-    }
-
     fun buildStartFunKt(fileSpecBuilder: FileSpec.Builder) {
-        val startMethodKt = StartFunctionKt(this, EXT_FUN_NAME_PREFIX + simpleName)
-        requiredFieldsRecursively.forEach(startMethodKt::visitField)
-        optionalFieldsRecursively.forEach(startMethodKt::visitField)
-        startMethodKt.brew(fileSpecBuilder);
+        StartFunctionKt(this, EXT_FUN_NAME_PREFIX + simpleName).brew(fileSpecBuilder);
     }
 
     fun brew(filer: Filer) {
@@ -322,21 +200,20 @@ class ActivityClass(val type: TypeElement) {
 
         buildConstants(typeBuilder)
 
-        buildInjectMethod(typeBuilder)
-
-        buildSaveStateMethod(typeBuilder)
+        InjectMethod(this).brew(typeBuilder)
+        SaveStateMethod(this).brew(typeBuilder)
 
         activityResultClass?.buildOnActivityResultListenerInterface()?.let(typeBuilder::addType)
 
         when (generateMode) {
             GenerateMode.JavaOnly -> {
-                buildStartMethod(typeBuilder)
+                MethodsBuilder.buildStartMethod(this, typeBuilder)
                 buildFinishMethod(typeBuilder)
 
                 activityResultClass?.buildFinishWithResultMethod()?.let(typeBuilder::addMethod)
             }
             GenerateMode.Both -> {
-                buildStartMethod(typeBuilder)
+                MethodsBuilder.buildStartMethod(this, typeBuilder)
                 buildFinishMethod(typeBuilder)
 
                 activityResultClass?.buildFinishWithResultMethod()?.let(typeBuilder::addMethod)
@@ -379,17 +256,14 @@ class ActivityClass(val type: TypeElement) {
     }
 
     companion object {
-        private const val METHOD_NAME = "start"
-        private const val METHOD_NAME_NO_OPTIONAL = METHOD_NAME + "WithoutOptional"
-        private const val METHOD_NAME_FOR_OPTIONAL = METHOD_NAME + "WithOptional"
-        private const val METHOD_NAME_SEPARATOR = "And"
-        private const val EXT_FUN_NAME_PREFIX = METHOD_NAME
-        private const val POSIX = "Builder"
+        public const val METHOD_NAME = "start"
+        public const val METHOD_NAME_NO_OPTIONAL = METHOD_NAME + "WithoutOptional"
+        public const val METHOD_NAME_FOR_OPTIONAL = METHOD_NAME + "WithOptional"
+        public const val EXT_FUN_NAME_PREFIX = METHOD_NAME
+        public const val POSIX = "Builder"
 
-        private const val CONSTS_REQUIRED_FIELD_PREFIX = "REQUIRED_"
-        private const val CONSTS_OPTIONAL_FIELD_PREFIX = "OPTIONAL_"
-        private const val CONSTS_RESULT_PREFIX = "RESULT_"
+        public const val CONSTS_RESULT_PREFIX = "RESULT_"
 
-        private val META_DATA = Class.forName("kotlin.Metadata") as Class<Annotation>
+        public val META_DATA = Class.forName("kotlin.Metadata") as Class<Annotation>
     }
 }

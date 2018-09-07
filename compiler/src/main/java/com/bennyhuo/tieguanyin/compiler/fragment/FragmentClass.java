@@ -5,6 +5,7 @@ import com.bennyhuo.tieguanyin.annotations.GenerateMode;
 import com.bennyhuo.tieguanyin.annotations.SharedElement;
 import com.bennyhuo.tieguanyin.annotations.SharedElementByNames;
 import com.bennyhuo.tieguanyin.annotations.SharedElementWithName;
+import com.bennyhuo.tieguanyin.compiler.basic.OptionalField;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils;
@@ -104,10 +105,10 @@ public class FragmentClass {
     }
 
     public void addSymbol(RequiredField field) {
-        if (field.isRequired()) {
-            requiredFields.add(field);
-        } else {
+        if (field instanceof OptionalField) {
             optionalFields.add(field);
+        } else {
+            requiredFields.add(field);
         }
     }
 

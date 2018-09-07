@@ -1,5 +1,6 @@
-package com.bennyhuo.tieguanyin.compiler.activity;
+package com.bennyhuo.tieguanyin.compiler.activity.methods;
 
+import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass;
 import com.bennyhuo.tieguanyin.compiler.basic.OptionalField;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
@@ -9,7 +10,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.sun.tools.javac.code.Type;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import javax.lang.model.element.Modifier;
@@ -21,14 +21,9 @@ import javax.lang.model.element.Modifier;
 public class InjectMethod {
 
     private ActivityClass activityClass;
-    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
 
     public InjectMethod(ActivityClass activityClass) {
         this.activityClass = activityClass;
-    }
-
-    public void visitField(RequiredField requiredField){
-        requiredFields.add(requiredField);
     }
 
     public void brew(TypeSpec.Builder typeBuilder){
@@ -42,13 +37,13 @@ public class InjectMethod {
                 .addStatement("$T extras = savedInstanceState == null ? activity.getIntent().getExtras() : savedInstanceState", JavaTypes.BUNDLE)
                 .beginControlFlow("if(extras != null)");
 
-        for (RequiredField requiredField : requiredFields) {
+        for (RequiredField requiredField : activityClass.getRequiredFieldsRecursively()) {
             String name = requiredField.getName();
             Set<Modifier> modifiers = requiredField.getSymbol().getModifiers();
             Type type = requiredField.getSymbol().type;
             TypeName typeName = TypeName.get(type).box();
 
-            if(!requiredField.isRequired()) {
+            if(requiredField instanceof OptionalField) {
                 OptionalField optionalField = ((OptionalField)requiredField);
                 injectMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S, $L)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name, optionalField.getValue());
             } else {

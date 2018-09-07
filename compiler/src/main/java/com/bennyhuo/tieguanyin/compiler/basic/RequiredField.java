@@ -7,17 +7,13 @@ import com.sun.tools.javac.code.Symbol;
  */
 
 public class RequiredField implements Comparable<RequiredField>{
+    private static final String CONSTS_REQUIRED_FIELD_PREFIX = "REQUIRED_";
+
     private final Symbol.VarSymbol symbol;
     private final String name;
-    private final boolean isRequired;
 
     public RequiredField(Symbol.VarSymbol symbol) {
-        this(symbol, true);
-    }
-
-    public RequiredField(Symbol.VarSymbol symbol, boolean isRequired) {
         this.symbol = symbol;
-        this.isRequired = isRequired;
         name = symbol.getQualifiedName().toString();
     }
 
@@ -29,8 +25,8 @@ public class RequiredField implements Comparable<RequiredField>{
         return name;
     }
 
-    public boolean isRequired() {
-        return isRequired;
+    public String getPrefix(){
+        return CONSTS_REQUIRED_FIELD_PREFIX;
     }
 
     @Override

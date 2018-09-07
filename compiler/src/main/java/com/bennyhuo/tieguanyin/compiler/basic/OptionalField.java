@@ -10,11 +10,12 @@ import com.sun.tools.javac.code.Type;
  */
 
 public class OptionalField extends RequiredField {
+    private static final String CONSTS_OPTIONAL_FIELD_PREFIX = "OPTIONAL_";
 
     private Object value;
 
     public OptionalField(Symbol.VarSymbol symbol) {
-        super(symbol, false);
+        super(symbol);
         Optional optional = symbol.getAnnotation(Optional.class);
         retrieveDefaultValue(symbol.type, optional);
     }
@@ -42,6 +43,11 @@ public class OptionalField extends RequiredField {
                 }
         }
 
+    }
+
+    @Override
+    public String getPrefix() {
+        return CONSTS_OPTIONAL_FIELD_PREFIX;
     }
 
     public Object getValue() {

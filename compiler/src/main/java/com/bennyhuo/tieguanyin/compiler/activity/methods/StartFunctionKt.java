@@ -1,6 +1,8 @@
-package com.bennyhuo.tieguanyin.compiler.activity;
+package com.bennyhuo.tieguanyin.compiler.activity.methods;
 
 import com.bennyhuo.tieguanyin.annotations.PendingTransition;
+import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass;
+import com.bennyhuo.tieguanyin.compiler.basic.OptionalField;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
@@ -23,15 +25,10 @@ public class StartFunctionKt {
 
     private ActivityClass activityClass;
     private String name;
-    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
 
     public StartFunctionKt(ActivityClass activityClass, String name) {
         this.activityClass = activityClass;
         this.name = name;
-    }
-
-    public void visitField(RequiredField requiredField){
-        requiredFields.add(requiredField);
     }
 
     public void brew(FileSpec.Builder fileBuilder){
@@ -63,10 +60,10 @@ public class StartFunctionKt {
             funBuilderForView.addStatement("intent.addFlags(%L)", flag);
         }
 
-        for (RequiredField requiredField : requiredFields) {
+        for (RequiredField requiredField : activityClass.getRequiredFieldsRecursively()) {
             String name = requiredField.getName();
             TypeName className = KotlinTypes.toKotlinType(requiredField.getSymbol().type);
-            if(!requiredField.isRequired()){
+            if(requiredField instanceof OptionalField){
                 className = className.asNullable();
                 funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
                 funBuilderForView.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());

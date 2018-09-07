@@ -1,6 +1,7 @@
-package com.bennyhuo.tieguanyin.compiler.activity;
+package com.bennyhuo.tieguanyin.compiler.activity.methods;
 
 import com.bennyhuo.tieguanyin.annotations.PendingTransition;
+import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;

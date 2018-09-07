@@ -1,5 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.fragment;
 
+import com.bennyhuo.tieguanyin.compiler.basic.OptionalField;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
@@ -57,7 +58,7 @@ public class ShowFunctionKt {
         for (RequiredField requiredField : requiredFields) {
             String name = requiredField.getName();
             TypeName className = KotlinTypes.toKotlinType(requiredField.getSymbol().type);
-            if (!requiredField.isRequired()) {
+            if (requiredField instanceof OptionalField) {
                 className = className.asNullable();
                 funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());
             } else {

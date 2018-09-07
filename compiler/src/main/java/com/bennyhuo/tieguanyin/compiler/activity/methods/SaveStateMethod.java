@@ -1,5 +1,6 @@
-package com.bennyhuo.tieguanyin.compiler.activity;
+package com.bennyhuo.tieguanyin.compiler.activity.methods;
 
+import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
@@ -7,7 +8,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import javax.lang.model.element.Modifier;
@@ -18,15 +18,10 @@ import javax.lang.model.element.Modifier;
 
 public class SaveStateMethod {
 
-    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
     private ActivityClass activityClass;
 
     public SaveStateMethod(ActivityClass activityClass) {
         this.activityClass = activityClass;
-    }
-
-    public void visitField(RequiredField requiredField) {
-        requiredFields.add(requiredField);
     }
 
     public void brew(TypeSpec.Builder typeBuilder){
@@ -40,7 +35,7 @@ public class SaveStateMethod {
 
         methodBuilder.addStatement("$T intent = new $T()", JavaTypes.INTENT, JavaTypes.INTENT);
 
-        for (RequiredField requiredField : requiredFields) {
+        for (RequiredField requiredField : activityClass.getRequiredFieldsRecursively()) {
             String name = requiredField.getName();
             Set<Modifier> modifiers = requiredField.getSymbol().getModifiers();
             if(modifiers.contains(Modifier.PRIVATE)){

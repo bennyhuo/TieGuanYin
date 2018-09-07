@@ -48,7 +48,7 @@ public class InjectMethod {
             Type type = requiredField.getSymbol().type;
             TypeName typeName = TypeName.get(type).box();
 
-            if(!requiredField.isRequired()) {
+            if(requiredField instanceof OptionalField) {
                 OptionalField optionalField = ((OptionalField)requiredField);
                 injectMethodBuilder.addStatement("$T $LValue = $T.<$T>get(args, $S, $L)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name, optionalField.getValue());
             } else {
