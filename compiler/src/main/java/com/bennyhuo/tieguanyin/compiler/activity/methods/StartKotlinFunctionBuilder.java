@@ -21,17 +21,17 @@ import kotlin.Unit;
  * Created by benny on 1/31/18.
  */
 
-public class StartFunctionKt {
+public class StartKotlinFunctionBuilder {
 
     private ActivityClass activityClass;
     private String name;
 
-    public StartFunctionKt(ActivityClass activityClass, String name) {
+    public StartKotlinFunctionBuilder(ActivityClass activityClass, String name) {
         this.activityClass = activityClass;
         this.name = name;
     }
 
-    public void brew(FileSpec.Builder fileBuilder){
+    public void build(FileSpec.Builder fileBuilder){
         FunSpec.Builder funBuilderForContext = FunSpec.builder(name)
                 .receiver(KotlinTypes.CONTEXT)
                 .addModifiers(KModifier.PUBLIC)

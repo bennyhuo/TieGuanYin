@@ -18,15 +18,15 @@ import javax.lang.model.element.Modifier;
  * Created by benny on 1/31/18.
  */
 
-public class InjectMethod {
+public class InjectMethodBuilder {
 
     private ActivityClass activityClass;
 
-    public InjectMethod(ActivityClass activityClass) {
+    public InjectMethodBuilder(ActivityClass activityClass) {
         this.activityClass = activityClass;
     }
 
-    public void brew(TypeSpec.Builder typeBuilder){
+    public void build(TypeSpec.Builder typeBuilder){
         MethodSpec.Builder injectMethodBuilder = MethodSpec.methodBuilder("inject")
                 .addParameter(JavaTypes.ACTIVITY, "activity")
                 .addParameter(JavaTypes.BUNDLE, "savedInstanceState")

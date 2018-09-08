@@ -16,15 +16,15 @@ import javax.lang.model.element.Modifier;
  * Created by benny on 1/31/18.
  */
 
-public class SaveStateMethod {
+public class SaveStateMethodBuilder {
 
     private ActivityClass activityClass;
 
-    public SaveStateMethod(ActivityClass activityClass) {
+    public SaveStateMethodBuilder(ActivityClass activityClass) {
         this.activityClass = activityClass;
     }
 
-    public void brew(TypeSpec.Builder typeBuilder){
+    public void build(TypeSpec.Builder typeBuilder){
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("saveState")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)

@@ -76,13 +76,8 @@ class BuilderProcessor : AbstractProcessor() {
     }
 
     private fun brewFiles(activityClasses: HashMap<Element, ActivityClass>, fragmentClasses: HashMap<Element, FragmentClass>) {
-        for (activityClass in activityClasses.values) {
-            activityClass.brew(filer)
-        }
-
-        for (fragmentClass in fragmentClasses.values) {
-            fragmentClass.brew(filer)
-        }
+        activityClasses.values.map(ActivityClass::builder).forEach { it.build(filer) }
+        fragmentClasses.values.forEach { it.brew(filer) }
     }
 
     private fun parseFields(env: RoundEnvironment, activityClasses: HashMap<Element, ActivityClass>, fragmentClasses: HashMap<Element, FragmentClass>) {
@@ -127,7 +122,6 @@ class BuilderProcessor : AbstractProcessor() {
             } catch (e: Exception) {
                 Logger.logParsingError(element, Required::class.java, e)
             }
-
         }
     }
 
@@ -141,12 +135,9 @@ class BuilderProcessor : AbstractProcessor() {
             } catch (e: Exception) {
                 Logger.logParsingError(element, ActivityBuilder::class.java, e)
             }
-
         }
 
-        for (activityClass in activityClasses.values) {
-            activityClass.setupSuperClass(activityClasses)
-        }
+        activityClasses.values.forEach { it.setupSuperClass(activityClasses) }
     }
 
     private fun parseFragmentClass(env: RoundEnvironment, fragmentClasses: HashMap<Element, FragmentClass>) {
@@ -159,15 +150,8 @@ class BuilderProcessor : AbstractProcessor() {
             } catch (e: Exception) {
                 Logger.logParsingError(element, FragmentBuilder::class.java, e)
             }
-
         }
 
-        for (fragmentClass in fragmentClasses.values) {
-            fragmentClass.setupSuperClass(fragmentClasses)
-        }
-    }
-
-    companion object {
-        val TAG = "BuilderProcessor"
+        fragmentClasses.values.forEach{ it.setupSuperClass(fragmentClasses) }
     }
 }
