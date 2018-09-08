@@ -21,6 +21,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
+import kotlin.collections.HashSet
 
 /**
  * Created by benny on 10/2/16.
@@ -30,15 +31,8 @@ class BuilderProcessor : AbstractProcessor() {
 
     private lateinit var filer: Filer
 
-    private val supportedAnnotations: Set<Class<out Annotation>>
-        get() {
-            val annotations = LinkedHashSet<Class<out Annotation>>()
-            annotations.add(ActivityBuilder::class.java)
-            annotations.add(FragmentBuilder::class.java)
-            annotations.add(Required::class.java)
-            annotations.add(Optional::class.java)
-            return annotations
-        }
+    private val supportedAnnotations = setOf(ActivityBuilder::class.java, FragmentBuilder::class.java,
+            Required::class.java, Optional::class.java)
 
     @Synchronized
     override fun init(env: ProcessingEnvironment) {
@@ -49,21 +43,9 @@ class BuilderProcessor : AbstractProcessor() {
         Logger.messager = env.messager
     }
 
-    override fun getSupportedOptions(): Set<String> {
-        return super.getSupportedOptions()
-    }
+    override fun getSupportedAnnotationTypes() = supportedAnnotations.mapTo(HashSet<String>(), Class<*>::getCanonicalName)
 
-    override fun getSupportedAnnotationTypes(): Set<String> {
-        val types = LinkedHashSet<String>()
-        for (annotation in supportedAnnotations) {
-            types.add(annotation.canonicalName)
-        }
-        return types
-    }
-
-    override fun getSupportedSourceVersion(): SourceVersion {
-        return SourceVersion.RELEASE_7
-    }
+    override fun getSupportedSourceVersion() = SourceVersion.RELEASE_7
 
     override fun process(annotations: Set<TypeElement>, env: RoundEnvironment): Boolean {
         val activityClasses = HashMap<Element, ActivityClass>()
