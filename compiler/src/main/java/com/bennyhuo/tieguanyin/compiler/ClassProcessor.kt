@@ -4,8 +4,8 @@ import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
-import com.bennyhuo.tieguanyin.compiler.basic.OptionalField
-import com.bennyhuo.tieguanyin.compiler.basic.RequiredField
+import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
+import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
 import com.bennyhuo.tieguanyin.compiler.utils.Logger
 import com.bennyhuo.tieguanyin.compiler.utils.isSubTypeOf
@@ -44,10 +44,10 @@ class ClassProcessor(val filer: Filer){
                         if (fragmentClass == null) {
                             Logger.error(element, "Field " + element + " annotated as Required while " + element.enclosingElement + " not annotated.")
                         } else {
-                            fragmentClass.addSymbol(RequiredField(element as VarSymbol))
+                            fragmentClass.addSymbol(Field(element as VarSymbol))
                         }
                     } else {
-                        activityClass.addSymbol(RequiredField(element as VarSymbol))
+                        activityClass.addSymbol(Field(element as VarSymbol))
                     }
                 }
             } catch (e: Exception) {

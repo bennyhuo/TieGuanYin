@@ -17,7 +17,7 @@ class FinishMethodBuilder(private val activityClass: ActivityClass) {
                 .returns(TypeName.VOID)
                 .addParameter(ClassName.get(activityClass.type), "activity")
                 .addStatement("\$T.finishAfterTransition(activity)", JavaTypes.ACTIVITY_COMPAT)
-        val pendingTransitionOnFinish = activityClass.pendingTransitionOnFinishRecursively
+        val pendingTransitionOnFinish = activityClass.pendingTransitionOnFinish
         if (pendingTransitionOnFinish.exitAnim != PendingTransition.DEFAULT || pendingTransitionOnFinish.enterAnim != PendingTransition.DEFAULT) {
             methodBuilder.addStatement("activity.overridePendingTransition(\$L, \$L)", pendingTransitionOnFinish.enterAnim, pendingTransitionOnFinish.exitAnim)
         }

@@ -37,7 +37,7 @@ public class JavaActivity extends AbsActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                JavaActivityBuilder.finishWithResult(JavaActivity.this, "I'm Java!!", 2, "hello");
+                JavaActivityBuilder.finishWithResult(JavaActivity.this, "I'm Java!!", "hello", 2);
             }
         });
         findViewById(R.id.openKotlinActivity).setOnClickListener(new View.OnClickListener() {

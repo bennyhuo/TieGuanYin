@@ -1,0 +1,19 @@
+package com.bennyhuo.tieguanyin.compiler.basic.builder
+
+import com.bennyhuo.tieguanyin.compiler.basic.BasicClass
+import com.bennyhuo.tieguanyin.compiler.utils.Utils
+import com.squareup.javapoet.FieldSpec
+import com.squareup.javapoet.TypeSpec
+import javax.lang.model.element.Modifier
+
+abstract class BasicConstantBuilder(private val basicClass: BasicClass) {
+    open fun build(typeBuilder: TypeSpec.Builder) {
+        basicClass.fields.forEach { field ->
+            typeBuilder.addField(FieldSpec.builder(String::class.java,
+                    field.prefix + Utils.camelToUnderline(field.name),
+                    Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("\$S", field.name)
+                    .build())
+        }
+    }
+}

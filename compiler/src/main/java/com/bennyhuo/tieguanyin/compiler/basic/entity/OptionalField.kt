@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.compiler.basic
+package com.bennyhuo.tieguanyin.compiler.basic.entity
 
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.squareup.javapoet.ClassName
@@ -9,7 +9,7 @@ import javax.lang.model.type.TypeKind
  * Created by benny on 1/31/18.
  */
 
-class OptionalField(symbol: Symbol.VarSymbol) : RequiredField(symbol) {
+class OptionalField(symbol: Symbol.VarSymbol) : Field(symbol) {
 
     var defaultValue: Any? = null
         private set
@@ -29,9 +29,11 @@ class OptionalField(symbol: Symbol.VarSymbol) : RequiredField(symbol) {
         }
     }
 
-    override fun compareTo(requiredField: RequiredField): Int {
-        return if (requiredField is OptionalField) {
-            super.compareTo(requiredField)
+    override fun asKotlinTypeName() = super.asKotlinTypeName().asNullable()
+
+    override fun compareTo(other: Field): Int {
+        return if (other is OptionalField) {
+            super.compareTo(other)
         } else {
             //如果与 RequiredField 比较，Optional 永远排在后面
             1

@@ -14,7 +14,7 @@ class FinishKotlinFunctionBuilder(private val activityClass: ActivityClass) {
                 .receiver(activityClass.type.asType().asTypeName())
                 .addStatement("%T.finishAfterTransition(this)", KotlinTypes.ACTIVITY_COMPAT)
 
-        val pendingTransitionOnFinish = activityClass.pendingTransitionOnFinishRecursively
+        val pendingTransitionOnFinish = activityClass.pendingTransitionOnFinish
         if (pendingTransitionOnFinish.exitAnim != PendingTransition.DEFAULT || pendingTransitionOnFinish.enterAnim != PendingTransition.DEFAULT) {
             funBuilder.addStatement("overridePendingTransition(%L, %L)", pendingTransitionOnFinish.enterAnim, pendingTransitionOnFinish.exitAnim)
         }

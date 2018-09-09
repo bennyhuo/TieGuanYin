@@ -15,10 +15,10 @@ import javax.lang.model.element.TypeElement
 
 class ActivityClass(type: TypeElement): BasicClass(type) {
 
-    private val pendingTransition: PendingTransition
-    private val pendingTransitionOnFinish: PendingTransition
-    private val categories = ArrayList<String>()
-    private val flags = ArrayList<Int>()
+    private val declaredPendingTransition: PendingTransition
+    private val declaredPendingTransitionOnFinish: PendingTransition
+    private val declaredCategories = ArrayList<String>()
+    private val declaredFlags = ArrayList<Int>()
 
     private var superActivityClass: ActivityClass? = null
     var activityResultClass: ActivityResultClass? = null
@@ -27,53 +27,37 @@ class ActivityClass(type: TypeElement): BasicClass(type) {
 
     init {
         val generateBuilder = type.getAnnotation(Builder::class.java)
-        flags.addAll(generateBuilder.flags.asList())
-        categories.addAll(generateBuilder.categories)
+        declaredFlags.addAll(generateBuilder.flags.asList())
+        declaredCategories.addAll(generateBuilder.categories)
 
-        pendingTransition = generateBuilder.pendingTransition
-        pendingTransitionOnFinish = generateBuilder.pendingTransitionOnFinish
+        declaredPendingTransition = generateBuilder.pendingTransition
+        declaredPendingTransitionOnFinish = generateBuilder.pendingTransitionOnFinish
 
         if (generateBuilder.resultTypes.isNotEmpty()) {
             activityResultClass = ActivityResultClass(this, generateBuilder.resultTypes)
         }
     }
 
-    val pendingTransitionRecursively: PendingTransition by lazy {
-        superActivityClass?.let {
-            if(pendingTransition.isDefault()){
-                it.pendingTransitionRecursively
-            } else {
-                pendingTransition
-            }
-        }?: pendingTransition
-    }
+    var pendingTransition = declaredPendingTransition
+        private set
 
-    val pendingTransitionOnFinishRecursively: PendingTransition by lazy {
-        superActivityClass?.let {
-            if(pendingTransitionOnFinish.isDefault()){
-                it.pendingTransitionOnFinishRecursively
-            } else {
-                pendingTransitionOnFinish
-            }
-        }?: pendingTransitionOnFinish
-    }
+    var pendingTransitionOnFinish = declaredPendingTransitionOnFinish
+        private set
 
-    val categoriesRecursively: ArrayList<String> by lazy {
-        superActivityClass?.let {
-            ArrayList<String>(categories).apply { addAll(it.categoriesRecursively) }
-        }?:categories
-    }
+    var categories: List<String> = declaredCategories
+        private set
 
-    val flagsRecursively: ArrayList<Int> by lazy {
-        superActivityClass?.let {
-            ArrayList<Int>(flags).apply { addAll(it.flagsRecursively) }
-        }?:flags
-    }
+    var flags: List<Int> = declaredFlags
+        private set
 
     fun setUpSuperClass(activityClasses: HashMap<Element, ActivityClass>) {
         this.superActivityClass = super.setUpSuperClass(activityClasses)
-        if (this.superActivityClass != null && this.activityResultClass != null) {
-            this.activityResultClass!!.setSuperActivityResultClass(this.superActivityClass!!.activityResultClass)
+        this.activityResultClass?.superActivityResultClass = this.superActivityClass?.activityResultClass
+        this.superActivityClass?.let { superActivityClass ->
+            categories += superActivityClass.categories
+            flags += superActivityClass.flags
+            if (pendingTransition.isDefault()) pendingTransition = superActivityClass.pendingTransition
+            if (pendingTransitionOnFinish.isDefault()) pendingTransitionOnFinish = superActivityClass.pendingTransitionOnFinish
         }
     }
 }

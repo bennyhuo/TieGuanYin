@@ -2,7 +2,7 @@ package com.bennyhuo.tieguanyin.compiler.activity.methods
 
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClassBuilder
-import com.bennyhuo.tieguanyin.compiler.basic.OptionalField
+import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
@@ -16,28 +16,29 @@ class StartMethodBuilder(private val activityClass: ActivityClass) {
     fun build(typeBuilder: TypeSpec.Builder) {
         val startMethod = StartMethod(activityClass, ActivityClassBuilder.METHOD_NAME)
 
-        val groupedFields = activityClass.requiredFieldsRecursively.groupBy { it is OptionalField }
+        val groupedFields = activityClass.fields.groupBy { it is OptionalField }
         val requiredFields = groupedFields[false] ?: emptyList()
         val optionalFields = groupedFields[true] ?: emptyList()
-        requiredFields.forEach(startMethod::visitField)
+
+        startMethod.addAllFields(requiredFields)
 
         val startMethodNoOptional = startMethod.copy(ActivityClassBuilder.METHOD_NAME_NO_OPTIONAL)
 
-        optionalFields.forEach(startMethod::visitField)
+        startMethod.addAllFields(optionalFields)
 
-        startMethod.brew(typeBuilder)
+        startMethod.build(typeBuilder)
 
         //有optional，先来个没有optional的方法
         if (optionalFields.isNotEmpty()) {
-            startMethodNoOptional.brew(typeBuilder);
+            startMethodNoOptional.build(typeBuilder);
         }
 
         //小于3的情况，只需要每一个参数加一个重载就好
         if (optionalFields.size < 3) {
             optionalFields.forEach { requiredField ->
                 startMethodNoOptional.copy(ActivityClassBuilder.METHOD_NAME_FOR_OPTIONAL + requiredField.name.capitalize())
-                        .also { it.visitField(requiredField) }
-                        .brew(typeBuilder)
+                        .also { it.addField(requiredField) }
+                        .build(typeBuilder)
             }
         } else {
             //大于等于3的情况，使用
@@ -68,7 +69,7 @@ class StartMethodBuilder(private val activityClass: ActivityClass) {
 
             startMethodNoOptional.copy(ActivityClassBuilder.METHOD_NAME_FOR_OPTIONALS)
                     .staticMethod(false)
-                    .brew(typeBuilder)
+                    .build(typeBuilder)
         }
     }
 

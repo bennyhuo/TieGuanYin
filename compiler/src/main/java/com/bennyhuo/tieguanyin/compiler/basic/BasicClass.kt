@@ -2,6 +2,7 @@ package com.bennyhuo.tieguanyin.compiler.basic
 
 import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.GenerateMode
+import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity
 import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils
 import com.sun.tools.javac.code.Type
@@ -16,8 +17,8 @@ abstract class BasicClass(val type: TypeElement) {
     val simpleName: String = TypeUtils.simpleName(type.asType())
     val packageName: String = TypeUtils.getPackageName(type)
 
-    private val requiredFields = TreeSet<RequiredField>()
-    private val sharedElements = ArrayList<SharedElementEntity>()
+    private val declaredFields = TreeSet<Field>()
+    private val declaredSharedElements = ArrayList<SharedElementEntity>()
 
     val generateMode: GenerateMode
 
@@ -33,40 +34,36 @@ abstract class BasicClass(val type: TypeElement) {
             if (isKotlin) GenerateMode.Both else GenerateMode.JavaOnly
         } else generateBuilder.mode
 
-        generateBuilder.sharedElements.mapTo(sharedElements){ SharedElementEntity(it) }
-        generateBuilder.sharedElementsByNames.mapTo(sharedElements){ SharedElementEntity(it) }
-        generateBuilder.sharedElementsWithName.mapTo(sharedElements){ SharedElementEntity(it) }
+        generateBuilder.sharedElements.mapTo(declaredSharedElements) { SharedElementEntity(it) }
+        generateBuilder.sharedElementsByNames.mapTo(declaredSharedElements) { SharedElementEntity(it) }
+        generateBuilder.sharedElementsWithName.mapTo(declaredSharedElements) { SharedElementEntity(it) }
     }
 
-    val requiredFieldsRecursively: TreeSet<RequiredField> by lazy {
-        superClass?.let {
-            TreeSet<RequiredField>(requiredFields)
-                    .apply {
-                        addAll(it.requiredFieldsRecursively)
-                    }
-        } ?: requiredFields
-    }
+    var fields: Set<Field> = declaredFields
+        private set
 
-    val sharedElementsRecursively: ArrayList<SharedElementEntity> by lazy {
-        superClass?.let {
-            ArrayList(sharedElements).apply {
-                addAll(it.sharedElementsRecursively)
-            }
-        } ?: sharedElements
-    }
+    var sharedElements: List<SharedElementEntity> = declaredSharedElements
+        private set
 
     fun <T: BasicClass> setUpSuperClass(classes: Map<Element, T>): T?{
         val typeMirror = type.superclass?: return null
         if (typeMirror == Type.noType) return null
         val superClassElement = (typeMirror as DeclaredType).asElement() as TypeElement
-        return classes[superClassElement].also { this.superClass = it }
+        return classes[superClassElement].also { superClass ->
+            superClass?.also {
+                fields += it.declaredFields
+                sharedElements += it.declaredSharedElements
+            }
+            this.superClass = superClass
+        }
     }
 
-    fun addSymbol(field: RequiredField) {
-        requiredFields.add(field)
+    fun addSymbol(field: Field) {
+        declaredFields.add(field)
     }
 
     companion object {
+        @Suppress("UNCHECKED_CAST")
         val META_DATA = Class.forName("kotlin.Metadata") as Class<Annotation>
     }
 }

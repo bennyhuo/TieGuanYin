@@ -1,6 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.fragment.methods
 
-import com.bennyhuo.tieguanyin.compiler.basic.OptionalField
+import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder.Companion.METHOD_NAME_FOR_OPTIONALS
@@ -15,16 +15,17 @@ import javax.lang.model.element.Modifier.PUBLIC
 class ShowMethodBuilder(private val fragmentClass: FragmentClass) {
 
     fun build(typeBuilder: TypeSpec.Builder) {
-        val showMethod = ShowMethod(fragmentClass, FragmentClassBuilder.METHOD_NAME)
+        val showMethod = ShowMethod(fragmentClass.type, fragmentClass.sharedElements, FragmentClassBuilder.METHOD_NAME)
 
-        val groupedFields = fragmentClass.requiredFieldsRecursively.groupBy { it is OptionalField }
+        val groupedFields = fragmentClass.fields.groupBy { it is OptionalField }
         val requiredFields = groupedFields[false] ?: emptyList()
         val optionalFields = groupedFields[true] ?: emptyList()
-        requiredFields.forEach(showMethod::visitField)
+
+        showMethod.addAllFields(requiredFields)
 
         val showMethodNoOptional = showMethod.copy(FragmentClassBuilder.METHOD_NAME_NO_OPTIONAL)
 
-        optionalFields.forEach(showMethod::visitField)
+        showMethod.addAllFields(optionalFields)
 
         showMethod.build(typeBuilder)
 
@@ -37,7 +38,7 @@ class ShowMethodBuilder(private val fragmentClass: FragmentClass) {
         if (optionalFields.size < 3) {
             optionalFields.forEach { requiredField ->
                 showMethodNoOptional.copy(FragmentClassBuilder.METHOD_NAME_FOR_OPTIONAL + requiredField.name.capitalize())
-                        .also { it.visitField(requiredField) }
+                        .also { it.addField(requiredField) }
                         .build(typeBuilder)
             }
         } else {
