@@ -5,14 +5,14 @@ import android.support.v7.app.AppCompatActivity
 import android.transition.ChangeBounds
 import android.transition.ChangeTransform
 import android.transition.TransitionSet
-import com.bennyhuo.tieguanyin.annotations.ActivityBuilder
+import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.SharedElement
 import com.bennyhuo.tieguanyin.annotations.SharedElementByNames
 import com.bennyhuo.tieguanyin.annotations.SharedElementWithName
 import com.bennyhuo.tieguanyin.sample.R
 import kotlinx.android.synthetic.main.activity_transitions.*
 
-@ActivityBuilder(
+@Builder(
         sharedElements = [SharedElement(sourceId = R.id.openJavaActivity, targetName = "hello")],
         sharedElementsWithName = [(SharedElementWithName("button2"))],
          sharedElementsByNames= [(SharedElementByNames(source = "button1",target = "button3"))]

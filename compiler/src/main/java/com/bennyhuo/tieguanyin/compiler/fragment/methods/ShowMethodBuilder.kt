@@ -1,8 +1,9 @@
-package com.bennyhuo.tieguanyin.compiler.activity.methods
+package com.bennyhuo.tieguanyin.compiler.fragment.methods
 
-import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
-import com.bennyhuo.tieguanyin.compiler.activity.ActivityClassBuilder
 import com.bennyhuo.tieguanyin.compiler.basic.OptionalField
+import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
+import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder
+import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder.Companion.METHOD_NAME_FOR_OPTIONALS
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
@@ -11,41 +12,41 @@ import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier.PRIVATE
 import javax.lang.model.element.Modifier.PUBLIC
 
-class StartMethodBuilder(private val activityClass: ActivityClass) {
+class ShowMethodBuilder(private val fragmentClass: FragmentClass) {
 
     fun build(typeBuilder: TypeSpec.Builder) {
-        val startMethod = StartMethod(activityClass, ActivityClassBuilder.METHOD_NAME)
+        val showMethod = ShowMethod(fragmentClass, FragmentClassBuilder.METHOD_NAME)
 
-        val groupedFields = activityClass.requiredFieldsRecursively.groupBy { it is OptionalField }
+        val groupedFields = fragmentClass.requiredFieldsRecursively.groupBy { it is OptionalField }
         val requiredFields = groupedFields[false] ?: emptyList()
         val optionalFields = groupedFields[true] ?: emptyList()
-        requiredFields.forEach(startMethod::visitField)
+        requiredFields.forEach(showMethod::visitField)
 
-        val startMethodNoOptional = startMethod.copy(ActivityClassBuilder.METHOD_NAME_NO_OPTIONAL)
+        val showMethodNoOptional = showMethod.copy(FragmentClassBuilder.METHOD_NAME_NO_OPTIONAL)
 
-        optionalFields.forEach(startMethod::visitField)
+        optionalFields.forEach(showMethod::visitField)
 
-        startMethod.brew(typeBuilder)
+        showMethod.build(typeBuilder)
 
         //有optional，先来个没有optional的方法
         if (optionalFields.isNotEmpty()) {
-            startMethodNoOptional.brew(typeBuilder);
+            showMethodNoOptional.build(typeBuilder);
         }
 
         //小于3的情况，只需要每一个参数加一个重载就好
         if (optionalFields.size < 3) {
             optionalFields.forEach { requiredField ->
-                startMethodNoOptional.copy(ActivityClassBuilder.METHOD_NAME_FOR_OPTIONAL + requiredField.name.capitalize())
+                showMethodNoOptional.copy(FragmentClassBuilder.METHOD_NAME_FOR_OPTIONAL + requiredField.name.capitalize())
                         .also { it.visitField(requiredField) }
-                        .brew(typeBuilder)
+                        .build(typeBuilder)
             }
         } else {
             //大于等于3的情况，使用
-            val builderName = activityClass.simpleName + ActivityClassBuilder.POSIX
+            val builderName = fragmentClass.simpleName + FragmentClassBuilder.POSIX
             val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
                     .addModifiers(PRIVATE)
                     .addParameter(JavaTypes.INTENT, "intent")
-            val optionalsClassName = ClassName.get(activityClass.packageName, builderName)
+            val optionalsClassName = ClassName.get(fragmentClass.packageName, builderName)
             optionalFields.forEach { requiredField ->
                 typeBuilder.addField(FieldSpec.builder(ClassName.get(requiredField.symbol.type), requiredField.name, PRIVATE).build())
                 typeBuilder.addMethod(MethodSpec.methodBuilder(requiredField.name)
@@ -66,9 +67,9 @@ class StartMethodBuilder(private val activityClass: ActivityClass) {
             }
             typeBuilder.addMethod(fillIntentMethodBuilder.build())
 
-            startMethodNoOptional.copy(ActivityClassBuilder.METHOD_NAME_FOR_OPTIONALS)
+            showMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONALS)
                     .staticMethod(false)
-                    .brew(typeBuilder)
+                    .build(typeBuilder)
         }
     }
 

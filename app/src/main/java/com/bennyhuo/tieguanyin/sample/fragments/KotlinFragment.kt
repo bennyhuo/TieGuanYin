@@ -6,7 +6,7 @@ import android.support.v4.view.ViewCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.bennyhuo.tieguanyin.annotations.FragmentBuilder
+import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.sample.R
 import com.bennyhuo.tieguanyin.sample.transitions.showDetailsFragment
@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.fragment_main.*
 /**
  * Created by benny on 2/6/18.
  */
-@FragmentBuilder
+@Builder
 class KotlinFragment : Fragment() {
 
     @Required

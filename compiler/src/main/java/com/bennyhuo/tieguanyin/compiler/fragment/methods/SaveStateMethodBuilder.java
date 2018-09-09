@@ -1,13 +1,13 @@
-package com.bennyhuo.tieguanyin.compiler.fragment;
+package com.bennyhuo.tieguanyin.compiler.fragment.methods;
 
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
+import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.bennyhuo.tieguanyin.compiler.utils.Utils;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import javax.lang.model.element.Modifier;
@@ -16,20 +16,15 @@ import javax.lang.model.element.Modifier;
  * Created by benny on 1/31/18.
  */
 
-public class SaveStateMethod {
+public class SaveStateMethodBuilder {
 
     private FragmentClass fragmentClass;
-    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
 
-    public SaveStateMethod(FragmentClass fragmentClass) {
+    public SaveStateMethodBuilder(FragmentClass fragmentClass) {
         this.fragmentClass = fragmentClass;
     }
 
-    public void visitField(RequiredField requiredField) {
-        requiredFields.add(requiredField);
-    }
-
-    public void brew(TypeSpec.Builder typeBuilder){
+    public void build(TypeSpec.Builder typeBuilder){
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("saveState")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
@@ -40,7 +35,7 @@ public class SaveStateMethod {
 
         methodBuilder.addStatement("$T intent = new $T()", JavaTypes.INTENT, JavaTypes.INTENT);
 
-        for (RequiredField requiredField : requiredFields) {
+        for (RequiredField requiredField : fragmentClass.getRequiredFieldsRecursively()) {
             String name = requiredField.getName();
             Set<Modifier> modifiers = requiredField.getSymbol().getModifiers();
             if(modifiers.contains(Modifier.PRIVATE)){

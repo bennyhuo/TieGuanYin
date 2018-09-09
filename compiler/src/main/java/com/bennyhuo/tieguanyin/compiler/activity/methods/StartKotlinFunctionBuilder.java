@@ -2,6 +2,7 @@ package com.bennyhuo.tieguanyin.compiler.activity.methods;
 
 import com.bennyhuo.tieguanyin.annotations.PendingTransition;
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass;
+import com.bennyhuo.tieguanyin.compiler.activity.ActivityClassBuilder;
 import com.bennyhuo.tieguanyin.compiler.basic.OptionalField;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
@@ -26,9 +27,9 @@ public class StartKotlinFunctionBuilder {
     private ActivityClass activityClass;
     private String name;
 
-    public StartKotlinFunctionBuilder(ActivityClass activityClass, String name) {
+    public StartKotlinFunctionBuilder(ActivityClass activityClass) {
         this.activityClass = activityClass;
-        this.name = name;
+        this.name = ActivityClassBuilder.METHOD_NAME + activityClass.getSimpleName();
     }
 
     public void build(FileSpec.Builder fileBuilder){

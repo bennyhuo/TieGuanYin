@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 /**
  * Created by benny on 1/29/18.
  */
-@ActivityBuilder(mode = Both,
+@Builder(mode = Both,
         pendingTransition = PendingTransition(enterAnim = 0, exitAnim = 0),
         pendingTransitionOnFinish = PendingTransition(enterAnim = 0, exitAnim = 0),
         resultTypes = [(ResultEntity(name = "java", type = Array<String>::class)), (ResultEntity(name = "kotlin", type = IntArray::class))],

@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.bennyhuo.tieguanyin.annotations.FragmentBuilder
+import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.sample.R
 import kotlinx.android.synthetic.main.fragment_main.*
@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.fragment_main.*
 /**
  * Created by benny on 2/6/18.
  */
-@FragmentBuilder
+@Builder
 class ChildFragment : Fragment() {
 
     @Required

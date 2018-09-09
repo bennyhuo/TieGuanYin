@@ -1,6 +1,7 @@
-package com.bennyhuo.tieguanyin.compiler.fragment;
+package com.bennyhuo.tieguanyin.compiler.fragment.methods;
 
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
+import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
 import com.squareup.javapoet.ClassName;
@@ -21,10 +22,16 @@ public class ShowMethod {
     private FragmentClass fragmentClass;
     private String name;
     private ArrayList<RequiredField> requiredFields = new ArrayList<>();
+    private boolean isStaticMethod = true;
 
     public ShowMethod(FragmentClass fragmentClass, String name) {
         this.fragmentClass = fragmentClass;
         this.name = name;
+    }
+
+    public ShowMethod staticMethod(boolean staticMethod) {
+        isStaticMethod = staticMethod;
+        return this;
     }
 
     public void visitField(RequiredField binding) {
@@ -43,9 +50,9 @@ public class ShowMethod {
         return openMethod;
     }
 
-    public void brew(TypeSpec.Builder typeBuilder){
+    public void build(TypeSpec.Builder typeBuilder){
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(name)
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID)
                 .addParameter(JavaTypes.ACTIVITY, "activity")
                 .addParameter(int.class, "containerId")
@@ -58,6 +65,13 @@ public class ShowMethod {
             String name = requiredField.getName();
             methodBuilder.addParameter(ClassName.get(requiredField.getSymbol().type), name);
             methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
+        }
+
+        if(isStaticMethod){
+            methodBuilder.addModifiers(Modifier.STATIC);
+        } else {
+            //非静态则需要填充 optional 成员
+            methodBuilder.addStatement("fillIntent(intent)");
         }
 
         ArrayList<SharedElementEntity> sharedElements = fragmentClass.getSharedElementsRecursively();

@@ -2,7 +2,7 @@ package com.bennyhuo.tieguanyin.sample
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.bennyhuo.tieguanyin.annotations.ActivityBuilder
+import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.annotations.PendingTransition
 import com.bennyhuo.tieguanyin.annotations.Required
@@ -13,7 +13,7 @@ import java.io.Serializable
 /**
  * Created by benny on 1/29/18.
  */
-@ActivityBuilder(pendingTransition = PendingTransition(enterAnim = 0, exitAnim = 0))
+@Builder(pendingTransition = PendingTransition(enterAnim = 0, exitAnim = 0))
 class GenerateBothActivity : AppCompatActivity() {
 
     @Required()

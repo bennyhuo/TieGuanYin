@@ -1,7 +1,9 @@
-package com.bennyhuo.tieguanyin.compiler.fragment;
+package com.bennyhuo.tieguanyin.compiler.fragment.methods;
 
 import com.bennyhuo.tieguanyin.compiler.basic.OptionalField;
 import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
+import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass;
+import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes;
 import com.squareup.kotlinpoet.FileSpec;
@@ -20,23 +22,17 @@ import kotlin.Unit;
  * Created by benny on 1/31/18.
  */
 
-public class ShowFunctionKt {
+public class ShowKotlinFunctionBuilder {
 
     private FragmentClass fragmentClass;
     private String name;
 
-    private ArrayList<RequiredField> requiredFields = new ArrayList<>();
-
-    public ShowFunctionKt(FragmentClass fragmentClass, String name) {
+    public ShowKotlinFunctionBuilder(FragmentClass fragmentClass) {
         this.fragmentClass = fragmentClass;
-        this.name = name;
+        this.name = FragmentClassBuilder.METHOD_NAME + fragmentClass.getSimpleName();
     }
 
-    public void visitField(RequiredField requiredField) {
-        requiredFields.add(requiredField);
-    }
-
-    public void brew(FileSpec.Builder fileBuilder){
+    public void build(FileSpec.Builder fileBuilder){
         FunSpec.Builder funBuilderForContext = FunSpec.builder(name)
                 .receiver(KotlinTypes.SUPPORT_ACTIVITY)
                 .addModifiers(KModifier.PUBLIC)
@@ -55,7 +51,7 @@ public class ShowFunctionKt {
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit.class);
 
-        for (RequiredField requiredField : requiredFields) {
+        for (RequiredField requiredField : fragmentClass.getRequiredFieldsRecursively()) {
             String name = requiredField.getName();
             TypeName className = KotlinTypes.toKotlinType(requiredField.getSymbol().type);
             if (requiredField instanceof OptionalField) {

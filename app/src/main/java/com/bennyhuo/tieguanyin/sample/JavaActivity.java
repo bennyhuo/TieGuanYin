@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 
-import com.bennyhuo.tieguanyin.annotations.ActivityBuilder;
+import com.bennyhuo.tieguanyin.annotations.Builder;
 import com.bennyhuo.tieguanyin.annotations.Optional;
 import com.bennyhuo.tieguanyin.annotations.Required;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
@@ -17,7 +17,7 @@ import kotlin.jvm.functions.Function2;
 /**
  * Created by benny on 1/29/18.
  */
-@ActivityBuilder(resultTypes = {@ResultEntity(name = "javaMethod", type = String.class), @ResultEntity(name = "kotlin", type=int.class)})
+@Builder(resultTypes = {@ResultEntity(name = "javaMethod", type = String.class), @ResultEntity(name = "kotlin", type=int.class)})
 public class JavaActivity extends AbsActivity {
 
     @Required

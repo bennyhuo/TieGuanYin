@@ -10,15 +10,34 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface ActivityBuilder {
+public @interface Builder {
     GenerateMode mode() default GenerateMode.Auto;
-    ResultEntity[] resultTypes() default {};
-    PendingTransition pendingTransition() default @PendingTransition;
-    PendingTransition pendingTransitionOnFinish() default @PendingTransition;
     SharedElement[] sharedElements() default {};
     SharedElementByNames[] sharedElementsByNames() default {};
     SharedElementWithName[] sharedElementsWithName() default {};
 
+    /**
+     * For Activities Only
+     */
+    ResultEntity[] resultTypes() default {};
+
+    /**
+     * For Activities Only
+     */
+    PendingTransition pendingTransition() default @PendingTransition;
+
+    /**
+     * For Activities Only
+     */
+    PendingTransition pendingTransitionOnFinish() default @PendingTransition;
+
+    /**
+     * For Activities Only
+     */
     String[] categories() default {};
+
+    /**
+     * For Activities Only
+     */
     int[] flags() default {};
 }
