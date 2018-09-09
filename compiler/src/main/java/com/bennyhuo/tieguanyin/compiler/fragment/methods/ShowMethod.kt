@@ -1,8 +1,8 @@
 package com.bennyhuo.tieguanyin.compiler.fragment.methods
 
 import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
+import com.bennyhuo.tieguanyin.compiler.basic.types.*
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity
-import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
@@ -42,12 +42,12 @@ class ShowMethod(private val enclosingElementType: TypeElement, sharedElements: 
         val methodBuilder = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID)
-                .addParameter(JavaTypes.ACTIVITY, "activity")
+                .addParameter(ACTIVITY.java, "activity")
                 .addParameter(Int::class.javaPrimitiveType, "containerId")
-                .beginControlFlow("if(activity instanceof \$T)", JavaTypes.SUPPORT_ACTIVITY)
-                .addStatement("\$T.INSTANCE.init(activity)", JavaTypes.ACTIVITY_BUILDER)
+                .beginControlFlow("if(activity instanceof \$T)", SUPPORT_ACTIVITY.java)
+                .addStatement("\$T.INSTANCE.init(activity)", ACTIVITY_BUILDER.java)
 
-        methodBuilder.addStatement("\$T intent = new \$T()", JavaTypes.INTENT, JavaTypes.INTENT)
+        methodBuilder.addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
 
         for (requiredField in requiredFields) {
             val name = requiredField.name
@@ -63,18 +63,18 @@ class ShowMethod(private val enclosingElementType: TypeElement, sharedElements: 
         }
 
         if (sharedElements.isEmpty()) {
-            methodBuilder.addStatement("\$T.showFragment((\$T) activity, containerId, intent.getExtras(), \$T.class, null)", JavaTypes.FRAGMENT_BUILDER, JavaTypes.SUPPORT_ACTIVITY, enclosingElementType)
+            methodBuilder.addStatement("\$T.showFragment((\$T) activity, containerId, intent.getExtras(), \$T.class, null)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, enclosingElementType)
         } else {
-            methodBuilder.addStatement("\$T<\$T<\$T, \$T>> sharedElements = new \$T<>()", JavaTypes.ARRAY_LIST, JavaTypes.SUPPORT_PAIR, String::class.java, String::class.java, JavaTypes.ARRAY_LIST)
-                    .addStatement("\$T container = activity.findViewById(containerId)", JavaTypes.VIEW)
+            methodBuilder.addStatement("\$T<\$T<\$T, \$T>> sharedElements = new \$T<>()", ARRAY_LIST.java, SUPPORT_PAIR.java, String::class.java, String::class.java, ARRAY_LIST.java)
+                    .addStatement("\$T container = activity.findViewById(containerId)", VIEW.java)
             for (sharedElement in sharedElements) {
                 if (sharedElement.sourceId == 0) {
                     methodBuilder.addStatement("sharedElements.add(new Pair<>(\$S, \$S))", sharedElement.sourceName, sharedElement.targetName)
                 } else {
-                    methodBuilder.addStatement("sharedElements.add(new Pair<>(\$T.getTransitionName(container.findViewById(\$L)), \$S))", JavaTypes.VIEW_COMPAT, sharedElement.sourceId, sharedElement.targetName)
+                    methodBuilder.addStatement("sharedElements.add(new Pair<>(\$T.getTransitionName(container.findViewById(\$L)), \$S))", VIEW_COMPAT.java, sharedElement.sourceId, sharedElement.targetName)
                 }
             }
-            methodBuilder.addStatement("\$T.showFragment((\$T) activity, containerId, intent.getExtras(), \$T.class, sharedElements)", JavaTypes.FRAGMENT_BUILDER, JavaTypes.SUPPORT_ACTIVITY, enclosingElementType)
+            methodBuilder.addStatement("\$T.showFragment((\$T) activity, containerId, intent.getExtras(), \$T.class, sharedElements)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, enclosingElementType)
         }
         methodBuilder.endControlFlow()
 

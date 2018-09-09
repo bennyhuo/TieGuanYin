@@ -1,10 +1,10 @@
 package com.bennyhuo.tieguanyin.compiler.fragment.methods
 
 import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
+import com.bennyhuo.tieguanyin.compiler.basic.types.INTENT
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder.Companion.METHOD_NAME_FOR_OPTIONALS
-import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
@@ -46,7 +46,7 @@ class ShowMethodBuilder(private val fragmentClass: FragmentClass) {
             val builderName = fragmentClass.simpleName + FragmentClassBuilder.POSIX
             val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
                     .addModifiers(PRIVATE)
-                    .addParameter(JavaTypes.INTENT, "intent")
+                    .addParameter(INTENT.java, "intent")
             val optionalsClassName = ClassName.get(fragmentClass.packageName, builderName)
             optionalFields.forEach { requiredField ->
                 typeBuilder.addField(FieldSpec.builder(requiredField.asTypeName(), requiredField.name, PRIVATE).build())

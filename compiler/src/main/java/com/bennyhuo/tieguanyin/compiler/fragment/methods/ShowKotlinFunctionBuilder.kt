@@ -1,9 +1,9 @@
 package com.bennyhuo.tieguanyin.compiler.fragment.methods
 
 import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
+import com.bennyhuo.tieguanyin.compiler.basic.types.*
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder
-import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes
 import com.squareup.kotlinpoet.*
 
 /**
@@ -15,20 +15,20 @@ class ShowKotlinFunctionBuilder(private val fragmentClass: FragmentClass) {
 
     fun build(fileBuilder: FileSpec.Builder) {
         val funBuilderForContext = FunSpec.builder(name)
-                .receiver(KotlinTypes.SUPPORT_ACTIVITY)
+                .receiver(SUPPORT_ACTIVITY.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit::class.java)
                 .addParameter("containerId", INT)
-                .addStatement("%T.INSTANCE.init(this)", KotlinTypes.ACTIVITY_BUILDER)
-                .addStatement("val intent = %T()", KotlinTypes.INTENT)
+                .addStatement("%T.INSTANCE.init(this)", ACTIVITY_BUILDER.kotlin)
+                .addStatement("val intent = %T()", INTENT.kotlin)
 
         val funBuilderForViewGroup = FunSpec.builder(name)
-                .receiver(KotlinTypes.VIEW_GROUP)
+                .receiver(VIEW_GROUP.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit::class.java)
 
         val funBuilderForFragment = FunSpec.builder(name)
-                .receiver(KotlinTypes.SUPPORT_FRAGMENT)
+                .receiver(SUPPORT_FRAGMENT.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit::class.java)
 
@@ -45,18 +45,18 @@ class ShowKotlinFunctionBuilder(private val fragmentClass: FragmentClass) {
 
         val sharedElements = fragmentClass.sharedElements
         if (sharedElements.isEmpty()) {
-            funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, null)", KotlinTypes.FRAGMENT_BUILDER, fragmentClass.type)
+            funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, null)", FRAGMENT_BUILDER.kotlin, fragmentClass.type)
         } else {
-            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.STRING, KotlinTypes.STRING)
-                    .addStatement("val container: %T = findViewById(containerId)", KotlinTypes.VIEW)
+            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", ARRAY_LIST.kotlin, SUPPORT_PAIR.kotlin, STRING.kotlin, STRING.kotlin)
+                    .addStatement("val container: %T = findViewById(containerId)", VIEW.kotlin)
             for (sharedElement in sharedElements) {
                 if (sharedElement.sourceName != null) {
                     funBuilderForContext.addStatement("sharedElements.add(Pair(%S, %S))", sharedElement.sourceName, sharedElement.targetName)
                 } else {
-                    funBuilderForContext.addStatement("sharedElements.add(Pair(%T.getTransitionName(container.findViewById(%L)), %S))", KotlinTypes.VIEW_COMPAT, sharedElement.sourceId, sharedElement.targetName)
+                    funBuilderForContext.addStatement("sharedElements.add(Pair(%T.getTransitionName(container.findViewById(%L)), %S))", VIEW_COMPAT.kotlin, sharedElement.sourceId, sharedElement.targetName)
                 }
             }
-            funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, sharedElements)", KotlinTypes.FRAGMENT_BUILDER, fragmentClass.type)
+            funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, sharedElements)", FRAGMENT_BUILDER.kotlin, fragmentClass.type)
         }
         val paramBuilder = StringBuilder()
         val parameterSpecList = funBuilderForContext.parameters
@@ -69,11 +69,11 @@ class ShowKotlinFunctionBuilder(private val fragmentClass: FragmentClass) {
         if (paramBuilder.isNotEmpty()) {
             paramBuilder.deleteCharAt(paramBuilder.length - 1)
         }
-        funBuilderForFragment.addStatement("(view?.parent as? %T)?.%L(%L)", KotlinTypes.VIEW_GROUP, name, paramBuilder.toString())
+        funBuilderForFragment.addStatement("(view?.parent as? %T)?.%L(%L)", VIEW_GROUP.kotlin, name, paramBuilder.toString())
         if (paramBuilder.isNotEmpty()) {
             paramBuilder.insert(0, ',')
         }
-        funBuilderForViewGroup.addStatement("(context as? %T)?.%L(id %L)", KotlinTypes.SUPPORT_ACTIVITY, name, paramBuilder.toString())
+        funBuilderForViewGroup.addStatement("(context as? %T)?.%L(id %L)", SUPPORT_ACTIVITY.kotlin, name, paramBuilder.toString())
 
         fileBuilder.addFunction(funBuilderForContext.build())
         fileBuilder.addFunction(funBuilderForViewGroup.build())

@@ -3,7 +3,7 @@ package com.bennyhuo.tieguanyin.compiler.activity
 import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.PendingTransition
 import com.bennyhuo.tieguanyin.compiler.basic.BasicClass
-import com.bennyhuo.tieguanyin.compiler.extensions.isDefault
+import com.bennyhuo.tieguanyin.compiler.utils.isDefault
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass
 import java.util.*
 import javax.lang.model.element.Element

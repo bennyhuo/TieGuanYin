@@ -3,7 +3,7 @@ package com.bennyhuo.tieguanyin.compiler.activity.methods
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClassBuilder
 import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
-import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes
+import com.bennyhuo.tieguanyin.compiler.basic.types.INTENT
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
@@ -45,7 +45,7 @@ class StartMethodBuilder(private val activityClass: ActivityClass) {
             val builderName = activityClass.simpleName + ActivityClassBuilder.POSIX
             val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
                     .addModifiers(PRIVATE)
-                    .addParameter(JavaTypes.INTENT, "intent")
+                    .addParameter(INTENT.java, "intent")
             val optionalsClassName = ClassName.get(activityClass.packageName, builderName)
             optionalFields.forEach { requiredField ->
                 typeBuilder.addField(FieldSpec.builder(requiredField.asTypeName(), requiredField.name, PRIVATE).build())

@@ -1,8 +1,8 @@
 package com.bennyhuo.tieguanyin.compiler.basic.builder
 
 import com.bennyhuo.tieguanyin.compiler.basic.BasicClass
-import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes
-import com.bennyhuo.tieguanyin.compiler.utils.Utils
+import com.bennyhuo.tieguanyin.compiler.basic.types.BUNDLE
+import com.bennyhuo.tieguanyin.compiler.basic.types.INTENT
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
@@ -17,16 +17,16 @@ abstract class BasicSaveStateMethodBuilder(val basicClass: BasicClass) {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
                 .addParameter(instanceType, "instance")
-                .addParameter(JavaTypes.BUNDLE, "outState")
+                .addParameter(BUNDLE.java, "outState")
                 .beginControlFlow("if(instance instanceof \$T)", basicClass.type)
                 .addStatement("\$T typedInstance = (\$T) instance", basicClass.type, basicClass.type)
 
-        methodBuilder.addStatement("\$T intent = new \$T()", JavaTypes.INTENT, JavaTypes.INTENT)
+        methodBuilder.addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
 
         for (requiredField in basicClass.fields) {
             val name = requiredField.name
             if (requiredField.isPrivate) {
-                methodBuilder.addStatement("intent.putExtra(\$S, typedInstance.get\$L())", name, Utils.capitalize(name))
+                methodBuilder.addStatement("intent.putExtra(\$S, typedInstance.get\$L())", name, name.capitalize())
             } else {
                 methodBuilder.addStatement("intent.putExtra(\$S, typedInstance.\$L)", name, name)
             }

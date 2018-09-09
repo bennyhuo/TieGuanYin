@@ -5,9 +5,8 @@ import com.bennyhuo.tieguanyin.annotations.ResultEntity
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.basic.entity.ResultParameter
 import com.bennyhuo.tieguanyin.compiler.basic.entity.asResultParameter
-import com.bennyhuo.tieguanyin.compiler.extensions.isDefault
-import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes
-import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes
+import com.bennyhuo.tieguanyin.compiler.basic.types.*
+import com.bennyhuo.tieguanyin.compiler.utils.isDefault
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
@@ -69,7 +68,7 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
         val onResultMethodBuilder = MethodSpec.methodBuilder("onResult")
                 .addAnnotation(Override::class.java)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(JavaTypes.BUNDLE, "bundle")
+                .addParameter(BUNDLE.java, "bundle")
                 .returns(TypeName.VOID)
 
         onResultMethodBuilder.beginControlFlow("if(\$L != null)", listenerName)
@@ -79,7 +78,7 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
         args.add(listenerName)
         for (resultEntity in resultParameters) {
             statementBuilder.append("\$T.<\$T>get(bundle, \$S),")
-            args.add(JavaTypes.RUNTIME_UTILS)
+            args.add(RUNTIME_UTILS.java)
             args.add(resultEntity.javaTypeName.box())
             args.add(resultEntity.name)
         }
@@ -90,7 +89,7 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
         onResultMethodBuilder.endControlFlow()
 
         return TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(JavaTypes.ON_ACTIVITY_RESULT_LISTENER)
+                .addSuperinterface(ON_ACTIVITY_RESULT_LISTENER.java)
                 .addMethod(onResultMethodBuilder.build())
                 .build()
     }
@@ -101,7 +100,7 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
     fun createOnResultListenerObjectKt(): com.squareup.kotlinpoet.TypeSpec {
         val onResultFunBuilderKt = FunSpec.builder("onResult")
                 .addModifiers(KModifier.OVERRIDE)
-                .addParameter("bundle", KotlinTypes.BUNDLE)
+                .addParameter("bundle", BUNDLE.kotlin)
                 .returns(UNIT)
 
         onResultFunBuilderKt.beginControlFlow("if(%L != null)", listenerName)
@@ -111,7 +110,7 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
 
         for (resultEntity in resultParameters) {
             statementBuilderKt.append("%T.get(bundle, %S),")
-            argsKt.add(KotlinTypes.RUNTIME_UTILS)
+            argsKt.add(RUNTIME_UTILS.kotlin)
             argsKt.add(resultEntity.name)
         }
         if (statementBuilderKt.isNotEmpty()) {
@@ -121,7 +120,7 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
         onResultFunBuilderKt.endControlFlow()
 
         return com.squareup.kotlinpoet.TypeSpec.anonymousClassBuilder()
-                .addSuperinterface(KotlinTypes.ON_ACTIVITY_RESULT_LISTENER, CodeBlock.of(""))
+                .addSuperinterface(ON_ACTIVITY_RESULT_LISTENER.kotlin, CodeBlock.of(""))
                 .addFunction(onResultFunBuilderKt.build())
                 .build()
     }
@@ -130,14 +129,14 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
         val funBuilder = FunSpec.builder("finishWithResult")
                 .receiver(activityClass.type.asType().asTypeName())
 
-        funBuilder.addStatement("val intent = %T()", KotlinTypes.INTENT)
+        funBuilder.addStatement("val intent = %T()", INTENT.kotlin)
         for (resultEntity in resultParameters) {
 
             funBuilder.addParameter(resultEntity.name, resultEntity.kotlinTypeName)
             funBuilder.addStatement("intent.putExtra(%S, %L)", resultEntity.name, resultEntity.name)
         }
         funBuilder.addStatement("setResult(1, intent)")
-        funBuilder.addStatement("%T.finishAfterTransition(this)", KotlinTypes.ACTIVITY_COMPAT)
+        funBuilder.addStatement("%T.finishAfterTransition(this)", ACTIVITY_COMPAT.kotlin)
         val pendingTransitionOnFinish = activityClass.pendingTransitionOnFinish
         if (pendingTransitionOnFinish.exitAnim != PendingTransition.DEFAULT || pendingTransitionOnFinish.enterAnim != PendingTransition.DEFAULT) {
             funBuilder.addStatement("overridePendingTransition(%L, %L)", pendingTransitionOnFinish.enterAnim, pendingTransitionOnFinish.exitAnim)
@@ -150,13 +149,13 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addParameter(ClassName.get(activityClass.type), "activity")
                 .returns(TypeName.VOID)
-                .addStatement("\$T intent = new \$T()", JavaTypes.INTENT, JavaTypes.INTENT)
+                .addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
 
         for (resultEntity in resultParameters) {
             finishWithResultMethodBuilder.addParameter(resultEntity.javaTypeName, resultEntity.name)
             finishWithResultMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", resultEntity.name, resultEntity.name)
         }
-        finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("\$T.finishAfterTransition(activity)", JavaTypes.ACTIVITY_COMPAT)
+        finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("\$T.finishAfterTransition(activity)", ACTIVITY_COMPAT.java)
 
         val pendingTransitionOnFinish = activityClass.pendingTransitionOnFinish
         if (!pendingTransitionOnFinish.isDefault()) {

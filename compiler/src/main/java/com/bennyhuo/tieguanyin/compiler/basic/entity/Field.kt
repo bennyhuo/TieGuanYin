@@ -1,6 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.basic.entity
 
-import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes
+import com.bennyhuo.tieguanyin.compiler.utils.asKotlinTypeName
 import com.squareup.javapoet.ClassName
 import com.sun.tools.javac.code.Symbol
 
@@ -19,7 +19,7 @@ open class Field(private val symbol: Symbol.VarSymbol) : Comparable<Field> {
 
     fun asTypeName() = ClassName.get(symbol.type)
 
-    open fun asKotlinTypeName() = KotlinTypes.toKotlinType(symbol.type)
+    open fun asKotlinTypeName() = symbol.type.asKotlinTypeName()
 
     override fun compareTo(other: Field): Int {
         return name.compareTo(other.name)

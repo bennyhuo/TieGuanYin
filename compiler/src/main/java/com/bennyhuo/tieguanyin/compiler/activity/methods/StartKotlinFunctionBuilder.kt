@@ -3,7 +3,7 @@ package com.bennyhuo.tieguanyin.compiler.activity.methods
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClassBuilder
 import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
-import com.bennyhuo.tieguanyin.compiler.utils.KotlinTypes
+import com.bennyhuo.tieguanyin.compiler.basic.types.*
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
@@ -19,21 +19,21 @@ class StartKotlinFunctionBuilder(private val activityClass: ActivityClass) {
 
     fun build(fileBuilder: FileSpec.Builder) {
         val funBuilderForContext = FunSpec.builder(name)
-                .receiver(KotlinTypes.CONTEXT)
+                .receiver(CONTEXT.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit::class.java)
-                .addStatement("%T.INSTANCE.init(this)", KotlinTypes.ACTIVITY_BUILDER)
-                .addStatement("val intent = %T(this, %T::class.java)", KotlinTypes.INTENT, activityClass.type)
+                .addStatement("%T.INSTANCE.init(this)", ACTIVITY_BUILDER.kotlin)
+                .addStatement("val intent = %T(this, %T::class.java)", INTENT.kotlin, activityClass.type)
 
         val funBuilderForView = FunSpec.builder(name)
-                .receiver(KotlinTypes.VIEW)
+                .receiver(VIEW.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit::class.java)
-                .addStatement("%T.INSTANCE.init(context)", KotlinTypes.ACTIVITY_BUILDER)
-                .addStatement("val intent = %T(context, %T::class.java)", KotlinTypes.INTENT, activityClass.type)
+                .addStatement("%T.INSTANCE.init(context)", ACTIVITY_BUILDER.kotlin)
+                .addStatement("val intent = %T(context, %T::class.java)", INTENT.kotlin, activityClass.type)
 
         val funBuilderForFragment = FunSpec.builder(name)
-                .receiver(KotlinTypes.FRAGMENT)
+                .receiver(FRAGMENT.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(Unit::class.java)
 
@@ -60,24 +60,24 @@ class StartKotlinFunctionBuilder(private val activityClass: ActivityClass) {
             funBuilderForView.addStatement("intent.putExtra(%S, %L)", name, name)
         }
 
-        funBuilderForContext.addStatement("var options: %T? = null", KotlinTypes.BUNDLE)
-        funBuilderForView.addStatement("var options: %T? = null", KotlinTypes.BUNDLE)
+        funBuilderForContext.addStatement("var options: %T? = null", BUNDLE.kotlin)
+        funBuilderForView.addStatement("var options: %T? = null", BUNDLE.kotlin)
 
         val sharedElements = activityClass.sharedElements
         if (sharedElements.size > 0) {
-            funBuilderForView.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.VIEW, KotlinTypes.STRING)
+            funBuilderForView.addStatement("val sharedElements = %T<%T<%T, %T>>()", ARRAY_LIST.kotlin, SUPPORT_PAIR.kotlin, VIEW.kotlin, STRING.kotlin)
 
-            funBuilderForContext.beginControlFlow("if(this is %T)", KotlinTypes.ACTIVITY)
-            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", KotlinTypes.ARRAY_LIST, KotlinTypes.SUPPORT_PAIR, KotlinTypes.VIEW, KotlinTypes.STRING)
+            funBuilderForContext.beginControlFlow("if(this is %T)", ACTIVITY.kotlin)
+            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", ARRAY_LIST.kotlin, SUPPORT_PAIR.kotlin, VIEW.kotlin, STRING.kotlin)
 
             var firstNeedTransitionNameMap = true
             for (sharedElement in sharedElements) {
                 if (sharedElement.sourceName != null) {
                     if (firstNeedTransitionNameMap) {
-                        funBuilderForView.addStatement("val nameMap = %T<%T, %T>()", KotlinTypes.HASH_MAP, KotlinTypes.STRING, KotlinTypes.VIEW)
-                                .addStatement("%T.findNamedViews(this, nameMap)", KotlinTypes.VIEW_UTILS)
-                        funBuilderForContext.addStatement("val nameMap = %T<%T, %T>()", KotlinTypes.HASH_MAP, KotlinTypes.STRING, KotlinTypes.VIEW)
-                                .addStatement("%T.findNamedViews(window.decorView, nameMap)", KotlinTypes.VIEW_UTILS)
+                        funBuilderForView.addStatement("val nameMap = %T<%T, %T>()", HASH_MAP.kotlin, STRING.kotlin, VIEW.kotlin)
+                                .addStatement("%T.findNamedViews(this, nameMap)", VIEW_UTILS.kotlin)
+                        funBuilderForContext.addStatement("val nameMap = %T<%T, %T>()", HASH_MAP.kotlin, STRING.kotlin, VIEW.kotlin)
+                                .addStatement("%T.findNamedViews(window.decorView, nameMap)", VIEW_UTILS.kotlin)
                         firstNeedTransitionNameMap = false
                     }
 
@@ -88,31 +88,31 @@ class StartKotlinFunctionBuilder(private val activityClass: ActivityClass) {
                     funBuilderForView.addStatement("sharedElements.add(Pair(findViewById(%L), %S))", sharedElement.sourceId, sharedElement.targetName)
                 }
             }
-            funBuilderForContext.addStatement("options = %T.makeSceneTransition(this, sharedElements)", KotlinTypes.ACTIVITY_BUILDER)
+            funBuilderForContext.addStatement("options = %T.makeSceneTransition(this, sharedElements)", ACTIVITY_BUILDER.kotlin)
             funBuilderForContext.endControlFlow()
 
-            funBuilderForView.addStatement("options = %T.makeSceneTransition(context, sharedElements)", KotlinTypes.ACTIVITY_BUILDER)
+            funBuilderForView.addStatement("options = %T.makeSceneTransition(context, sharedElements)", ACTIVITY_BUILDER.kotlin)
         }
         val pendingTransition = activityClass.pendingTransition
         val activityResultClass = activityClass.activityResultClass
         if (activityResultClass != null) {
             funBuilderForContext
-                    .addStatement("%T.INSTANCE.startActivityForResult(this, intent, options, %L, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim, pendingTransition.exitAnim, activityResultClass.createOnResultListenerObjectKt())
+                    .addStatement("%T.INSTANCE.startActivityForResult(this, intent, options, %L, %L, %L)", ACTIVITY_BUILDER.kotlin, pendingTransition.enterAnim, pendingTransition.exitAnim, activityResultClass.createOnResultListenerObjectKt())
                     .addParameter(
                             ParameterSpec.builder(activityResultClass.listenerName, activityResultClass.listenerClassKt)
                                     .defaultValue("null").build())
         } else {
-            funBuilderForContext.addStatement("%T.INSTANCE.startActivity(this, intent, options, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim, pendingTransition.exitAnim)
+            funBuilderForContext.addStatement("%T.INSTANCE.startActivity(this, intent, options, %L, %L)", ACTIVITY_BUILDER.kotlin, pendingTransition.enterAnim, pendingTransition.exitAnim)
         }
 
         if (activityResultClass != null) {
             funBuilderForView
-                    .addStatement("%T.INSTANCE.startActivityForResult(context, intent, options, %L, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim, pendingTransition.exitAnim, activityResultClass.createOnResultListenerObjectKt())
+                    .addStatement("%T.INSTANCE.startActivityForResult(context, intent, options, %L, %L, %L)", ACTIVITY_BUILDER.kotlin, pendingTransition.enterAnim, pendingTransition.exitAnim, activityResultClass.createOnResultListenerObjectKt())
                     .addParameter(
                             ParameterSpec.builder(activityResultClass.listenerName, activityResultClass.listenerClassKt)
                                     .defaultValue("null").build())
         } else {
-            funBuilderForView.addStatement("%T.INSTANCE.startActivity(context, intent, options, %L, %L)", KotlinTypes.ACTIVITY_BUILDER, pendingTransition.enterAnim, pendingTransition.exitAnim)
+            funBuilderForView.addStatement("%T.INSTANCE.startActivity(context, intent, options, %L, %L)", ACTIVITY_BUILDER.kotlin, pendingTransition.enterAnim, pendingTransition.exitAnim)
         }
 
         val paramBuilder = StringBuilder()
