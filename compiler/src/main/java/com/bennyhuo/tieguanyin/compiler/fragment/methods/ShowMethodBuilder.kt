@@ -48,15 +48,15 @@ class ShowMethodBuilder(private val fragmentClass: FragmentClass) {
                     .addParameter(JavaTypes.INTENT, "intent")
             val optionalsClassName = ClassName.get(fragmentClass.packageName, builderName)
             optionalFields.forEach { requiredField ->
-                typeBuilder.addField(FieldSpec.builder(ClassName.get(requiredField.symbol.type), requiredField.name, PRIVATE).build())
+                typeBuilder.addField(FieldSpec.builder(requiredField.asTypeName(), requiredField.name, PRIVATE).build())
                 typeBuilder.addMethod(MethodSpec.methodBuilder(requiredField.name)
                         .addModifiers(PUBLIC)
-                        .addParameter(ClassName.get(requiredField.symbol.type), requiredField.name)
+                        .addParameter(requiredField.asTypeName(), requiredField.name)
                         .addStatement("this.${requiredField.name} = ${requiredField.name}")
                         .addStatement("return this")
                         .returns(optionalsClassName)
                         .build())
-                if (requiredField.symbol.type.isPrimitive) {
+                if (requiredField.isPrimitive) {
                     fillIntentMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", requiredField.name, requiredField.name)
                 } else {
                     fillIntentMethodBuilder

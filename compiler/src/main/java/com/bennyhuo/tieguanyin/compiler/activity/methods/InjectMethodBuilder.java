@@ -8,9 +8,6 @@ import com.bennyhuo.tieguanyin.compiler.utils.Utils;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.sun.tools.javac.code.Type;
-
-import java.util.Set;
 
 import javax.lang.model.element.Modifier;
 
@@ -39,17 +36,15 @@ public class InjectMethodBuilder {
 
         for (RequiredField requiredField : activityClass.getRequiredFieldsRecursively()) {
             String name = requiredField.getName();
-            Set<Modifier> modifiers = requiredField.getSymbol().getModifiers();
-            Type type = requiredField.getSymbol().type;
-            TypeName typeName = TypeName.get(type).box();
+            TypeName typeName = requiredField.asTypeName().box();
 
             if(requiredField instanceof OptionalField) {
                 OptionalField optionalField = ((OptionalField)requiredField);
-                injectMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S, $L)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name, optionalField.getValue());
+                injectMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S, $L)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name, optionalField.getDefaultValue());
             } else {
                 injectMethodBuilder.addStatement("$T $LValue = $T.<$T>get(extras, $S)", typeName, name, JavaTypes.RUNTIME_UTILS, typeName, name);
             }
-            if (modifiers.contains(Modifier.PRIVATE)) {
+            if (requiredField.isPrivate()) {
                 injectMethodBuilder.addStatement("typedActivity.set$L($LValue)", Utils.capitalize(name), name);
             } else {
                 injectMethodBuilder.addStatement("typedActivity.$L = $LValue", name, name);

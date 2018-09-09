@@ -8,8 +8,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import java.util.Set;
-
 import javax.lang.model.element.Modifier;
 
 /**
@@ -37,8 +35,7 @@ public class SaveStateMethodBuilder {
 
         for (RequiredField requiredField : activityClass.getRequiredFieldsRecursively()) {
             String name = requiredField.getName();
-            Set<Modifier> modifiers = requiredField.getSymbol().getModifiers();
-            if(modifiers.contains(Modifier.PRIVATE)){
+            if(requiredField.isPrivate()){
                 methodBuilder.addStatement("intent.putExtra($S, typedActivity.get$L())", name, Utils.capitalize(name));
             } else {
                 methodBuilder.addStatement("intent.putExtra($S, typedActivity.$L)", name, name);

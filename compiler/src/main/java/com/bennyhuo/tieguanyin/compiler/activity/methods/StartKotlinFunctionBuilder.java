@@ -63,7 +63,7 @@ public class StartKotlinFunctionBuilder {
 
         for (RequiredField requiredField : activityClass.getRequiredFieldsRecursively()) {
             String name = requiredField.getName();
-            TypeName className = KotlinTypes.toKotlinType(requiredField.getSymbol().type);
+            TypeName className = requiredField.asKotlinTypeName();
             if(requiredField instanceof OptionalField){
                 className = className.asNullable();
                 funBuilderForContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build());

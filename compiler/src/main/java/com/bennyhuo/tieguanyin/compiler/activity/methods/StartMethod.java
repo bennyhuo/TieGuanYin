@@ -6,7 +6,6 @@ import com.bennyhuo.tieguanyin.compiler.basic.RequiredField;
 import com.bennyhuo.tieguanyin.compiler.result.ActivityResultClass;
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity;
 import com.bennyhuo.tieguanyin.compiler.utils.JavaTypes;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -72,10 +71,10 @@ public class StartMethod {
 
         for (RequiredField requiredField : requiredFields) {
             String name = requiredField.getName();
-            methodBuilder.addParameter(ClassName.get(requiredField.getSymbol().type), name);
+            methodBuilder.addParameter(requiredField.asTypeName(), name);
             methodBuilder.addStatement("intent.putExtra($S, $L)", name, name);
 
-            methodBuilderForView.addParameter(ClassName.get(requiredField.getSymbol().type), name);
+            methodBuilderForView.addParameter(requiredField.asTypeName(), name);
             methodBuilderForView.addStatement("intent.putExtra($S, $L)", name, name);
         }
 
