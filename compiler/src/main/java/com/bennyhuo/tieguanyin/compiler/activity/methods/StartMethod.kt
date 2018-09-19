@@ -79,19 +79,19 @@ class StartMethod(private val activityClass: ActivityClass, private val name: St
         methodBuilderForView.addStatement("\$T options = null", BUNDLE.java)
         val sharedElements = activityClass.sharedElements
         if (sharedElements.isNotEmpty()) {
-            methodBuilderForView.addStatement("\$T<\$T<\$T, \$T>> sharedElements = new \$T<>()", ARRAY_LIST.java, SUPPORT_PAIR.java, VIEW.java, String::class.java, ARRAY_LIST.java)
+            methodBuilderForView.addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[SUPPORT_PAIR[VIEW, STRING]].java, ARRAY_LIST.java)
 
             methodBuilder.beginControlFlow("if(context instanceof \$T)", ACTIVITY.java)
                     .addStatement("\$T activity = (\$T) context", ACTIVITY.java, ACTIVITY.java)
-                    .addStatement("\$T<\$T<\$T, \$T>> sharedElements = new \$T<>()", ARRAY_LIST.java, SUPPORT_PAIR.java, VIEW.java, String::class.java, ARRAY_LIST.java)
+                    .addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[SUPPORT_PAIR[VIEW, STRING]].java, ARRAY_LIST.java)
 
             var firstNeedTransitionNameMap = true
             for (sharedElement in sharedElements) {
                 if (sharedElement.sourceId == 0) {
                     if (firstNeedTransitionNameMap) {
-                        methodBuilderForView.addStatement("\$T<\$T, \$T> nameMap = new \$T<>()", HASH_MAP.java, String::class.java, VIEW.java, HASH_MAP.java)
+                        methodBuilderForView.addStatement("\$T nameMap = new \$T<>()", HASH_MAP[STRING, VIEW].java, HASH_MAP.java)
                                 .addStatement("\$T.findNamedViews(view, nameMap)", VIEW_UTILS.java)
-                        methodBuilder.addStatement("\$T<\$T, \$T> nameMap = new \$T<>()", HASH_MAP.java, String::class.java, VIEW.java, HASH_MAP.java)
+                        methodBuilder.addStatement("\$T nameMap = new \$T<>()", HASH_MAP[STRING, VIEW].java, HASH_MAP.java)
                                 .addStatement("\$T.findNamedViews(activity.getWindow().getDecorView(), nameMap)", VIEW_UTILS.java)
                         firstNeedTransitionNameMap = false
                     }

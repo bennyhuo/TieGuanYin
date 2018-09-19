@@ -65,7 +65,7 @@ class ShowMethod(private val enclosingElementType: TypeElement, sharedElements: 
         if (sharedElements.isEmpty()) {
             methodBuilder.addStatement("\$T.showFragment((\$T) activity, containerId, intent.getExtras(), \$T.class, null)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, enclosingElementType)
         } else {
-            methodBuilder.addStatement("\$T<\$T<\$T, \$T>> sharedElements = new \$T<>()", ARRAY_LIST.java, SUPPORT_PAIR.java, String::class.java, String::class.java, ARRAY_LIST.java)
+            methodBuilder.addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[SUPPORT_PAIR[STRING, STRING]].java, ARRAY_LIST.java)
                     .addStatement("\$T container = activity.findViewById(containerId)", VIEW.java)
             for (sharedElement in sharedElements) {
                 if (sharedElement.sourceId == 0) {
