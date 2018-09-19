@@ -1,1 +1,1 @@
-include ':app', ':runtime', ':compiler', ':annotations', ':app-java'
+include ':app', ':runtime', ':compiler', ':annotations', ':app-java', ':runtime-kt'

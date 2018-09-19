@@ -65,18 +65,18 @@ class StartKotlinFunctionBuilder(private val activityClass: ActivityClass) {
 
         val sharedElements = activityClass.sharedElements
         if (sharedElements.size > 0) {
-            funBuilderForView.addStatement("val sharedElements = %T<%T<%T, %T>>()", ARRAY_LIST.kotlin, SUPPORT_PAIR.kotlin, VIEW.kotlin, STRING.kotlin)
+            funBuilderForView.addStatement("val sharedElements = %T()", ARRAY_LIST[SUPPORT_PAIR[VIEW, STRING]].kotlin)
 
             funBuilderForContext.beginControlFlow("if(this is %T)", ACTIVITY.kotlin)
-            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", ARRAY_LIST.kotlin, SUPPORT_PAIR.kotlin, VIEW.kotlin, STRING.kotlin)
+            funBuilderForContext.addStatement("val sharedElements = %T()", ARRAY_LIST[SUPPORT_PAIR[VIEW, STRING]].kotlin)
 
             var firstNeedTransitionNameMap = true
             for (sharedElement in sharedElements) {
                 if (sharedElement.sourceName != null) {
                     if (firstNeedTransitionNameMap) {
-                        funBuilderForView.addStatement("val nameMap = %T<%T, %T>()", HASH_MAP.kotlin, STRING.kotlin, VIEW.kotlin)
+                        funBuilderForView.addStatement("val nameMap = %T()", HASH_MAP[STRING, VIEW].kotlin)
                                 .addStatement("%T.findNamedViews(this, nameMap)", VIEW_UTILS.kotlin)
-                        funBuilderForContext.addStatement("val nameMap = %T<%T, %T>()", HASH_MAP.kotlin, STRING.kotlin, VIEW.kotlin)
+                        funBuilderForContext.addStatement("val nameMap = %T()", HASH_MAP[STRING, VIEW].kotlin)
                                 .addStatement("%T.findNamedViews(window.decorView, nameMap)", VIEW_UTILS.kotlin)
                         firstNeedTransitionNameMap = false
                     }

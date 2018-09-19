@@ -47,7 +47,7 @@ class ShowKotlinFunctionBuilder(private val fragmentClass: FragmentClass) {
         if (sharedElements.isEmpty()) {
             funBuilderForContext.addStatement("%T.showFragment(this, containerId, intent.getExtras(), %T::class.java, null)", FRAGMENT_BUILDER.kotlin, fragmentClass.type)
         } else {
-            funBuilderForContext.addStatement("val sharedElements = %T<%T<%T, %T>>()", ARRAY_LIST.kotlin, SUPPORT_PAIR.kotlin, STRING.kotlin, STRING.kotlin)
+            funBuilderForContext.addStatement("val sharedElements = %T()", ARRAY_LIST[SUPPORT_PAIR[STRING, STRING]].kotlin)
                     .addStatement("val container: %T = findViewById(containerId)", VIEW.kotlin)
             for (sharedElement in sharedElements) {
                 if (sharedElement.sourceName != null) {
