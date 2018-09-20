@@ -1,5 +1,6 @@
-package com.bennyhuo.tieguanyin.compiler.utils
+package com.bennyhuo.aptutils.types
 
+import com.bennyhuo.aptutils.AptContext
 import com.squareup.javapoet.TypeName
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -8,8 +9,6 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.ArrayType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
-import javax.lang.model.util.Elements
-import javax.lang.model.util.Types
 import kotlin.reflect.KClass
 import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 
@@ -17,11 +16,9 @@ import com.squareup.kotlinpoet.TypeName as KotlinTypeName
  * Created by benny on 2/3/18.
  */
 object TypeUtils {
-    lateinit var types: Types
-    lateinit var elements: Elements
 
     private fun doubleErasure(elementType: TypeMirror): String {
-        var name = types.erasure(elementType).toString()
+        var name = AptContext.types.erasure(elementType).toString()
         val typeParamStart = name.indexOf('<')
         if (typeParamStart != -1) {
             name = name.substring(0, typeParamStart)
@@ -42,22 +39,24 @@ object TypeUtils {
         }
     }
 
-    fun getTypeFromClassName(className: String) = elements.getTypeElement(className).asType()
+    fun getTypeFromClassName(className: String) = AptContext.elements.getTypeElement(className).asType()
 
 }
 
-fun TypeMirror.erasure() = TypeUtils.types.erasure(this)
+fun TypeMirror.erasure() = AptContext.types.erasure(this)
 
 fun TypeMirror.isSubTypeOf(className: String): Boolean {
-    return TypeUtils.types.isSubtype(this, TypeUtils.getTypeFromClassName(className))
+    return AptContext.types.isSubtype(this, TypeUtils.getTypeFromClassName(className))
 }
 
+fun TypeMirror.asElement() = AptContext.types.asElement(this)
+
 fun Class<*>.asTypeMirror(): TypeMirror {
-    return TypeUtils.elements.getTypeElement(canonicalName).asType()
+    return AptContext.elements.getTypeElement(canonicalName).asType()
 }
 
 fun KClass<*>.asTypeMirror(): TypeMirror {
-    return TypeUtils.elements.getTypeElement(qualifiedName).asType()
+    return AptContext.elements.getTypeElement(qualifiedName).asType()
 }
 
 fun TypeMirror.asJavaTypeName() = TypeName.get(this)

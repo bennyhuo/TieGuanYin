@@ -1,5 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler
 
+import com.bennyhuo.aptutils.logger.Logger
+import com.bennyhuo.aptutils.types.isSubTypeOf
 import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.annotations.Required
@@ -7,8 +9,6 @@ import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
-import com.bennyhuo.tieguanyin.compiler.utils.Logger
-import com.bennyhuo.tieguanyin.compiler.utils.isSubTypeOf
 import com.google.auto.common.SuperficialValidation
 import com.sun.tools.javac.code.Symbol.VarSymbol
 import java.util.*

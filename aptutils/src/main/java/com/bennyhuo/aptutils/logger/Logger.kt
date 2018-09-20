@@ -1,29 +1,28 @@
-package com.bennyhuo.tieguanyin.compiler.utils
+package com.bennyhuo.aptutils.logger
 
+import com.bennyhuo.aptutils.AptContext
 import java.io.PrintWriter
 import java.io.StringWriter
-
-import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.tools.Diagnostic
+import javax.tools.Diagnostic.Kind.ERROR
+import javax.tools.Diagnostic.Kind.NOTE
 
 /**
  * Created by benny on 2/3/18.
  */
 object Logger {
 
-    lateinit var messager: Messager
-
     fun debug(message: String) {
-        messager.printMessage(Diagnostic.Kind.OTHER, message)
+        AptContext.messager.printMessage(Diagnostic.Kind.OTHER, message)
     }
 
     fun error(element: Element, message: String, vararg args: Any) {
-        printMessage(Diagnostic.Kind.ERROR, element, message, *args)
+        printMessage(ERROR, element, message, *args)
     }
 
     fun note(element: Element, message: String, vararg args: Any) {
-        printMessage(Diagnostic.Kind.NOTE, element, message, *args)
+        printMessage(NOTE, element, message, *args)
     }
 
     fun logParsingError(element: Element, annotation: Class<out Annotation>, e: Exception) {
@@ -33,7 +32,7 @@ object Logger {
     }
 
     private fun printMessage(kind: Diagnostic.Kind, element: Element, message: String, vararg args: Any) {
-        messager.printMessage(kind,
+        AptContext.messager.printMessage(kind,
                 if (args.isNotEmpty()) { String.format(message, *args) } else message
                 , element)
     }

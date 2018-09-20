@@ -1,10 +1,10 @@
 package com.bennyhuo.tieguanyin.compiler.basic
 
+import com.bennyhuo.aptutils.types.TypeUtils
 import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.GenerateMode
 import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity
-import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils
 import com.sun.tools.javac.code.Type
 import java.util.*
 import javax.lang.model.element.Element

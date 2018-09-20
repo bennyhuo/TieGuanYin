@@ -1,6 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.basic.entity
 
-import com.bennyhuo.tieguanyin.compiler.utils.asKotlinTypeName
+import com.bennyhuo.aptutils.types.asKotlinTypeName
 import com.squareup.javapoet.ClassName
 import com.sun.tools.javac.code.Symbol
 

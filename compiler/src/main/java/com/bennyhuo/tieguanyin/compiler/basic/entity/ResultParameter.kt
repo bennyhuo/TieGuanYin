@@ -1,9 +1,9 @@
 package com.bennyhuo.tieguanyin.compiler.basic.entity
 
 import com.bennyhuo.tieguanyin.annotations.ResultEntity
-import com.bennyhuo.tieguanyin.compiler.utils.asJavaTypeName
-import com.bennyhuo.tieguanyin.compiler.utils.asKotlinTypeName
-import com.bennyhuo.tieguanyin.compiler.utils.asTypeMirror
+import com.bennyhuo.aptutils.types.asJavaTypeName
+import com.bennyhuo.aptutils.types.asKotlinTypeName
+import com.bennyhuo.aptutils.types.asTypeMirror
 import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.TypeMirror
 

@@ -1,9 +1,5 @@
-package com.bennyhuo.tieguanyin.compiler.basic.entity
+package com.bennyhuo.aptutils.types
 
-import com.bennyhuo.tieguanyin.compiler.utils.TypeUtils
-import com.bennyhuo.tieguanyin.compiler.utils.asJavaTypeName
-import com.bennyhuo.tieguanyin.compiler.utils.asKotlinTypeName
-import com.bennyhuo.tieguanyin.compiler.utils.erasure
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy

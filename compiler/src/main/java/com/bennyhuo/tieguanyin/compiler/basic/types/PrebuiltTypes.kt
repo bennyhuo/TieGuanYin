@@ -1,6 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.basic.types
 
-import com.bennyhuo.tieguanyin.compiler.basic.entity.ClassType
+import com.bennyhuo.aptutils.types.ClassType
+
 
 /**
  * Created by benny on 2/2/18.
