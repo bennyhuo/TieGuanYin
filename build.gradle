@@ -36,7 +36,9 @@ ext {
     apiKey = props.getProperty("bintray.key")
     repoName = "bennyhuo"
     groupId = 'com.bennyhuo.tieguanyin'
-    publishVersion = '2.0-SNAPSHOT'
+    //bintray-release PropertyFinder retiever property from project firstly,
+    //so use a different name to avoid overriding
+    commonVersion = '2.0-SNAPSHOT'
     desc = "Generate methods/functions to help start Activities or Fragments."
     website = 'https://github.com/enbandari/tieguanyin'
     dryRun = "false"

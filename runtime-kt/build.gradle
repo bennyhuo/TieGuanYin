@@ -37,7 +37,7 @@ publish {
     groupId = project.groupId
     repoName = project.repoName
     artifactId = 'tieguanyin-runtime-kotlin'
-    publishVersion = project.publishVersion
+    publishVersion = project.commonVersion
     desc = project.desc//描述，不重要
     website = project.website
     bintrayUser = project.userName
