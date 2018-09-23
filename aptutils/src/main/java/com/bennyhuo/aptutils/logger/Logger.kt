@@ -1,20 +1,26 @@
 package com.bennyhuo.aptutils.logger
 
-import com.bennyhuo.aptutils.AptContext
 import java.io.PrintWriter
 import java.io.StringWriter
+
+import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.tools.Diagnostic
-import javax.tools.Diagnostic.Kind.ERROR
-import javax.tools.Diagnostic.Kind.NOTE
+import javax.tools.Diagnostic.Kind.*
 
 /**
  * Created by benny on 2/3/18.
  */
 object Logger {
 
-    fun debug(message: String) {
-        AptContext.messager.printMessage(Diagnostic.Kind.OTHER, message)
+    lateinit var messager: Messager
+
+    fun warn(element: Element, message: String, vararg args: Any) {
+        printMessage(WARNING, element, message, *args)
+    }
+
+    fun warn(message: String, vararg args: Any) {
+        printMessage(WARNING, null, message, *args)
     }
 
     fun error(element: Element, message: String, vararg args: Any) {
@@ -31,9 +37,15 @@ object Logger {
         error(element, "Unable to parse @%s binding.\n\n%s", annotation.simpleName, stackTrace)
     }
 
-    private fun printMessage(kind: Diagnostic.Kind, element: Element, message: String, vararg args: Any) {
-        AptContext.messager.printMessage(kind,
-                if (args.isNotEmpty()) { String.format(message, *args) } else message
-                , element)
+    private fun printMessage(kind: Diagnostic.Kind, element: Element?, message: String, vararg args: Any) {
+        if(element == null){
+            messager.printMessage(Diagnostic.Kind.WARNING, if (args.isNotEmpty()) { String.format(message, *args) } else message)
+        } else {
+            messager.printMessage(kind,
+                    if (args.isNotEmpty()) {
+                        String.format(message, *args)
+                    } else message
+                    , element)
+        }
     }
 }

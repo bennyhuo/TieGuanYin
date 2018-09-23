@@ -17,7 +17,7 @@ import com.squareup.kotlinpoet.TypeName as KotlinTypeName
  */
 object TypeUtils {
 
-    private fun doubleErasure(elementType: TypeMirror): String {
+    internal fun doubleErasure(elementType: TypeMirror): String {
         var name = AptContext.types.erasure(elementType).toString()
         val typeParamStart = name.indexOf('<')
         if (typeParamStart != -1) {
@@ -26,22 +26,18 @@ object TypeUtils {
         return name
     }
 
-    fun simpleName(elementType: TypeMirror): String {
-        val name = doubleErasure(elementType)
-        return name.substring(name.lastIndexOf(".") + 1)
-    }
-
-    fun getPackageName(type: TypeElement): String {
-        return if (type.enclosingElement.kind == ElementKind.PACKAGE) {
-            type.enclosingElement.asType().toString()
-        } else {
-            throw IllegalArgumentException(type.enclosingElement.toString())
-        }
-    }
-
-    fun getTypeFromClassName(className: String) = AptContext.elements.getTypeElement(className).asType()
-
+    internal fun getTypeFromClassName(className: String) = AptContext.elements.getTypeElement(className).asType()
 }
+
+fun TypeElement.packageName() = if (this.enclosingElement.kind == ElementKind.PACKAGE) {
+    enclosingElement.asType().toString()
+} else {
+    throw IllegalArgumentException(enclosingElement.toString())
+}
+
+fun TypeElement.simpleName(): String = simpleName.toString()
+
+fun TypeMirror.simpleName() = TypeUtils.doubleErasure(this).let { name -> name.substring(name.lastIndexOf(".") + 1) }
 
 fun TypeMirror.erasure() = AptContext.types.erasure(this)
 

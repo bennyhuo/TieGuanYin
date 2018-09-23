@@ -1,6 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.basic
 
-import com.bennyhuo.aptutils.types.TypeUtils
+import com.bennyhuo.aptutils.types.packageName
+import com.bennyhuo.aptutils.types.simpleName
 import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.GenerateMode
 import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
@@ -14,8 +15,8 @@ import javax.lang.model.type.DeclaredType
 
 abstract class BasicClass(val type: TypeElement) {
 
-    val simpleName: String = TypeUtils.simpleName(type.asType())
-    val packageName: String = TypeUtils.getPackageName(type)
+    val simpleName: String = type.simpleName()
+    val packageName: String = type.packageName()
 
     private val declaredFields = TreeSet<Field>()
     private val declaredSharedElements = ArrayList<SharedElementEntity>()

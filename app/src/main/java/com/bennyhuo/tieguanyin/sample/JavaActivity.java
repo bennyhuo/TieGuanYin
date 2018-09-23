@@ -63,4 +63,10 @@ public class JavaActivity extends AbsActivity {
             }
         });
     }
+
+//    @Builder
+//    public static class InnerActivity extends Activity{
+//        @Required
+//        int num;
+//    }
 }
