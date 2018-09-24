@@ -46,7 +46,7 @@ publish {
     groupId = "com.bennyhuo.aptutils"
     repoName = project.repoName
     artifactId = 'aptutils'
-    publishVersion = '1.3'
+    publishVersion = '1.4'
     desc = project.desc//描述，不重要
     website = project.website
     bintrayUser = project.userName

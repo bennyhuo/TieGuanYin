@@ -41,19 +41,52 @@ fun TypeMirror.simpleName() = TypeUtils.doubleErasure(this).let { name -> name.s
 
 fun TypeMirror.erasure() = AptContext.types.erasure(this)
 
+//region subType
 fun TypeMirror.isSubTypeOf(className: String): Boolean {
     return AptContext.types.isSubtype(this, TypeUtils.getTypeFromClassName(className))
 }
 
-fun TypeMirror.asElement() = AptContext.types.asElement(this)
+fun TypeMirror.isSubTypeOf(cls: Class<*>): Boolean {
+    return AptContext.types.isSubtype(this, TypeUtils.getTypeFromClassName(cls.canonicalName))
+}
 
+fun TypeMirror.isSubTypeOf(typeMirror: TypeMirror): Boolean {
+    return AptContext.types.isSubtype(this, typeMirror)
+}
+//endregion
+
+//region sameType
+fun TypeMirror.isSameTypeWith(typeMirror: TypeMirror): Boolean {
+    return AptContext.types.isSameType(this, typeMirror)
+}
+
+fun TypeMirror.isSameTypeWith(cls: Class<*>): Boolean{
+    return isSameTypeWith(TypeUtils.getTypeFromClassName(cls.canonicalName))
+}
+
+fun TypeMirror.isSameTypeWith(className: String): Boolean{
+    return isSameTypeWith(TypeUtils.getTypeFromClassName(className))
+}
+//endregion
+
+//region Class/KClass
 fun Class<*>.asTypeMirror(): TypeMirror {
     return AptContext.elements.getTypeElement(canonicalName).asType()
 }
+fun Class<*>.asJavaTypeName() = this.asTypeMirror().asJavaTypeName()
+fun Class<*>.asKotlinTypeName() = this.asTypeMirror().asKotlinTypeName()
+fun Class<*>.asElement() = this.asTypeMirror().asElement()
 
 fun KClass<*>.asTypeMirror(): TypeMirror {
     return AptContext.elements.getTypeElement(qualifiedName).asType()
 }
+fun KClass<*>.asJavaTypeName() = this.asTypeMirror().asJavaTypeName()
+fun KClass<*>.asKotlinTypeName() = this.asTypeMirror().asKotlinTypeName()
+fun KClass<*>.asElement() = this.asTypeMirror().asElement()
+//endregion
+
+//region TypeMirror
+fun TypeMirror.asElement() = AptContext.types.asElement(this)
 
 fun TypeMirror.asJavaTypeName() = TypeName.get(this)
 
@@ -100,3 +133,4 @@ private val CHAR_ARRAY: ClassName = ClassName("kotlin", "CharArray")
 private val BOOLEAN_ARRAY: ClassName = ClassName("kotlin", "BooleanArray")
 private val FLOAT_ARRAY: ClassName = ClassName("kotlin", "FloatArray")
 private val DOUBLE_ARRAY: ClassName = ClassName("kotlin", "DoubleArray")
+//endregion
