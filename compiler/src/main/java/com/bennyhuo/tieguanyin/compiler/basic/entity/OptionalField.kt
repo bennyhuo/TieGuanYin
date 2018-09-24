@@ -1,7 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.basic.entity
 
+import com.bennyhuo.aptutils.types.isSameTypeWith
 import com.bennyhuo.tieguanyin.annotations.Optional
-import com.squareup.javapoet.ClassName
 import com.sun.tools.javac.code.Symbol
 import javax.lang.model.type.TypeKind
 
@@ -22,7 +22,7 @@ class OptionalField(symbol: Symbol.VarSymbol) : Field(symbol) {
             TypeKind.BOOLEAN -> defaultValue = optional.booleanValue
             TypeKind.BYTE, TypeKind.SHORT, TypeKind.INT, TypeKind.LONG, TypeKind.CHAR -> defaultValue = optional.intValue
             TypeKind.FLOAT, TypeKind.DOUBLE -> defaultValue = optional.floatValue
-            else -> if (ClassName.get(symbol.type) == ClassName.get(String::class.java)) {
+            else -> if (symbol.type.isSameTypeWith(String::class)) {
                 //注意字面量的引号
                 defaultValue = """"${optional.stringValue }""""
             }

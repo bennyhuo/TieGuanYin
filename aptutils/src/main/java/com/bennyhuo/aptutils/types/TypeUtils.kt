@@ -47,8 +47,12 @@ fun TypeMirror.isSubTypeOf(className: String): Boolean {
 }
 
 fun TypeMirror.isSubTypeOf(cls: Class<*>): Boolean {
-    return AptContext.types.isSubtype(this, TypeUtils.getTypeFromClassName(cls.canonicalName))
+    return cls.canonicalName?.let {className ->
+        isSubTypeOf(className)
+    }?: false
 }
+
+fun TypeMirror.isSubTypeOf(cls: KClass<*>) = isSubTypeOf(cls.java)
 
 fun TypeMirror.isSubTypeOf(typeMirror: TypeMirror): Boolean {
     return AptContext.types.isSubtype(this, typeMirror)
@@ -61,8 +65,12 @@ fun TypeMirror.isSameTypeWith(typeMirror: TypeMirror): Boolean {
 }
 
 fun TypeMirror.isSameTypeWith(cls: Class<*>): Boolean{
-    return isSameTypeWith(TypeUtils.getTypeFromClassName(cls.canonicalName))
+    return  cls.canonicalName?.let {className ->
+        isSameTypeWith(className)
+    }?: false
 }
+
+fun TypeMirror.isSameTypeWith(cls: KClass<*>) = isSameTypeWith(cls.java)
 
 fun TypeMirror.isSameTypeWith(className: String): Boolean{
     return isSameTypeWith(TypeUtils.getTypeFromClassName(className))
