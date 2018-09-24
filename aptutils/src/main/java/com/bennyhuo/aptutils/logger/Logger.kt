@@ -1,9 +1,8 @@
 package com.bennyhuo.aptutils.logger
 
+import com.bennyhuo.aptutils.AptContext.messager
 import java.io.PrintWriter
 import java.io.StringWriter
-
-import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.tools.Diagnostic
 import javax.tools.Diagnostic.Kind.*
@@ -12,8 +11,6 @@ import javax.tools.Diagnostic.Kind.*
  * Created by benny on 2/3/18.
  */
 object Logger {
-
-    lateinit var messager: Messager
 
     fun warn(element: Element, message: String, vararg args: Any) {
         printMessage(WARNING, element, message, *args)
