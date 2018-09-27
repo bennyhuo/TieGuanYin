@@ -47,9 +47,9 @@ fun TypeMirror.isSubTypeOf(className: String): Boolean {
 }
 
 fun TypeMirror.isSubTypeOf(cls: Class<*>): Boolean {
-    return cls.canonicalName?.let {className ->
+    return cls.canonicalName?.let { className ->
         isSubTypeOf(className)
-    }?: false
+    } ?: false
 }
 
 fun TypeMirror.isSubTypeOf(cls: KClass<*>) = isSubTypeOf(cls.java)
@@ -64,15 +64,15 @@ fun TypeMirror.isSameTypeWith(typeMirror: TypeMirror): Boolean {
     return AptContext.types.isSameType(this, typeMirror)
 }
 
-fun TypeMirror.isSameTypeWith(cls: Class<*>): Boolean{
-    return  cls.canonicalName?.let {className ->
+fun TypeMirror.isSameTypeWith(cls: Class<*>): Boolean {
+    return cls.canonicalName?.let { className ->
         isSameTypeWith(className)
-    }?: false
+    } ?: false
 }
 
 fun TypeMirror.isSameTypeWith(cls: KClass<*>) = isSameTypeWith(cls.java)
 
-fun TypeMirror.isSameTypeWith(className: String): Boolean{
+fun TypeMirror.isSameTypeWith(className: String): Boolean {
     return isSameTypeWith(TypeUtils.getTypeFromClassName(className))
 }
 //endregion
@@ -81,13 +81,15 @@ fun TypeMirror.isSameTypeWith(className: String): Boolean{
 fun Class<*>.asTypeMirror(): TypeMirror {
     return AptContext.elements.getTypeElement(canonicalName).asType()
 }
+
 fun Class<*>.asJavaTypeName() = this.asTypeMirror().asJavaTypeName()
 fun Class<*>.asKotlinTypeName() = this.asTypeMirror().asKotlinTypeName()
 fun Class<*>.asElement() = this.asTypeMirror().asElement()
 
 fun KClass<*>.asTypeMirror(): TypeMirror {
-    return AptContext.elements.getTypeElement(qualifiedName).asType()
+    return AptContext.elements.getTypeElement(java.canonicalName).asType()
 }
+
 fun KClass<*>.asJavaTypeName() = this.asTypeMirror().asJavaTypeName()
 fun KClass<*>.asKotlinTypeName() = this.asTypeMirror().asKotlinTypeName()
 fun KClass<*>.asElement() = this.asTypeMirror().asElement()
@@ -99,37 +101,33 @@ fun TypeMirror.asElement() = AptContext.types.asElement(this)
 fun TypeMirror.asJavaTypeName() = TypeName.get(this)
 
 fun TypeMirror.asKotlinTypeName(): KotlinTypeName {
-    when (kind) {
-        TypeKind.BOOLEAN -> return BOOLEAN
-        TypeKind.BYTE -> return BYTE
-        TypeKind.SHORT -> return SHORT
-        TypeKind.INT -> return INT
-        TypeKind.LONG -> return LONG
-        TypeKind.CHAR -> return CHAR
-        TypeKind.FLOAT -> return FLOAT
-        TypeKind.DOUBLE -> return DOUBLE
-        TypeKind.DECLARED -> if (toString() == "java.lang.String") {
-            return STRING
-        }
+    return when (kind) {
+        TypeKind.BOOLEAN -> BOOLEAN
+        TypeKind.BYTE -> BYTE
+        TypeKind.SHORT -> SHORT
+        TypeKind.INT -> INT
+        TypeKind.LONG -> LONG
+        TypeKind.CHAR -> CHAR
+        TypeKind.FLOAT -> FLOAT
+        TypeKind.DOUBLE -> DOUBLE
         TypeKind.ARRAY -> {
             val arrayType = this as ArrayType
             when (arrayType.componentType.kind) {
-                TypeKind.BOOLEAN -> return BOOLEAN_ARRAY
-                TypeKind.BYTE -> return BYTE_ARRAY
-                TypeKind.SHORT -> return SHORT_ARRAY
-                TypeKind.INT -> return INT_ARRAY
-                TypeKind.LONG -> return LONG_ARRAY
-                TypeKind.CHAR -> return CHAR_ARRAY
-                TypeKind.FLOAT -> return FLOAT_ARRAY
-                TypeKind.DOUBLE -> return DOUBLE_ARRAY
-                TypeKind.DECLARED -> if (toString() == "java.lang.String[]") {
-                    return STRING_ARRAY
-                }
+                TypeKind.BOOLEAN -> BOOLEAN_ARRAY
+                TypeKind.BYTE -> BYTE_ARRAY
+                TypeKind.SHORT -> SHORT_ARRAY
+                TypeKind.INT -> INT_ARRAY
+                TypeKind.LONG -> LONG_ARRAY
+                TypeKind.CHAR -> CHAR_ARRAY
+                TypeKind.FLOAT -> FLOAT_ARRAY
+                TypeKind.DOUBLE -> DOUBLE_ARRAY
+                else -> if (toString() == "java.lang.String[]") STRING_ARRAY else asTypeName()
             }
         }
+        else -> if (toString() == "java.lang.String") STRING else asTypeName()
     }
-    return asTypeName()
 }
+
 
 private val STRING: ClassName = ClassName("kotlin", "String")
 private val STRING_ARRAY = ClassName("kotlin", "Array").parameterizedBy(STRING)
