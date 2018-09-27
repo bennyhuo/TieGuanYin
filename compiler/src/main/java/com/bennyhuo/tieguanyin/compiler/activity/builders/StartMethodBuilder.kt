@@ -1,36 +1,17 @@
-package com.bennyhuo.tieguanyin.compiler.activity.methods
+package com.bennyhuo.tieguanyin.compiler.activity.builders
 
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
-import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.basic.types.*
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
-import java.util.*
 import javax.lang.model.element.Modifier
 
 /**
  * Created by benny on 1/31/18.
  */
 
-class StartMethod(private val activityClass: ActivityClass, private val name: String) {
-    private val requiredFields = ArrayList<Field>()
-    private var isStaticMethod = true
-
-    fun staticMethod(staticMethod: Boolean): StartMethod {
-        isStaticMethod = staticMethod
-        return this
-    }
-
-    fun addAllFields(requiredFields: List<Field>){
-        this.requiredFields += requiredFields
-    }
-
-    fun addField(requiredField: Field) {
-        this.requiredFields += requiredField
-    }
-
-    fun copy(name: String) = StartMethod(activityClass, name).also { it.requiredFields.addAll(this.requiredFields) }
+class StartMethodBuilder(private val activityClass: ActivityClass, private val name: String) {
 
     fun build(typeBuilder: TypeSpec.Builder) {
         val methodBuilder = MethodSpec.methodBuilder(name)
@@ -57,23 +38,8 @@ class StartMethod(private val activityClass: ActivityClass, private val name: St
             methodBuilderForView.addStatement("intent.addFlags(\$L)", flag)
         }
 
-        requiredFields.forEach { requiredField ->
-            val name = requiredField.name
-            methodBuilder.addParameter(requiredField.asTypeName(), name)
-                    .addStatement("intent.putExtra(\$S, \$L)", name, name)
-
-            methodBuilderForView.addParameter(requiredField.asTypeName(), name)
-                    .addStatement("intent.putExtra(\$S, \$L)", name, name)
-        }
-
-        if (isStaticMethod) {
-            methodBuilder.addModifiers(Modifier.STATIC)
-            methodBuilderForView.addModifiers(Modifier.STATIC)
-        } else {
-            //非静态则需要填充 optional 成员
-            methodBuilder.addStatement("fillIntent(intent)")
-            methodBuilderForView.addStatement("fillIntent(intent)")
-        }
+        methodBuilder.addStatement("fillIntent(intent)")
+        methodBuilderForView.addStatement("fillIntent(intent)")
 
         methodBuilder.addStatement("\$T options = null", BUNDLE.java)
         methodBuilderForView.addStatement("\$T options = null", BUNDLE.java)

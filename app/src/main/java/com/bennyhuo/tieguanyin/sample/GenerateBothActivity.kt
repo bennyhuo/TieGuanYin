@@ -54,7 +54,7 @@ class GenerateBothActivity : AppCompatActivity() {
 
         openGenerateBothActivity.text = "Finish Me!"
         openGenerateBothActivity.setOnClickListener {
-            finishWithTransition()
+            smartFinish()
         }
     }
 

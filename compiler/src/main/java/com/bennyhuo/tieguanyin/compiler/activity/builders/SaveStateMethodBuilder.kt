@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.compiler.activity.methods
+package com.bennyhuo.tieguanyin.compiler.activity.builders
 
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.basic.builder.BasicSaveStateMethodBuilder

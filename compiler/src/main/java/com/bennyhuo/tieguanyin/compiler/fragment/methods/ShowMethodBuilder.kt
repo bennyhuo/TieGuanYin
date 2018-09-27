@@ -31,7 +31,7 @@ class ShowMethodBuilder(private val fragmentClass: FragmentClass) {
 
         //有optional，先来个没有optional的方法
         if (optionalFields.isNotEmpty()) {
-            showMethodNoOptional.build(typeBuilder);
+            showMethodNoOptional.build(typeBuilder)
         }
 
         //小于3的情况，只需要每一个参数加一个重载就好

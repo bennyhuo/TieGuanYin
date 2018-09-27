@@ -1,12 +1,11 @@
-package com.bennyhuo.tieguanyin.compiler.result
+package com.bennyhuo.tieguanyin.compiler.activity
 
-import com.bennyhuo.tieguanyin.annotations.PendingTransition
 import com.bennyhuo.tieguanyin.annotations.ResultEntity
-import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.basic.entity.ResultParameter
 import com.bennyhuo.tieguanyin.compiler.basic.entity.asResultParameter
-import com.bennyhuo.tieguanyin.compiler.basic.types.*
-import com.bennyhuo.tieguanyin.compiler.utils.isDefault
+import com.bennyhuo.tieguanyin.compiler.basic.types.BUNDLE
+import com.bennyhuo.tieguanyin.compiler.basic.types.ON_ACTIVITY_RESULT_LISTENER
+import com.bennyhuo.tieguanyin.compiler.basic.types.RUNTIME_UTILS
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
@@ -29,7 +28,7 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
         set(value) {
             field = value
             value?.let {
-                resultParameters = it.resultParameters.plus(declaredResultParameters)
+                resultParameters += it.resultParameters
             }
         }
 
@@ -123,45 +122,5 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
                 .addSuperinterface(ON_ACTIVITY_RESULT_LISTENER.kotlin, CodeBlock.of(""))
                 .addFunction(onResultFunBuilderKt.build())
                 .build()
-    }
-
-    fun buildFinishWithResultKt(): FunSpec {
-        val funBuilder = FunSpec.builder("finishWithResult")
-                .receiver(activityClass.type.asType().asTypeName())
-
-        funBuilder.addStatement("val intent = %T()", INTENT.kotlin)
-        for (resultEntity in resultParameters) {
-
-            funBuilder.addParameter(resultEntity.name, resultEntity.kotlinTypeName)
-            funBuilder.addStatement("intent.putExtra(%S, %L)", resultEntity.name, resultEntity.name)
-        }
-        funBuilder.addStatement("setResult(1, intent)")
-        funBuilder.addStatement("%T.finishAfterTransition(this)", ACTIVITY_COMPAT.kotlin)
-        val pendingTransitionOnFinish = activityClass.pendingTransitionOnFinish
-        if (pendingTransitionOnFinish.exitAnim != PendingTransition.DEFAULT || pendingTransitionOnFinish.enterAnim != PendingTransition.DEFAULT) {
-            funBuilder.addStatement("overridePendingTransition(%L, %L)", pendingTransitionOnFinish.enterAnim, pendingTransitionOnFinish.exitAnim)
-        }
-        return funBuilder.build()
-    }
-
-    fun buildFinishWithResultMethod(): MethodSpec {
-        val finishWithResultMethodBuilder = MethodSpec.methodBuilder("finishWithResult")
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .addParameter(ClassName.get(activityClass.type), "activity")
-                .returns(TypeName.VOID)
-                .addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
-
-        for (resultEntity in resultParameters) {
-            finishWithResultMethodBuilder.addParameter(resultEntity.javaTypeName, resultEntity.name)
-            finishWithResultMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", resultEntity.name, resultEntity.name)
-        }
-        finishWithResultMethodBuilder.addStatement("activity.setResult(1, intent)").addStatement("\$T.finishAfterTransition(activity)", ACTIVITY_COMPAT.java)
-
-        val pendingTransitionOnFinish = activityClass.pendingTransitionOnFinish
-        if (!pendingTransitionOnFinish.isDefault()) {
-            finishWithResultMethodBuilder.addStatement("activity.overridePendingTransition(\$L, \$L)", pendingTransitionOnFinish.enterAnim, pendingTransitionOnFinish.exitAnim)
-        }
-
-        return finishWithResultMethodBuilder.build()
     }
 }

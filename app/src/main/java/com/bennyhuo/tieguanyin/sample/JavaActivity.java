@@ -37,7 +37,7 @@ public class JavaActivity extends AbsActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                JavaActivityBuilder.finishWithResult(JavaActivity.this, "I'm Java!!", "hello", 2);
+                JavaActivityBuilder.smartFinish(JavaActivity.this, "I'm Java!!", "hello", 2);
             }
         });
         findViewById(R.id.openKotlinActivity).setOnClickListener(new View.OnClickListener() {
@@ -55,11 +55,11 @@ public class JavaActivity extends AbsActivity {
         findViewById(R.id.openGenerateBothActivity).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new GenerateBothActivityBuilder()
+                GenerateBothActivityBuilder.builder(30, "bennyhuo")
                         .num(1234)
                         .details("HelloWorld")
                         .subTitle("dfdf")
-                        .startWithOptionals(JavaActivity.this, 30, "bennyhuo");
+                        .start(JavaActivity.this);
             }
         });
     }
