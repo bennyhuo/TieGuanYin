@@ -26,6 +26,5 @@ class FragmentClassBuilder(private val fragmentClass: FragmentClass): BasicClass
         const val METHOD_NAME_NO_OPTIONAL = METHOD_NAME + "WithoutOptional"
         const val METHOD_NAME_FOR_OPTIONAL = METHOD_NAME + "WithOptional"
         const val METHOD_NAME_FOR_OPTIONALS = METHOD_NAME + "WithOptionals"
-        const val POSIX = "Builder"
     }
 }

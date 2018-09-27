@@ -33,7 +33,7 @@ class ActivityResultClass(private val activityClass: ActivityClass, resultEntiti
             }
         }
 
-    val listenerClass = ClassName.get(activityClass.packageName, activityClass.simpleName + "Builder",
+    val listenerClass = ClassName.get(activityClass.packageName, activityClass.builderClassName,
             "On" + activityClass.simpleName + "ResultListener")
 
     val listenerClassKt by lazy {

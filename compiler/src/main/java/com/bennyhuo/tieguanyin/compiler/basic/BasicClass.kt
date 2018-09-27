@@ -9,13 +9,26 @@ import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity
 import com.sun.tools.javac.code.Type
 import java.util.*
 import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
+import kotlin.collections.ArrayList
 
 abstract class BasicClass(val type: TypeElement) {
 
-    val simpleName: String = type.simpleName()
+    val simpleName = type.simpleName()
+
+    val builderClassName: String by lazy {
+        val list = ArrayList<String>()
+        list += type.simpleName()
+        var element = type.enclosingElement
+        while (element != null && element.kind != ElementKind.PACKAGE){
+            list += element.simpleName()
+            element = element.enclosingElement
+        }
+        list.reversed().joinToString("_") + POSIX
+    }
     val packageName: String = type.packageName()
 
     private val declaredFields = TreeSet<Field>()
@@ -66,5 +79,6 @@ abstract class BasicClass(val type: TypeElement) {
     companion object {
         @Suppress("UNCHECKED_CAST")
         val META_DATA = Class.forName("kotlin.Metadata") as Class<Annotation>
+        const val POSIX = "Builder"
     }
 }

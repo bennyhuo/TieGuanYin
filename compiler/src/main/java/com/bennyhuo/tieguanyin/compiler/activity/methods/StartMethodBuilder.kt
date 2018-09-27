@@ -42,11 +42,10 @@ class StartMethodBuilder(private val activityClass: ActivityClass) {
             }
         } else {
             //大于等于3的情况，使用
-            val builderName = activityClass.simpleName + ActivityClassBuilder.POSIX
             val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
                     .addModifiers(PRIVATE)
                     .addParameter(INTENT.java, "intent")
-            val optionalsClassName = ClassName.get(activityClass.packageName, builderName)
+            val optionalsClassName = ClassName.get(activityClass.packageName, activityClass.builderClassName)
             optionalFields.forEach { requiredField ->
                 typeBuilder.addField(FieldSpec.builder(requiredField.asTypeName(), requiredField.name, PRIVATE).build())
                 typeBuilder.addMethod(MethodSpec.methodBuilder(requiredField.name)

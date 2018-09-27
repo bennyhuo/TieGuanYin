@@ -26,7 +26,6 @@ import java.util.Iterator;
  */
 
 public class ActivityBuilder {
-    public static final String BUILDER_NAME_POSIX = "Builder";
     public final static ActivityBuilder INSTANCE = new ActivityBuilder();
     private Application application;
 
@@ -75,14 +74,12 @@ public class ActivityBuilder {
     public void init(Context context){
         if(this.application != null) return;
         this.application = (Application) context.getApplicationContext();
-        //Logger.isDebug = (0 != (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-
         this.application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
     }
 
     private void performInject(Activity activity, Bundle savedInstanceState){
         try {
-            Class.forName(activity.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("inject", Activity.class, Bundle.class).invoke(null, activity, savedInstanceState);
+            BuilderClassFinder.findBuilderClass(activity).getDeclaredMethod("inject", Activity.class, Bundle.class).invoke(null, activity, savedInstanceState);
         } catch (Exception e) {
             Logger.warn(e);
         }
@@ -90,7 +87,7 @@ public class ActivityBuilder {
 
     private void performSaveState(Activity activity, Bundle outState){
         try {
-            Class.forName(activity.getClass().getName() + BUILDER_NAME_POSIX).getDeclaredMethod("saveState", Activity.class, Bundle.class).invoke(null, activity, outState);
+            BuilderClassFinder.findBuilderClass(activity).getDeclaredMethod("saveState", Activity.class, Bundle.class).invoke(null, activity, outState);
         } catch (Exception e) {
             Logger.warn(e);
         }

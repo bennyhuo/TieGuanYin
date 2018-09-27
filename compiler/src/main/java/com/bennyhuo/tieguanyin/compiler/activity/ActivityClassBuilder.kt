@@ -32,7 +32,6 @@ class ActivityClassBuilder(private val activityClass: ActivityClass): BasicClass
         const val METHOD_NAME_NO_OPTIONAL = METHOD_NAME + "WithoutOptional"
         const val METHOD_NAME_FOR_OPTIONAL = METHOD_NAME + "WithOptional"
         const val METHOD_NAME_FOR_OPTIONALS = METHOD_NAME + "WithOptionals"
-        const val POSIX = "Builder"
         const val CONSTS_RESULT_PREFIX = "RESULT_"
     }
 }

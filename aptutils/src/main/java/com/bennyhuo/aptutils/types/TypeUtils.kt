@@ -4,6 +4,7 @@ import com.bennyhuo.aptutils.AptContext
 import com.squareup.javapoet.TypeName
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.ArrayType
@@ -29,13 +30,16 @@ object TypeUtils {
     internal fun getTypeFromClassName(className: String) = AptContext.elements.getTypeElement(className).asType()
 }
 
-fun TypeElement.packageName() = if (this.enclosingElement.kind == ElementKind.PACKAGE) {
-    enclosingElement.asType().toString()
-} else {
-    throw IllegalArgumentException(enclosingElement.toString())
+fun TypeElement.packageName(): String {
+    var element = this.enclosingElement
+    while (element != null && element.kind != ElementKind.PACKAGE) {
+        element = element.enclosingElement
+    }
+    return element?.asType()?.toString() ?: throw IllegalArgumentException("$this does not have an enclosing element of package.")
 }
 
-fun TypeElement.simpleName(): String = simpleName.toString()
+fun Element.simpleName(): String = simpleName.toString()
+fun TypeElement.canonicalName(): String = qualifiedName.toString()
 
 fun TypeMirror.simpleName() = TypeUtils.doubleErasure(this).let { name -> name.substring(name.lastIndexOf(".") + 1) }
 
@@ -87,7 +91,7 @@ fun Class<*>.asKotlinTypeName() = this.asTypeMirror().asKotlinTypeName()
 fun Class<*>.asElement() = this.asTypeMirror().asElement()
 
 fun KClass<*>.asTypeMirror(): TypeMirror {
-    return AptContext.elements.getTypeElement(java.canonicalName).asType()
+    return AptContext.elements.getTypeElement(qualifiedName/* == java.canonicalName*/).asType()
 }
 
 fun KClass<*>.asJavaTypeName() = this.asTypeMirror().asJavaTypeName()

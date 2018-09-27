@@ -43,11 +43,10 @@ class ShowMethodBuilder(private val fragmentClass: FragmentClass) {
             }
         } else {
             //大于等于3的情况，使用
-            val builderName = fragmentClass.simpleName + FragmentClassBuilder.POSIX
             val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
                     .addModifiers(PRIVATE)
                     .addParameter(INTENT.java, "intent")
-            val optionalsClassName = ClassName.get(fragmentClass.packageName, builderName)
+            val optionalsClassName = ClassName.get(fragmentClass.packageName, fragmentClass.builderClassName)
             optionalFields.forEach { requiredField ->
                 typeBuilder.addField(FieldSpec.builder(requiredField.asTypeName(), requiredField.name, PRIVATE).build())
                 typeBuilder.addMethod(MethodSpec.methodBuilder(requiredField.name)

@@ -35,6 +35,14 @@
         android:text="openFragmentContainerActivity"
         android:textAllCaps="false"/>
 
+    <Button
+        android:id="@+id/openInnerActivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:transitionName="button1"
+        android:text="openInnerActivity"
+        android:textAllCaps="false"/>
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"

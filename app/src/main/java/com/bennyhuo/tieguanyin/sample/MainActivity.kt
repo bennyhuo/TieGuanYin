@@ -7,6 +7,7 @@ import android.transition.ChangeBounds
 import android.transition.ChangeTransform
 import android.transition.TransitionSet
 import android.util.Log
+import com.bennyhuo.tieguanyin.sample.inner.startInnerClass
 import com.bennyhuo.tieguanyin.sample.transitions.startDetailsActivity
 import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
@@ -20,20 +21,13 @@ class MainActivity : AppCompatActivity() {
         setTitle(this.javaClass.simpleName)
 
         openJavaActivity.setOnClickListener {
-//            val intent = Intent(this, DetailsActivity::class.java)
-//            //openJavaActivity.transitionName = "hello"
-//
-//
-//            val sharedElements = ActivityOptions.makeSceneTransitionAnimation(this, openJavaActivity, "hello").toBundle()
-//            startActivity(intent, sharedElements)
             startDetailsActivity()
         }
 
         openKotlinActivity.setOnClickListener {
-            Log.d("Main", "leave: "+this@MainActivity.toString())
-            startKotlinActivity(1234){
-                java, kotlin ->
-                toast("Result From JavaActivity: java=${java.contentToString()}, kotlin=${kotlin.contentToString()}" )
+            Log.d("Main", "leave: " + this@MainActivity.toString())
+            startKotlinActivity(1234) { java, kotlin ->
+                toast("Result From JavaActivity: java=${java.contentToString()}, kotlin=${kotlin.contentToString()}")
             }
         }
 
@@ -43,6 +37,10 @@ class MainActivity : AppCompatActivity() {
 
         openFragmentContainerActivity.setOnClickListener {
             startFragmentContainerActivity()
+        }
+
+        openInnerActivity.setOnClickListener {
+            startInnerClass(2, true)
         }
     }
 

@@ -23,6 +23,7 @@
         <activity android:name=".KotlinActivity"/>
         <activity android:name=".FragmentContainerActivity"/>
         <activity android:name=".transitions.DetailsActivity"/>
+        <activity android:name=".inner.OutterClass$InnerClass"/>
     </application>
 
 </manifest>
