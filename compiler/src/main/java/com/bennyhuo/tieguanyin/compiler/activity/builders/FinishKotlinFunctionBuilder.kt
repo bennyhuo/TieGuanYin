@@ -14,14 +14,14 @@ class FinishKotlinFunctionBuilder(private val activityClass: ActivityClass) {
         val funBuilder = FunSpec.builder("smartFinish")
                 .receiver(activityClass.type.asType().asKotlinTypeName())
 
-        activityClass.activityResultClass?.resultParameters?.also {
+        activityClass.resultParameters.also {
             if (it.isNotEmpty()) {
                 funBuilder.addStatement("val intent = %T()", INTENT.kotlin)
                         .addStatement("setResult(1, intent)")
             }
-        }?.forEach { resultEntity ->
-            funBuilder.addParameter(resultEntity.name, resultEntity.kotlinTypeName)
-                    .addStatement("intent.putExtra(%S, %L)", resultEntity.name, resultEntity.name)
+        }.forEach { resultParameter ->
+            funBuilder.addParameter(resultParameter.name, resultParameter.kotlinTypeName)
+                    .addStatement("intent.putExtra(%S, %L)", resultParameter.name, resultParameter.name)
         }
 
         funBuilder.addStatement("%T.finishAfterTransition(this)", ACTIVITY_COMPAT.kotlin)

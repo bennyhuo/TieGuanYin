@@ -11,8 +11,6 @@ class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClas
         ConstantBuilder(activityClass).build(typeBuilder)
         InjectMethodBuilder(activityClass).build(typeBuilder)
         SaveStateMethodBuilder(activityClass).build(typeBuilder)
-
-        activityClass.activityResultClass?.buildOnActivityResultListenerInterface()?.let(typeBuilder::addType)
     }
 
     override fun buildKotlinBuilders(fileBuilder: FileSpec.Builder) {

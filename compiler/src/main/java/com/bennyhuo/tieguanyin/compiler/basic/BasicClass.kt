@@ -53,10 +53,10 @@ abstract class BasicClass(val type: TypeElement) {
         generateBuilder.sharedElementsWithName.mapTo(declaredSharedElements) { SharedElementEntity(it) }
     }
 
-    var fields: Set<Field> = declaredFields
+    var fields: TreeSet<Field> = TreeSet()
         private set
 
-    var sharedElements: List<SharedElementEntity> = declaredSharedElements
+    var sharedElements: List<SharedElementEntity> = ArrayList(declaredSharedElements)
         private set
 
     fun <T: BasicClass> setUpSuperClass(classes: Map<Element, T>): T?{
@@ -65,8 +65,8 @@ abstract class BasicClass(val type: TypeElement) {
         val superClassElement = (typeMirror as DeclaredType).asElement() as TypeElement
         return classes[superClassElement].also { superClass ->
             superClass?.also {
-                fields += it.declaredFields
-                sharedElements += it.declaredSharedElements
+                fields.addAll(it.fields)
+                sharedElements += it.sharedElements
             }
             this.superClass = superClass
         }
@@ -74,6 +74,7 @@ abstract class BasicClass(val type: TypeElement) {
 
     fun addSymbol(field: Field) {
         declaredFields.add(field)
+        fields.add(field)
     }
 
     companion object {

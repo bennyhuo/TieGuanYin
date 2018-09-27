@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.bennyhuo.tieguanyin.annotations.*
 import com.bennyhuo.tieguanyin.annotations.GenerateMode.Both
+import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
@@ -30,10 +31,10 @@ class KotlinActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setTitle(this.javaClass.simpleName)
         openJavaActivity.setOnClickListener {
-//            JavaActivityBuilder.open(this@KotlinActivity, 1234, true){
-//                java, kotlin ->
-//                toast("Result From JavaActivity: java=$java, kotlin=$kotlin")
-//            }
+            JavaActivityBuilder.builder(1234)
+                    .start(this@KotlinActivity) { javaMethod, java, kotlin ->
+                        toast("Result From JavaActivity: javaMethod=$javaMethod, java=$java, kotlin=$kotlin")
+                    }
         }
 
         openKotlinActivity.text = "Finish With java='I'm Kotlin!' & kotlin=12"

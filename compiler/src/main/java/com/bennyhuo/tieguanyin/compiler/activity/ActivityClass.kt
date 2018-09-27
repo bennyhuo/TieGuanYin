@@ -2,7 +2,10 @@ package com.bennyhuo.tieguanyin.compiler.activity
 
 import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.PendingTransition
+import com.bennyhuo.tieguanyin.annotations.ResultEntity
 import com.bennyhuo.tieguanyin.compiler.basic.BasicClass
+import com.bennyhuo.tieguanyin.compiler.basic.entity.ResultParameter
+import com.bennyhuo.tieguanyin.compiler.basic.entity.asResultParameter
 import com.bennyhuo.tieguanyin.compiler.utils.isDefault
 import java.util.*
 import javax.lang.model.element.Element
@@ -18,9 +21,9 @@ class ActivityClass(type: TypeElement): BasicClass(type) {
     private val declaredPendingTransitionOnFinish: PendingTransition
     private val declaredCategories = ArrayList<String>()
     private val declaredFlags = ArrayList<Int>()
+    private val declaredResultParameters = TreeSet<ResultParameter>()
 
     private var superActivityClass: ActivityClass? = null
-    var activityResultClass: ActivityResultClass? = null
 
     val builder = ActivityClassBuilder(this)
 
@@ -33,7 +36,7 @@ class ActivityClass(type: TypeElement): BasicClass(type) {
         declaredPendingTransitionOnFinish = generateBuilder.pendingTransitionOnFinish
 
         if (generateBuilder.resultTypes.isNotEmpty()) {
-            activityResultClass = ActivityResultClass(this, generateBuilder.resultTypes)
+            generateBuilder.resultTypes.mapTo(declaredResultParameters, ResultEntity::asResultParameter)
         }
     }
 
@@ -43,18 +46,25 @@ class ActivityClass(type: TypeElement): BasicClass(type) {
     var pendingTransitionOnFinish = declaredPendingTransitionOnFinish
         private set
 
-    var categories: List<String> = declaredCategories
+    var categories: List<String> = ArrayList(declaredCategories)
         private set
 
-    var flags: List<Int> = declaredFlags
+    var flags: List<Int> = ArrayList(declaredFlags)
         private set
+
+    var resultParameters: TreeSet<ResultParameter> = TreeSet(declaredResultParameters)
+        private set
+
+    val hasResult: Boolean
+        get() = resultParameters.isNotEmpty()
 
     fun setUpSuperClass(activityClasses: HashMap<Element, ActivityClass>) {
         this.superActivityClass = super.setUpSuperClass(activityClasses)
-        this.activityResultClass?.superActivityResultClass = this.superActivityClass?.activityResultClass
         this.superActivityClass?.let { superActivityClass ->
             categories += superActivityClass.categories
             flags += superActivityClass.flags
+            resultParameters.addAll(superActivityClass.resultParameters)
+
             if (pendingTransition.isDefault()) pendingTransition = superActivityClass.pendingTransition
             if (pendingTransitionOnFinish.isDefault()) pendingTransitionOnFinish = superActivityClass.pendingTransitionOnFinish
         }

@@ -13,7 +13,7 @@ class ConstantBuilder(private val activityClass: ActivityClass)
 
     override fun build(typeBuilder: TypeSpec.Builder) {
         super.build(typeBuilder)
-        activityClass.activityResultClass?.resultParameters?.forEach { resultEntity ->
+        activityClass.resultParameters.forEach { resultEntity ->
             typeBuilder.addField(FieldSpec.builder(String::class.java,
                     ActivityClassBuilder.CONSTS_RESULT_PREFIX + resultEntity.name.camelToUnderline(),
                     Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)

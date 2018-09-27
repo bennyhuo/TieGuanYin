@@ -19,15 +19,15 @@ class FinishMethodBuilder(private val activityClass: ActivityClass) {
                 .addParameter(activityClass.type.asType().asJavaTypeName(), "activity")
 
         //handle result parameters.
-        activityClass.activityResultClass?.resultParameters?.also{
+        activityClass.resultParameters.also{
             if(it.isNotEmpty()){
                 finishMethodBuilder.addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
                         .addStatement("activity.setResult(1, intent)")
             }
-        }?.forEach {
-            resultEntity ->
-            finishMethodBuilder.addParameter(resultEntity.javaTypeName, resultEntity.name)
-            finishMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", resultEntity.name, resultEntity.name)
+        }.forEach {
+            resultParameter ->
+            finishMethodBuilder.addParameter(resultParameter.javaTypeName, resultParameter.name)
+            finishMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", resultParameter.name, resultParameter.name)
         }
 
         finishMethodBuilder.addStatement("\$T.finishAfterTransition(activity)", ACTIVITY_COMPAT.java)

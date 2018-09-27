@@ -1,6 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.activity.builders
 
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
+import com.bennyhuo.tieguanyin.compiler.activity.entity.JavaOnResultListener
 import com.bennyhuo.tieguanyin.compiler.basic.types.*
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
@@ -77,21 +78,19 @@ class StartMethodBuilder(private val activityClass: ActivityClass, private val n
         }
 
         val pendingTransition = activityClass.pendingTransition
-        val activityResultClass = activityClass.activityResultClass
-        if (activityResultClass != null) {
-            methodBuilder.addStatement("\$T.INSTANCE.startActivityForResult(context, intent, options, \$L, \$L, \$L)", ACTIVITY_BUILDER.java, pendingTransition.enterAnim, pendingTransition.exitAnim, activityResultClass.createOnResultListenerObject())
-                    .addParameter(activityResultClass.listenerClass, activityResultClass.listenerName, Modifier.FINAL)
+        if (activityClass.hasResult) {
+            val javaOnResultListener = JavaOnResultListener(activityClass)
+            typeBuilder.addType(javaOnResultListener.buildInterface())
+
+            methodBuilder.addStatement("\$T.INSTANCE.startActivityForResult(context, intent, options, \$L, \$L, \$L)", ACTIVITY_BUILDER.java, pendingTransition.enterAnim, pendingTransition.exitAnim, javaOnResultListener.buildObject())
+                    .addParameter(javaOnResultListener.typeName, javaOnResultListener.name, Modifier.FINAL)
+
+            methodBuilderForView.addStatement("\$T.INSTANCE.startActivityForResult(view.getContext(), intent, options, \$L, \$L, \$L)", ACTIVITY_BUILDER.java, pendingTransition.enterAnim, pendingTransition.exitAnim, javaOnResultListener.buildObject())
+                    .addParameter(javaOnResultListener.typeName, javaOnResultListener.name, Modifier.FINAL)
         } else {
             methodBuilder.addStatement("\$T.INSTANCE.startActivity(context, intent, options, \$L, \$L)", ACTIVITY_BUILDER.java, pendingTransition.enterAnim, pendingTransition.exitAnim)
-        }
-
-        if (activityResultClass != null) {
-            methodBuilderForView.addStatement("\$T.INSTANCE.startActivityForResult(view.getContext(), intent, options, \$L, \$L, \$L)", ACTIVITY_BUILDER.java, pendingTransition.enterAnim, pendingTransition.exitAnim, activityResultClass.createOnResultListenerObject())
-                    .addParameter(activityResultClass.listenerClass, activityResultClass.listenerName, Modifier.FINAL)
-        } else {
             methodBuilderForView.addStatement("\$T.INSTANCE.startActivity(view.getContext(), intent, options, \$L, \$L)", ACTIVITY_BUILDER.java, pendingTransition.enterAnim, pendingTransition.exitAnim)
         }
-
 
         typeBuilder.addMethod(methodBuilder.build())
         typeBuilder.addMethod(methodBuilderForView.build())
