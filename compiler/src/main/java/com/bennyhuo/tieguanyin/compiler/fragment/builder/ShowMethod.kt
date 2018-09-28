@@ -2,7 +2,7 @@ package com.bennyhuo.tieguanyin.compiler.fragment.builder
 
 import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.basic.types.*
-import com.bennyhuo.tieguanyin.compiler.shared.SharedElementEntity
+import com.bennyhuo.tieguanyin.compiler.basic.entity.SharedElementEntity
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
