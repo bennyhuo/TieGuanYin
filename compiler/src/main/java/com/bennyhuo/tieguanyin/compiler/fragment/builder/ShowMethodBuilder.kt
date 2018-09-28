@@ -1,76 +1,47 @@
 package com.bennyhuo.tieguanyin.compiler.fragment.builder
 
-import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
-import com.bennyhuo.tieguanyin.compiler.basic.types.INTENT
+import com.bennyhuo.tieguanyin.compiler.basic.types.*
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
-import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder
-import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClassBuilder.Companion.METHOD_NAME_FOR_OPTIONALS
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
-import javax.lang.model.element.Modifier.PRIVATE
-import javax.lang.model.element.Modifier.PUBLIC
+import javax.lang.model.element.Modifier
 
-class ShowMethodBuilder(private val fragmentClass: FragmentClass) {
+/**
+ * Created by benny on 1/31/18.
+ */
+
+class ShowMethodBuilder(private val fragmentClass: FragmentClass, private val name: String) {
 
     fun build(typeBuilder: TypeSpec.Builder) {
-        val showMethod = ShowMethod(fragmentClass.type, fragmentClass.sharedElements, FragmentClassBuilder.METHOD_NAME)
+        val methodBuilder = MethodSpec.methodBuilder(name)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.VOID)
+                .addParameter(ACTIVITY.java, "activity")
+                .addParameter(Int::class.javaPrimitiveType, "containerId")
+                .beginControlFlow("if(activity instanceof \$T)", SUPPORT_ACTIVITY.java)
+                .addStatement("\$T.INSTANCE.init(activity)", ACTIVITY_BUILDER.java)
 
-        val groupedFields = fragmentClass.fields.groupBy { it is OptionalField }
-        val requiredFields = groupedFields[false] ?: emptyList()
-        val optionalFields = groupedFields[true] ?: emptyList()
+        methodBuilder.addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
 
-        showMethod.addAllFields(requiredFields)
+         methodBuilder.addStatement("fillIntent(intent)")
 
-        val showMethodNoOptional = showMethod.copy(FragmentClassBuilder.METHOD_NAME_NO_OPTIONAL)
-
-        showMethod.addAllFields(optionalFields)
-
-        showMethod.build(typeBuilder)
-
-        //有optional，先来个没有optional的方法
-        if (optionalFields.isNotEmpty()) {
-            showMethodNoOptional.build(typeBuilder)
-        }
-
-        //小于3的情况，只需要每一个参数加一个重载就好
-        if (optionalFields.size < 3) {
-            optionalFields.forEach { requiredField ->
-                showMethodNoOptional.copy(FragmentClassBuilder.METHOD_NAME_FOR_OPTIONAL + requiredField.name.capitalize())
-                        .also { it.addField(requiredField) }
-                        .build(typeBuilder)
-            }
+        if (fragmentClass.sharedElements.isEmpty()) {
+            methodBuilder.addStatement("\$T.showFragment((\$T) activity, containerId, intent.getExtras(), \$T.class, null)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, fragmentClass.type)
         } else {
-            //大于等于3的情况，使用
-            val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
-                    .addModifiers(PRIVATE)
-                    .addParameter(INTENT.java, "intent")
-            val optionalsClassName = ClassName.get(fragmentClass.packageName, fragmentClass.builderClassName)
-            optionalFields.forEach { requiredField ->
-                typeBuilder.addField(FieldSpec.builder(requiredField.asTypeName(), requiredField.name, PRIVATE).build())
-                typeBuilder.addMethod(MethodSpec.methodBuilder(requiredField.name)
-                        .addModifiers(PUBLIC)
-                        .addParameter(requiredField.asTypeName(), requiredField.name)
-                        .addStatement("this.${requiredField.name} = ${requiredField.name}")
-                        .addStatement("return this")
-                        .returns(optionalsClassName)
-                        .build())
-                if (requiredField.isPrimitive) {
-                    fillIntentMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", requiredField.name, requiredField.name)
+            methodBuilder.addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[SUPPORT_PAIR[STRING, STRING]].java, ARRAY_LIST.java)
+                    .addStatement("\$T container = activity.findViewById(containerId)", VIEW.java)
+            for (sharedElement in fragmentClass.sharedElements) {
+                if (sharedElement.sourceId == 0) {
+                    methodBuilder.addStatement("sharedElements.add(new Pair<>(\$S, \$S))", sharedElement.sourceName, sharedElement.targetName)
                 } else {
-                    fillIntentMethodBuilder
-                            .beginControlFlow("if(\$L != null)", requiredField.name)
-                            .addStatement("intent.putExtra(\$S, \$L)", requiredField.name, requiredField.name)
-                            .endControlFlow()
+                    methodBuilder.addStatement("sharedElements.add(new Pair<>(\$T.getTransitionName(container.findViewById(\$L)), \$S))", VIEW_COMPAT.java, sharedElement.sourceId, sharedElement.targetName)
                 }
             }
-            typeBuilder.addMethod(fillIntentMethodBuilder.build())
-
-            showMethodNoOptional.copy(METHOD_NAME_FOR_OPTIONALS)
-                    .staticMethod(false)
-                    .build(typeBuilder)
+            methodBuilder.addStatement("\$T.showFragment((\$T) activity, containerId, intent.getExtras(), \$T.class, sharedElements)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, fragmentClass.type)
         }
-    }
+        methodBuilder.endControlFlow()
 
+        typeBuilder.addMethod(methodBuilder.build())
+    }
 }
