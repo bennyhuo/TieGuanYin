@@ -36,6 +36,7 @@ public class ListenerEnvironment {
 
             while (!cls.isAnonymousClass()){
                 Log.e("listenerEnv", "find probable class: " + cls.toString());
+                // 注意这个其实是 $this 引用，指向外部类实例
                 realListenerField = cls.getDeclaredFields()[0];
                 realListenerField.setAccessible(true);
                 obj = realListenerField.get(obj);

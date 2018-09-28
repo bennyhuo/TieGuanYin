@@ -7,8 +7,8 @@ import android.transition.ChangeBounds
 import android.transition.ChangeTransform
 import android.transition.TransitionSet
 import android.util.Log
+import android.view.ViewGroup
 import com.bennyhuo.tieguanyin.sample.inner.startInnerClass
-import com.bennyhuo.tieguanyin.sample.transitions.startDetailsActivity
 import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -21,7 +21,13 @@ class MainActivity : AppCompatActivity() {
         setTitle(this.javaClass.simpleName)
 
         openJavaActivity.setOnClickListener {
-            startDetailsActivity()
+            //startDetailsActivity()
+            Log.d("Main", it.rootView.toString())
+            val decorView = this.window.decorView as ViewGroup
+//            Log.d("Main", decorView.toString())
+//            for (i in 0 until decorView.childCount){
+//                Log.d("Main", decorView.getChildAt(i).context.toString())
+//            }
         }
 
         openKotlinActivity.setOnClickListener {

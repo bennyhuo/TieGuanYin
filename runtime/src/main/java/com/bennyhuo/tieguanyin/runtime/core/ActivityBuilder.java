@@ -5,6 +5,7 @@ import android.app.Application;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -12,12 +13,14 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.bennyhuo.tieguanyin.annotations.PendingTransition;
 import com.bennyhuo.tieguanyin.runtime.result.ListenerEnvironment;
 import com.bennyhuo.tieguanyin.runtime.result.ResultFragment;
 import com.bennyhuo.tieguanyin.runtime.utils.Logger;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -28,12 +31,14 @@ import java.util.Iterator;
 public class ActivityBuilder {
     public final static ActivityBuilder INSTANCE = new ActivityBuilder();
     private Application application;
+    private WeakReference<Activity> currentActivityRef;
 
     private ArrayList<ListenerEnvironment> listenerEnvironments = new ArrayList<>();
 
     private Application.ActivityLifecycleCallbacks activityLifecycleCallbacks = new Application.ActivityLifecycleCallbacks() {
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            currentActivityRef = new WeakReference<>(activity);
             performInject(activity, savedInstanceState);
             FragmentBuilder.INSTANCE.onActivityCreated(activity);
         }
@@ -178,5 +183,39 @@ public class ActivityBuilder {
         } else {
             return null;
         }
+    }
+
+    public Activity findProperActivity(View view){
+        if(currentActivityRef != null){
+            Activity currentActivity = currentActivityRef.get();
+            //大多数情况
+            if(currentActivity != null && view.getRootView() == currentActivity.getWindow().getDecorView()){
+                return currentActivity;
+            }
+        }
+        Activity candidate = getActivity(view);
+        //View 不是用 Activity 的实例创建
+        if(candidate == null){
+            View decorView = view.getRootView();
+            if(decorView != null && decorView instanceof ViewGroup){
+                ViewGroup viewGroup = (ViewGroup) decorView;
+                for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                    candidate = getActivity(viewGroup.getChildAt(i));
+                    if(candidate != null) break;
+                }
+            }
+        }
+        return candidate;
+    }
+
+    private static Activity getActivity(View view) {
+        Context context = view.getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity)context;
+            }
+            context = ((ContextWrapper)context).getBaseContext();
+        }
+        return null;
     }
 }
