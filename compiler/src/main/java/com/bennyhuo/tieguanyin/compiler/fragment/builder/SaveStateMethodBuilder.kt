@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.compiler.fragment.methods
+package com.bennyhuo.tieguanyin.compiler.fragment.builder
 
 import com.bennyhuo.tieguanyin.compiler.basic.builder.BasicSaveStateMethodBuilder
 import com.bennyhuo.tieguanyin.compiler.basic.types.SUPPORT_FRAGMENT

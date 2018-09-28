@@ -1,6 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.fragment
 
 import com.bennyhuo.tieguanyin.compiler.basic.BasicClassBuilder
+import com.bennyhuo.tieguanyin.compiler.fragment.builder.*
 import com.bennyhuo.tieguanyin.compiler.fragment.methods.*
 import com.squareup.javapoet.TypeSpec.Builder
 import com.squareup.kotlinpoet.FileSpec

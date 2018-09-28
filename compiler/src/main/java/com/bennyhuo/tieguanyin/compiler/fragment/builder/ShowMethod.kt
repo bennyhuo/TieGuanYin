@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.compiler.fragment.methods
+package com.bennyhuo.tieguanyin.compiler.fragment.builder
 
 import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.basic.types.*
