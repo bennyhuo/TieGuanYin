@@ -1,7 +1,8 @@
 package com.bennyhuo.tieguanyin.compiler.activity
 
-import com.bennyhuo.tieguanyin.compiler.activity.builders.*
+import com.bennyhuo.tieguanyin.compiler.activity.builder.*
 import com.bennyhuo.tieguanyin.compiler.basic.BasicClassBuilder
+import com.bennyhuo.tieguanyin.compiler.basic.builder.FieldBuilder
 import com.squareup.javapoet.TypeSpec.Builder
 import com.squareup.kotlinpoet.FileSpec
 
@@ -9,6 +10,7 @@ class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClas
 
     override fun buildCommon(typeBuilder: Builder) {
         ConstantBuilder(activityClass).build(typeBuilder)
+        FieldBuilder(activityClass).build(typeBuilder)
         InjectMethodBuilder(activityClass).build(typeBuilder)
         SaveStateMethodBuilder(activityClass).build(typeBuilder)
     }
@@ -20,7 +22,6 @@ class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClas
 
     override fun buildJavaBuilders(typeBuilder: Builder) {
         StartMethodBuilder(activityClass, METHOD_NAME).build(typeBuilder)
-        FieldBuilder(activityClass).build(typeBuilder)
         FinishMethodBuilder(activityClass).build(typeBuilder)
     }
 

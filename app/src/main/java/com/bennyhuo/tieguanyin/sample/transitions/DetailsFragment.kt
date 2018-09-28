@@ -10,6 +10,7 @@ import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.annotations.SharedElementWithName
 import com.bennyhuo.tieguanyin.sample.R
+import com.bennyhuo.tieguanyin.sample.fragments.JavaFragmentBuilder
 import kotlinx.android.synthetic.main.fragment_transitions.*
 
 /**
@@ -32,5 +33,8 @@ class DetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         ViewCompat.setTransitionName(textView, "fragment")
         textView.text = text
+        textView.setOnClickListener {
+            JavaFragmentBuilder.builder("Hello").num(1).num2(2.0).show(this.activity, R.id.fragmentContainer)
+        }
     }
 }

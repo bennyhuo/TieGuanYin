@@ -1,17 +1,17 @@
-package com.bennyhuo.tieguanyin.compiler.activity.builders
+package com.bennyhuo.tieguanyin.compiler.basic.builder
 
-import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
+import com.bennyhuo.tieguanyin.compiler.basic.BasicClass
 import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
 import com.bennyhuo.tieguanyin.compiler.basic.types.INTENT
 import com.squareup.javapoet.*
 import javax.lang.model.element.Modifier.*
 
-class FieldBuilder(private val activityClass: ActivityClass) {
+class FieldBuilder(private val basicClass: BasicClass) {
 
     fun build(typeBuilder: TypeSpec.Builder) {
-        val builderClassTypeName = ClassName.get(activityClass.packageName, activityClass.builderClassName)
+        val builderClassTypeName = ClassName.get(basicClass.packageName, basicClass.builderClassName)
 
-        val groupedFields = activityClass.fields.groupBy { it is OptionalField }
+        val groupedFields = basicClass.fields.groupBy { it is OptionalField }
         val requiredFields = groupedFields[false] ?: emptyList()
         val optionalFields = groupedFields[true] ?: emptyList()
 

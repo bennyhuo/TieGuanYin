@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.compiler.activity.builders
+package com.bennyhuo.tieguanyin.compiler.activity.builder
 
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.basic.builder.BasicInjectMethodBuilder

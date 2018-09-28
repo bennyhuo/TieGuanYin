@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.compiler.shared
+package com.bennyhuo.tieguanyin.compiler.basic.entity
 
 import com.bennyhuo.tieguanyin.annotations.SharedElement
 import com.bennyhuo.tieguanyin.annotations.SharedElementByNames

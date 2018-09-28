@@ -1,4 +1,4 @@
-package com.bennyhuo.tieguanyin.compiler.activity.builders
+package com.bennyhuo.tieguanyin.compiler.activity.builder
 
 import com.bennyhuo.aptutils.types.asJavaTypeName
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
