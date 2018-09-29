@@ -15,15 +15,15 @@ import javax.lang.model.element.Modifier
 class StartMethodBuilder(private val activityClass: ActivityClass, private val name: String) {
 
     fun build(typeBuilder: TypeSpec.Builder) {
-        val methodBuilder = MethodSpec.methodBuilder(name)
+        val methodBuilderOfContext = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID)
                 .addParameter(CONTEXT.java, "context")
                 .addStatement("\$T.INSTANCE.init(context)", ACTIVITY_BUILDER.java)
 
-        methodBuilder.addStatement("\$T intent = new \$T(context, \$T.class)", INTENT.java, INTENT.java, activityClass.type)
+        methodBuilderOfContext.addStatement("\$T intent = new \$T(context, \$T.class)", INTENT.java, INTENT.java, activityClass.type)
 
-        val methodBuilderForView = MethodSpec.methodBuilder(name)
+        val methodBuilderOfView = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID)
                 .addParameter(VIEW.java, "view")
@@ -31,16 +31,19 @@ class StartMethodBuilder(private val activityClass: ActivityClass, private val n
                 .beginControlFlow("if(activity != null)")
 
         activityClass.categories.forEach { category ->
-            methodBuilder.addStatement("intent.addCategory(\$S)", category)
+            methodBuilderOfContext.addStatement("intent.addCategory(\$S)", category)
         }
         activityClass.flags.forEach { flag ->
-            methodBuilder.addStatement("intent.addFlags(\$L)", flag)
+            methodBuilderOfContext.addStatement("intent.addFlags(\$L)", flag)
         }
-        methodBuilder.addStatement("fillIntent(intent)")
-        methodBuilder.addStatement("\$T options = null", BUNDLE.java)
+        methodBuilderOfContext.addStatement("fillIntent(intent)")
+
         val sharedElements = activityClass.sharedElements
+        val optionsName: String
         if (sharedElements.isNotEmpty()) {
-            methodBuilder.beginControlFlow("if(context instanceof \$T)", ACTIVITY.java)
+            optionsName = "options"
+            methodBuilderOfContext.addStatement("\$T options = null", BUNDLE.java)
+                    .beginControlFlow("if(context instanceof \$T)", ACTIVITY.java)
                     .addStatement("\$T activity = (\$T) context", ACTIVITY.java, ACTIVITY.java)
                     .addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[SUPPORT_PAIR[VIEW, STRING]].java, ARRAY_LIST.java)
 
@@ -48,18 +51,20 @@ class StartMethodBuilder(private val activityClass: ActivityClass, private val n
             for (sharedElement in sharedElements) {
                 if (sharedElement.sourceId == 0) {
                     if (firstNeedTransitionNameMap) {
-                        methodBuilder.addStatement("\$T nameMap = new \$T<>()", HASH_MAP[STRING, VIEW].java, HASH_MAP.java)
+                        methodBuilderOfContext.addStatement("\$T nameMap = new \$T<>()", HASH_MAP[STRING, VIEW].java, HASH_MAP.java)
                                 .addStatement("\$T.findNamedViews(activity.getWindow().getDecorView(), nameMap)", VIEW_UTILS.java)
                         firstNeedTransitionNameMap = false
                     }
 
-                    methodBuilder.addStatement("sharedElements.add(new Pair<>(nameMap.get(\$S), \$S))", sharedElement.sourceName, sharedElement.targetName)
+                    methodBuilderOfContext.addStatement("sharedElements.add(new Pair<>(nameMap.get(\$S), \$S))", sharedElement.sourceName, sharedElement.targetName)
                 } else {
-                    methodBuilder.addStatement("sharedElements.add(new Pair<>(activity.findViewById(\$L), \$S))", sharedElement.sourceId, sharedElement.targetName)
+                    methodBuilderOfContext.addStatement("sharedElements.add(new Pair<>(activity.findViewById(\$L), \$S))", sharedElement.sourceId, sharedElement.targetName)
                 }
             }
-            methodBuilder.addStatement("options = \$T.makeSceneTransition(context, sharedElements)", ACTIVITY_BUILDER.java)
+            methodBuilderOfContext.addStatement("options = \$T.makeSceneTransition(context, sharedElements)", ACTIVITY_BUILDER.java)
                     .endControlFlow()
+        } else {
+            optionsName = "null"
         }
 
         val pendingTransition = activityClass.pendingTransition
@@ -67,17 +72,17 @@ class StartMethodBuilder(private val activityClass: ActivityClass, private val n
             val javaOnResultListener = JavaOnResultListener(activityClass)
             typeBuilder.addType(javaOnResultListener.buildInterface())
 
-            methodBuilder.addStatement("\$T.INSTANCE.startActivityForResult(context, intent, options, \$L, \$L, \$L)", ACTIVITY_BUILDER.java, pendingTransition.enterAnim, pendingTransition.exitAnim, javaOnResultListener.buildObject())
+            methodBuilderOfContext.addStatement("\$T.INSTANCE.startActivityForResult(context, intent, \$L, \$L, \$L, \$L)", ACTIVITY_BUILDER.java, optionsName, pendingTransition.enterAnim, pendingTransition.exitAnim, javaOnResultListener.buildObject())
                     .addParameter(javaOnResultListener.typeName, javaOnResultListener.name, Modifier.FINAL)
 
-            methodBuilderForView.addParameter(javaOnResultListener.typeName, javaOnResultListener.name, Modifier.FINAL)
-                    .addStatement("start(activity, \$L)", javaOnResultListener.name)
+            methodBuilderOfView.addParameter(javaOnResultListener.typeName, javaOnResultListener.name, Modifier.FINAL)
+                    .addStatement("\$L(activity, \$L)", name, javaOnResultListener.name)
         } else {
-            methodBuilder.addStatement("\$T.INSTANCE.startActivity(context, intent, options, \$L, \$L)", ACTIVITY_BUILDER.java, pendingTransition.enterAnim, pendingTransition.exitAnim)
-            methodBuilderForView.addStatement("start(activity)")
+            methodBuilderOfContext.addStatement("\$T.INSTANCE.startActivity(context, intent, \$L, \$L, \$L)", ACTIVITY_BUILDER.java, optionsName, pendingTransition.enterAnim, pendingTransition.exitAnim)
+            methodBuilderOfView.addStatement("\$L(activity)", name)
         }
 
-        typeBuilder.addMethod(methodBuilder.build())
-        typeBuilder.addMethod(methodBuilderForView.endControlFlow().build())
+        typeBuilder.addMethod(methodBuilderOfContext.build())
+        typeBuilder.addMethod(methodBuilderOfView.endControlFlow().build())
     }
 }
