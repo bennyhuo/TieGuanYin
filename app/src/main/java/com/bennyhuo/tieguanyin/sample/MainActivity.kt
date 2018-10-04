@@ -47,6 +47,13 @@ class MainActivity : AppCompatActivity() {
 
         openInnerActivity.setOnClickListener {
             startInnerClass(2, true)
+
+            startUserActivity(30, "bennyhuo", "Kotliner", "Kotlin Developer")
+        }
+
+        startEditUserActivity(36, "Kotliner", "bennyhuo", "Kotlin Dev"){
+            age, company, name, title ->
+
         }
     }
 
