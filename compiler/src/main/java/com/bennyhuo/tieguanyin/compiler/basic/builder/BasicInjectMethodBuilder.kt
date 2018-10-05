@@ -20,8 +20,8 @@ abstract class BasicInjectMethodBuilder(val basicClass: BasicClass) {
                 .addParameter(BUNDLE.java, "savedInstanceState")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
-                .beginControlFlow("if(instance instanceof \$T)", basicClass.type)
-                .addStatement("\$T typedInstance = (\$T) instance", basicClass.type, basicClass.type)
+                .beginControlFlow("if(instance instanceof \$T)", basicClass.typeElement)
+                .addStatement("\$T typedInstance = (\$T) instance", basicClass.typeElement, basicClass.typeElement)
                 .addStatement("\$T extras = savedInstanceState == null ? $snippetToRetrieveState", BUNDLE.java)
                 .beginControlFlow("if(extras != null)")
 

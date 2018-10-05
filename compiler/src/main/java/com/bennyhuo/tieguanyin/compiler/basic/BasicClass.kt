@@ -15,21 +15,21 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import kotlin.collections.ArrayList
 
-abstract class BasicClass(val type: TypeElement) {
+abstract class BasicClass(val typeElement: TypeElement) {
 
-    val simpleName = type.simpleName()
+    val simpleName = typeElement.simpleName()
 
     val builderClassName: String by lazy {
         val list = ArrayList<String>()
-        list += type.simpleName()
-        var element = type.enclosingElement
+        list += typeElement.simpleName()
+        var element = typeElement.enclosingElement
         while (element != null && element.kind != ElementKind.PACKAGE){
             list += element.simpleName()
             element = element.enclosingElement
         }
         list.reversed().joinToString("_") + POSIX
     }
-    val packageName: String = type.packageName()
+    val packageName: String = typeElement.packageName()
 
     private val declaredFields = TreeSet<Field>()
     private val declaredSharedElements = ArrayList<SharedElementEntity>()
@@ -38,13 +38,13 @@ abstract class BasicClass(val type: TypeElement) {
 
     private var superClass: BasicClass? = null
 
-    val isAbstract = type.modifiers.contains(Modifier.ABSTRACT)
+    val isAbstract = typeElement.modifiers.contains(Modifier.ABSTRACT)
 
     init {
-        val generateBuilder = type.getAnnotation(Builder::class.java)
+        val generateBuilder = typeElement.getAnnotation(Builder::class.java)
         generateMode = if (generateBuilder.mode == GenerateMode.Auto) {
             //如果有这个注解，说明就是 Kotlin 类
-            val isKotlin = type.getAnnotation(META_DATA) != null
+            val isKotlin = typeElement.getAnnotation(META_DATA) != null
             if (isKotlin) GenerateMode.Both else GenerateMode.JavaOnly
         } else generateBuilder.mode
 
@@ -60,7 +60,7 @@ abstract class BasicClass(val type: TypeElement) {
         private set
 
     fun <T: BasicClass> setUpSuperClass(classes: Map<Element, T>): T?{
-        val typeMirror = type.superclass?: return null
+        val typeMirror = typeElement.superclass?: return null
         if (typeMirror == Type.noType) return null
         val superClassElement = (typeMirror as DeclaredType).asElement() as TypeElement
         return classes[superClassElement].also { superClass ->

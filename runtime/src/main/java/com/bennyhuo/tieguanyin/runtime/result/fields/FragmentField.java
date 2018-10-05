@@ -1,5 +1,7 @@
 package com.bennyhuo.tieguanyin.runtime.result.fields;
 
+import com.bennyhuo.tieguanyin.runtime.utils.Logger;
+
 import java.lang.reflect.Field;
 
 /**
@@ -7,10 +9,11 @@ import java.lang.reflect.Field;
  */
 
 public class FragmentField extends ListenerField {
-    public final int id;
+    public final String who;
 
-    public FragmentField(Object object, Field field, int id) {
+    public FragmentField(Object object, Field field, String who) {
         super(object, field);
-        this.id = id;
+        Logger.debug("Who: " + who);
+        this.who = who;
     }
 }

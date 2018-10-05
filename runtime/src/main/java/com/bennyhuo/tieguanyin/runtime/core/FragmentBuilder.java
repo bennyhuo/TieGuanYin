@@ -7,7 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.FragmentUtils;
+import android.support.v4.app.SupportFragmentUtils;
 import android.support.v4.util.Pair;
 import android.transition.AutoTransition;
 
@@ -66,24 +66,31 @@ public class FragmentBuilder {
         }
     }
 
-    public static void showFragment(FragmentActivity activity, int containerId, Bundle args, Class<? extends Fragment> fragmentCls, ArrayList<Pair<String, String>> sharedElements) {
+    public static <T  extends Fragment> T showFragment(FragmentActivity activity, boolean isReplace, int containerId, String tag, Bundle args, Class<T> fragmentCls, ArrayList<Pair<String, String>> sharedElements) {
         try {
             Fragment fragment = fragmentCls.newInstance();
             if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
                 fragment.setSharedElementEnterTransition(new AutoTransition());
             }
             fragment.setArguments(args);
-            FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction().replace(containerId, fragment);
+            FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
+            if(isReplace){
+                transaction.replace(containerId, fragment, tag);
+            } else {
+                transaction.add(containerId, fragment, tag);
+            }
             if(sharedElements != null){
                 for (Pair<String, String> sharedElement : sharedElements) {
                     if(sharedElement.first != null) {
-                        FragmentUtils.addSharedElement(transaction, sharedElement.first, sharedElement.second);
+                        SupportFragmentUtils.addSharedElement(transaction, sharedElement.first, sharedElement.second);
                     }
                 }
             }
             transaction.commit();
+            return (T) fragment;
         } catch (Exception e) {
             Logger.error(e);
         }
+        return null;
     }
 }

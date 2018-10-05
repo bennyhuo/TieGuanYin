@@ -16,7 +16,7 @@ class FinishMethodBuilder(private val activityClass: ActivityClass) {
         val finishMethodBuilder = MethodSpec.methodBuilder("smartFinish")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .returns(TypeName.VOID)
-                .addParameter(activityClass.type.asType().asJavaTypeName(), "activity")
+                .addParameter(activityClass.typeElement.asType().asJavaTypeName(), "activity")
 
         //handle result parameters.
         activityClass.resultParameters.also{

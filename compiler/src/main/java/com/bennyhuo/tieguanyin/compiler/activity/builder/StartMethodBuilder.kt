@@ -21,7 +21,7 @@ class StartMethodBuilder(private val activityClass: ActivityClass, private val n
                 .addParameter(CONTEXT.java, "context")
                 .addStatement("\$T.INSTANCE.init(context)", ACTIVITY_BUILDER.java)
 
-        methodBuilderOfContext.addStatement("\$T intent = new \$T(context, \$T.class)", INTENT.java, INTENT.java, activityClass.type)
+        methodBuilderOfContext.addStatement("\$T intent = new \$T(context, \$T.class)", INTENT.java, INTENT.java, activityClass.typeElement)
 
         val methodBuilderOfView = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC)

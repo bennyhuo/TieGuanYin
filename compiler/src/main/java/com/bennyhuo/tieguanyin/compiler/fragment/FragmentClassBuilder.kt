@@ -16,14 +16,10 @@ class FragmentClassBuilder(private val fragmentClass: FragmentClass): BasicClass
     }
 
     override fun buildKotlinBuilders(fileBuilder: FileSpec.Builder) {
-        ShowKotlinFunctionBuilder(fragmentClass).build(fileBuilder)
+        ReplaceKFunctionBuilder(fragmentClass).build(fileBuilder)
     }
 
     override fun buildJavaBuilders(typeBuilder: Builder) {
-        ShowMethodBuilder(fragmentClass, METHOD_NAME).build(typeBuilder)
-    }
-
-    companion object {
-        const val METHOD_NAME = "show"
+        ReplaceMethodBuilder(fragmentClass).build(typeBuilder)
     }
 }

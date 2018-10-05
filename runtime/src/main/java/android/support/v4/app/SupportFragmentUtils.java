@@ -8,7 +8,16 @@ import java.util.ArrayList;
  * Created by benny on 2/13/18.
  */
 
-public class FragmentUtils {
+public class SupportFragmentUtils {
+
+    public static String getWhoFromFragment(Fragment fragment){
+        return fragment.mWho;
+    }
+
+    public static Fragment findFragmentByWho(FragmentManager fragmentManager, String who){
+        return ((FragmentManagerImpl)fragmentManager).findFragmentByWho(who);
+    }
+
     public static void addSharedElement(FragmentTransaction fragmentTransaction, String sourceName, String targetName) {
         if (fragmentTransaction instanceof BackStackRecord) {
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {

@@ -8,11 +8,11 @@ import com.bennyhuo.tieguanyin.compiler.utils.isDefault
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 
-class FinishKotlinFunctionBuilder(private val activityClass: ActivityClass) {
+class FinishKFunctionBuilder(private val activityClass: ActivityClass) {
 
     fun build(fileSpecBuilder: FileSpec.Builder) {
         val funBuilder = FunSpec.builder("smartFinish")
-                .receiver(activityClass.type.asType().asKotlinTypeName())
+                .receiver(activityClass.typeElement.asType().asKotlinTypeName())
 
         activityClass.resultParameters.also {
             if (it.isNotEmpty()) {

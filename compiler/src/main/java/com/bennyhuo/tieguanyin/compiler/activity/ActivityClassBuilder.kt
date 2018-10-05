@@ -16,8 +16,8 @@ class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClas
     }
 
     override fun buildKotlinBuilders(fileBuilder: FileSpec.Builder) {
-        StartKotlinFunctionBuilder(activityClass).build(fileBuilder)
-        FinishKotlinFunctionBuilder(activityClass).build(fileBuilder)
+        StartKFunctionBuilder(activityClass).build(fileBuilder)
+        FinishKFunctionBuilder(activityClass).build(fileBuilder)
     }
 
     override fun buildJavaBuilders(typeBuilder: Builder) {

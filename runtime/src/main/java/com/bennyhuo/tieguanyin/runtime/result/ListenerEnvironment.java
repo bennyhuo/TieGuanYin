@@ -2,6 +2,9 @@ package com.bennyhuo.tieguanyin.runtime.result;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentUtils;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.SupportFragmentUtils;
 import android.util.Log;
 import android.view.View;
 
@@ -22,24 +25,26 @@ public class ListenerEnvironment {
     public final OnActivityResultListener onActivityResultListener;
     private ActivityField activityField;
     private ArrayList<FragmentField> fragmentFields = new ArrayList<>();
+    private ArrayList<FragmentField> supportFragmentFields = new ArrayList<>();
     private ArrayList<ViewField> viewFields = new ArrayList<>();
 
     public ListenerEnvironment(OnActivityResultListener onActivityResultListener) {
         this.onActivityResultListener = onActivityResultListener;
 
         try {
-            Field realListenerField = onActivityResultListener.getClass().getDeclaredFields()[0];
-            realListenerField.setAccessible(true);
+//            Field realListenerField = onActivityResultListener.getClass().getDeclaredFields()[0];
+//            realListenerField.setAccessible(true);
 
-            Object obj = realListenerField.get(onActivityResultListener);
+            Object obj = onActivityResultListener.realListener;
             Class cls = obj.getClass();
+            Field outerRefField;
 
             while (!cls.isAnonymousClass()){
                 Log.e("listenerEnv", "find probable class: " + cls.toString());
                 // 注意这个其实是 $this 引用，指向外部类实例
-                realListenerField = cls.getDeclaredFields()[0];
-                realListenerField.setAccessible(true);
-                obj = realListenerField.get(obj);
+                outerRefField = cls.getDeclaredFields()[0];
+                outerRefField.setAccessible(true);
+                obj = outerRefField.get(obj);
                 cls = obj.getClass();
             }
 
@@ -54,11 +59,11 @@ public class ListenerEnvironment {
                         int id = ((View)field.get(obj)).getId();
                         viewFields.add(new ViewField(obj, field, id));
                     } else if(Fragment.class.isAssignableFrom(field.getType())){
-                        int id = ((Fragment)field.get(obj)).getId();
-                        fragmentFields.add(new FragmentField(obj, field, id));
+                        String who = FragmentUtils.getWhoFromFragment((Fragment)field.get(obj));
+                        fragmentFields.add(new FragmentField(obj, field, who));
                     } else if(android.support.v4.app.Fragment.class.isAssignableFrom(field.getType())){
-                        int id = ((android.support.v4.app.Fragment)field.get(obj)).getId();
-                        fragmentFields.add(new FragmentField(obj, field, id));
+                        String who = SupportFragmentUtils.getWhoFromFragment((android.support.v4.app.Fragment)field.get(obj));
+                        supportFragmentFields.add(new FragmentField(obj, field, who));
                     } else if(Activity.class.isAssignableFrom(field.getType())){
                         activityField = new ActivityField(obj, field);
                     }
@@ -88,7 +93,13 @@ public class ListenerEnvironment {
             viewField.update(resultFragment.getActivity().findViewById(viewField.id));
         }
         for (FragmentField fragmentField : fragmentFields) {
-            fragmentField.update(resultFragment.getActivity().getFragmentManager().findFragmentById(fragmentField.id));
+            fragmentField.update(FragmentUtils.findFragmentByWho(resultFragment.getActivity().getFragmentManager(), fragmentField.who));
+        }
+        if(resultFragment.getActivity() instanceof FragmentActivity){
+            FragmentActivity fragmentActivity = (FragmentActivity) resultFragment.getActivity();
+            for (FragmentField fragmentField : supportFragmentFields) {
+                fragmentField.update(SupportFragmentUtils.findFragmentByWho(fragmentActivity.getSupportFragmentManager(), fragmentField.who));
+            }
         }
     }
 }

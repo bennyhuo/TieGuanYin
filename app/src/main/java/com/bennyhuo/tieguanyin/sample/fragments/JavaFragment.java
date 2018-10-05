@@ -20,10 +20,10 @@ import com.bennyhuo.tieguanyin.sample.R;
 public class JavaFragment extends Fragment {
 
     @Required
-    String text;
+    public String text;
 
     @Optional
-    String text2;
+    public String text2;
 
     @Optional
     int num;
@@ -46,7 +46,7 @@ public class JavaFragment extends Fragment {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                KotlinFragmentBuilderKt.showKotlinFragment(((ViewGroup)getView().getParent()), "From Java");
+                KotlinFragmentBuilder.builder("From Java").replace(getActivity(), getId());
             }
         });
     }

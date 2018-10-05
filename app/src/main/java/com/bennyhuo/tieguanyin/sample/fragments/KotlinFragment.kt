@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.sample.R
-import com.bennyhuo.tieguanyin.sample.transitions.showDetailsFragment
+import com.bennyhuo.tieguanyin.sample.transitions.replaceDetailsFragment
 import kotlinx.android.synthetic.main.fragment_main.*
 
 /**
@@ -30,7 +30,7 @@ class KotlinFragment : Fragment() {
         ViewCompat.setTransitionName(textView, "fragment")
         textView.text = text
         textView.setOnClickListener {
-            showDetailsFragment("Kotlin Fragment")
+            replaceDetailsFragment("Kotlin Fragment")
         }
     }
 }

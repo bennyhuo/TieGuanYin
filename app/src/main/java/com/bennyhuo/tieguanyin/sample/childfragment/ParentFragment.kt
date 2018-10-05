@@ -23,7 +23,7 @@ class ParentFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         textView.text = "show child fragment."
         textView.setOnClickListener {
-            showChildFragment("ChildFragment.")
+            replaceChildFragment("ChildFragment.")
         }
     }
 }

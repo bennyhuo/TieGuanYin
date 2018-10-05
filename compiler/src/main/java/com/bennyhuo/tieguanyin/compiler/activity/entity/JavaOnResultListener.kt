@@ -60,7 +60,7 @@ class JavaOnResultListener(private val activityClass: ActivityClass) {
         onResultMethodBuilder.addStatement("\$L.onResult(" + statementBuilder.toString() + ")", *args.toTypedArray())
         onResultMethodBuilder.endControlFlow()
 
-        return TypeSpec.anonymousClassBuilder("")
+        return TypeSpec.anonymousClassBuilder(name)
                 .addSuperinterface(ON_ACTIVITY_RESULT_LISTENER.java)
                 .addMethod(onResultMethodBuilder.build())
                 .build()

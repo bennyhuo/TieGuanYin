@@ -14,7 +14,7 @@ import com.squareup.kotlinpoet.ParameterSpec
  * Created by benny on 1/31/18.
  */
 
-class StartKotlinFunctionBuilder(private val activityClass: ActivityClass) {
+class StartKFunctionBuilder(private val activityClass: ActivityClass) {
 
     private val name = ActivityClassBuilder.METHOD_NAME + activityClass.simpleName
 
@@ -23,7 +23,7 @@ class StartKotlinFunctionBuilder(private val activityClass: ActivityClass) {
                 .receiver(CONTEXT.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .addStatement("%T.INSTANCE.init(this)", ACTIVITY_BUILDER.kotlin)
-                .addStatement("val intent = %T(this, %T::class.java)", INTENT.kotlin, activityClass.type)
+                .addStatement("val intent = %T(this, %T::class.java)", INTENT.kotlin, activityClass.typeElement)
 
         activityClass.categories.forEach { category ->
             functionBuilderOfContext.addStatement("intent.addCategory(%S)", category)

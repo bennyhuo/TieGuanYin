@@ -177,7 +177,13 @@ startEditUserActivity(36, "Kotliner", "bennyhuo", "Kotlin Dev"){
 }
 ```
 
->值得一提的是，对于在编辑用户信息时， `UserActivity` 的实例因各种原因（例如开发者选项中的”不保留活动“开启时）被销毁，从 `EditUserActivity` 返回时，`UserActivity` 被重新创建，导致之间的回调（匿名内部类、Lambda 表达式）持有的外部引用失效，进而使回调没有意义。为了解决这个问题，我会在页面返回，上一个页面被重新创建时尝试替换掉失效的实例以保证回调可以正常使用，但这个功能比较 Tricky，如果大家在使用过程中发现回调调用之后没有反应，那么请开 Issue 一起讨论下。
+值得一提的是，对于在编辑用户信息时， `UserActivity` 的实例因各种原因（例如开发者选项中的”不保留活动“开启时）被销毁，从 `EditUserActivity` 返回时，`UserActivity` 被重新创建，导致之间的回调（匿名内部类、Lambda 表达式）持有的外部引用失效，进而使回调没有意义。为了解决这个问题，我会在页面返回，上一个页面被重新创建时尝试替换掉失效的实例以保证回调可以正常使用，其中主要包括：
+
+1. 外部 `Activity` 的实例，这个通常没有问题。
+2. 外部 `View` 的实例，通常也是回调所在的 `Activity` 当中的 `View`，在更新实例时，我们通过 `View` 的 id 来索引，因此如果布局当中有重复的 id，回调可能将无法更新到正确的实例而产生问题。因此请注意保持 `Activity` 的布局当中 `View` 的 id 的唯一性。
+3. 外部 `Fragment` 的实例，通常也是所在的 `Activity` 当中的 `Fragment`，为了保证 `Fragment` 的唯一性，我使用了 `Fragment` 未公开的属性 `mWho` 来进行索引。
+
+尽管从理论的角度，这个更新实例的方法较为可靠，但毕竟这个功能比较 Tricky，如果大家在使用过程中发现回调调用之后没有反应，那么请开 Issue 一起讨论解决方案。
 
 ### 属性名常量
 
@@ -192,6 +198,10 @@ public final class UserActivityBuilder {
   ...
 }
 ```
+
+### `Fragment` 支持
+
+由于从 API 28 开始，Android 废弃了 `android.app.Fragment` 相关的 API，转而推荐使用 `support-fragment`，同时由于框架本身也需要监听 `Fragment` 的生命周期，因此我们对于 `android.app.Fragment` 不予支持，请谅解。
 
 ## 项目如何接入？
 

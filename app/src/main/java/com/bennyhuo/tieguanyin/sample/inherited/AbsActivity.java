@@ -11,7 +11,7 @@ import com.bennyhuo.tieguanyin.annotations.ResultEntity;
 /**
  * Created by benny on 2/9/18.
  */
-@Builder(pendingTransition = @PendingTransition(enterAnim = 0, exitAnim = 2),
+@Builder(pendingTransition = @PendingTransition(enterAnim = 0, exitAnim = 0),
         resultTypes = @ResultEntity(name = "hello", type = String.class))
 public abstract class AbsActivity extends AppCompatActivity {
 

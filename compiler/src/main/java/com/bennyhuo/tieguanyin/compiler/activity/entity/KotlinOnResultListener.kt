@@ -45,7 +45,8 @@ class KotlinOnResultListener(private val activityClass: ActivityClass) {
         onResultFunBuilderKt.endControlFlow()
 
         return com.squareup.kotlinpoet.TypeSpec.anonymousClassBuilder()
-                .addSuperinterface(ON_ACTIVITY_RESULT_LISTENER.kotlin, CodeBlock.of(""))
+                .superclass(ON_ACTIVITY_RESULT_LISTENER.kotlin)
+                .addSuperclassConstructorParameter(name)
                 .addFunction(onResultFunBuilderKt.build())
                 .build()
     }

@@ -18,8 +18,8 @@ abstract class BasicSaveStateMethodBuilder(val basicClass: BasicClass) {
                 .returns(TypeName.VOID)
                 .addParameter(instanceType, "instance")
                 .addParameter(BUNDLE.java, "outState")
-                .beginControlFlow("if(instance instanceof \$T)", basicClass.type)
-                .addStatement("\$T typedInstance = (\$T) instance", basicClass.type, basicClass.type)
+                .beginControlFlow("if(instance instanceof \$T)", basicClass.typeElement)
+                .addStatement("\$T typedInstance = (\$T) instance", basicClass.typeElement, basicClass.typeElement)
 
         methodBuilder.addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
 

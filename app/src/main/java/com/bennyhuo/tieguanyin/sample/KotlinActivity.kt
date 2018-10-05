@@ -39,7 +39,7 @@ class KotlinActivity : AppCompatActivity() {
 
         openKotlinActivity.text = "Finish With java='I'm Kotlin!' & kotlin=12"
         openKotlinActivity.setOnClickListener {
-            smartFinish(arrayOf("I'm Kotlin!"), intArrayOf(12))
+            smartFinish(arrayOf("I'm Java!", "You're Kotlin!"), intArrayOf(12))
         }
 
         openGenerateBothActivity.setOnClickListener {
