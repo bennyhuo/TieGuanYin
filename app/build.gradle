@@ -33,6 +33,7 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 
     implementation project(':runtime')
+    implementation project(':runtime-kt')
     implementation project(':annotations')
     kapt project(':compiler')
 

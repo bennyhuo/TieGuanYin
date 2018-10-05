@@ -33,6 +33,7 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
 
     implementation project(':runtime')
+    implementation project(':runtime-kt')
     implementation project(':annotations')
     annotationProcessor project(':compiler')
 

@@ -1,4 +1,5 @@
-package com.bennyhuo.tieguanyin.runtime.fragment
+@file:JvmName("Fragments")
+package com.bennyhuo.tieguanyin.runtime.kotlin.fragment
 
 import android.support.v4.app.Fragment
 
