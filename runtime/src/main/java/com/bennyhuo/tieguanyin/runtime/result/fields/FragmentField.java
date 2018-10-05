@@ -13,7 +13,11 @@ public class FragmentField extends ListenerField {
 
     public FragmentField(Object object, Field field, String who) {
         super(object, field);
-        Logger.debug("Who: " + who);
+        try {
+            Logger.debug("Setup, Who: " + who + ", fragment=" + field.get(object));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
         this.who = who;
     }
 }

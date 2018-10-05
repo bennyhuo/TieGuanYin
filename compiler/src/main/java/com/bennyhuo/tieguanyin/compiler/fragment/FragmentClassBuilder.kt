@@ -17,9 +17,11 @@ class FragmentClassBuilder(private val fragmentClass: FragmentClass): BasicClass
 
     override fun buildKotlinBuilders(fileBuilder: FileSpec.Builder) {
         ReplaceKFunctionBuilder(fragmentClass).build(fileBuilder)
+        AddKFunctionBuilder(fragmentClass).build(fileBuilder)
     }
 
     override fun buildJavaBuilders(typeBuilder: Builder) {
         ReplaceMethodBuilder(fragmentClass).build(typeBuilder)
+        AddMethodBuilder(fragmentClass).build(typeBuilder)
     }
 }

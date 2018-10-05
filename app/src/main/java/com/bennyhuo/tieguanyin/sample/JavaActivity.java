@@ -4,14 +4,20 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bennyhuo.tieguanyin.annotations.Builder;
 import com.bennyhuo.tieguanyin.annotations.Optional;
 import com.bennyhuo.tieguanyin.annotations.Required;
 import com.bennyhuo.tieguanyin.annotations.ResultEntity;
+import com.bennyhuo.tieguanyin.sample.fragments.JavaFragment;
 import com.bennyhuo.tieguanyin.sample.fragments.JavaFragmentBuilder;
+import com.bennyhuo.tieguanyin.sample.fragments.KotlinFragment;
 import com.bennyhuo.tieguanyin.sample.fragments.KotlinFragmentBuilder;
 import com.bennyhuo.tieguanyin.sample.inherited.AbsActivity;
+
+import java.util.Arrays;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
@@ -34,11 +40,11 @@ public class JavaActivity extends AbsActivity {
         setContentView(R.layout.activity_main);
         setTitle(this.getClass().getSimpleName());
 
-        JavaFragmentBuilder.builder("HelloJava")
-                .replace(this, R.id.fragmentContainer);
+        final JavaFragment javaFragment = JavaFragmentBuilder.builder("HelloJava")
+                .add(this, R.id.fragmentContainer);
 
-        KotlinFragmentBuilder.builder("HelloKotlin")
-                .replace(this, R.id.fragmentContainer);
+        final KotlinFragment kotlinFragment = KotlinFragmentBuilder.builder("HelloKotlin")
+                .add(this, R.id.fragmentContainer);
 
         Button button = findViewById(R.id.openJavaActivity);
         button.setText("Finish With java='I'm Java' & kotlin=2");
@@ -54,11 +60,14 @@ public class JavaActivity extends AbsActivity {
                 KotlinActivityBuilderKt.startKotlinActivity(JavaActivity.this, 1234, null, new Function2<String[], int[], Unit>() {
                     @Override
                     public Unit invoke(String[] strings, int[] ints) {
-//                        TextView textView = javaFragment.getView().findViewById(R.id.textView);
-//                        textView.setText(strings[0]);
-//
-//                        TextView textView2 = kotlinFragment.getView().findViewById(R.id.textView);
-//                        textView2.setText(strings[1]);
+
+                        Toast.makeText(JavaActivity.this, "strings=" + Arrays.toString(strings) + ", ints=" + Arrays.toString(ints), Toast.LENGTH_SHORT).show();
+
+                        TextView textView = javaFragment.getView().findViewById(R.id.textView);
+                        textView.setText(strings[0]);
+
+                        TextView textView2 = kotlinFragment.getView().findViewById(R.id.textView);
+                        textView2.setText(strings[1]);
                         return null;
                     }
                 });

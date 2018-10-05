@@ -98,7 +98,9 @@ public class ListenerEnvironment {
         if(resultFragment.getActivity() instanceof FragmentActivity){
             FragmentActivity fragmentActivity = (FragmentActivity) resultFragment.getActivity();
             for (FragmentField fragmentField : supportFragmentFields) {
-                fragmentField.update(SupportFragmentUtils.findFragmentByWho(fragmentActivity.getSupportFragmentManager(), fragmentField.who));
+                android.support.v4.app.Fragment fragment = SupportFragmentUtils.findFragmentByWho(fragmentActivity.getSupportFragmentManager(), fragmentField.who);
+                Logger.debug("Update, Who: " + fragmentField.who + ", fragment=" + fragment);
+                fragmentField.update(fragment);
             }
         }
     }
