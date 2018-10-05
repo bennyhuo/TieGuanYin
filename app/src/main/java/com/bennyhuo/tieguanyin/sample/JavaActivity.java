@@ -41,7 +41,7 @@ public class JavaActivity extends AbsActivity {
         setTitle(this.getClass().getSimpleName());
 
         final JavaFragment javaFragment = JavaFragmentBuilder.builder("HelloJava")
-                .add(this, R.id.fragmentContainer);
+                .replace(this, R.id.fragmentContainer);
 
         final KotlinFragment kotlinFragment = KotlinFragmentBuilder.builder("HelloKotlin")
                 .add(this, R.id.fragmentContainer);

@@ -12,11 +12,12 @@ import com.squareup.kotlinpoet.*
  * Created by benny on 1/31/18.
  */
 
-abstract class StartFragmentKFunctionBuilder(private val fragmentClass: FragmentClass, private val op: Op) {
+abstract class StartFragmentKFunctionBuilder(private val fragmentClass: FragmentClass) {
 
     abstract val name: String
+    abstract val op: Op
 
-    fun build(fileBuilder: FileSpec.Builder) {
+    open fun build(fileBuilder: FileSpec.Builder) {
         val isReplace = op == REPLACE
         val returnType = fragmentClass.typeElement.asType().asKotlinTypeName().asNullable()
         val funBuilderOfContext = FunSpec.builder(name)
@@ -75,14 +76,31 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
                 .returns(returnType)
                 .addParameters(parameterSpecs)
                 .addStatement("return (view?.parent as? %T)?.%L(%L)", VIEW_GROUP.kotlin, name, parameterLiteral).build())
+
+        when(op){
+            Op.ADD -> {
+                fileBuilder.addFunction(FunSpec.builder(name)
+                        .receiver(SUPPORT_ACTIVITY.kotlin)
+                        .addModifiers(KModifier.PUBLIC)
+                        .returns(returnType)
+                        .addParameter("tag", STRING.kotlin)
+                        .addParameters(parameterSpecs.subList(0, parameterSpecs.size - 1))
+                        .addParameter(ParameterSpec.builder("containerId", INT).defaultValue("0").build())
+                        .addStatement("return %L(containerId, %L)", name, parameterLiteral).build())
+            }
+            Op.REPLACE -> {
+
+            }
+        }
     }
-
 }
 
-class ReplaceKFunctionBuilder(fragmentClass: FragmentClass): StartFragmentKFunctionBuilder(fragmentClass, REPLACE) {
+class ReplaceKFunctionBuilder(fragmentClass: FragmentClass): StartFragmentKFunctionBuilder(fragmentClass) {
     override val name: String = "replace" + fragmentClass.simpleName
+    override val op: Op = REPLACE
 }
 
-class AddKFunctionBuilder(fragmentClass: FragmentClass): StartFragmentKFunctionBuilder(fragmentClass, ADD) {
+class AddKFunctionBuilder(fragmentClass: FragmentClass): StartFragmentKFunctionBuilder(fragmentClass) {
     override val name: String = "add" + fragmentClass.simpleName
+    override val op: Op = ADD
 }

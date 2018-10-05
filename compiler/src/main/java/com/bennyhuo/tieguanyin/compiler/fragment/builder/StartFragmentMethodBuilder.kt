@@ -7,6 +7,7 @@ import com.bennyhuo.tieguanyin.compiler.fragment.builder.Op.ADD
 import com.bennyhuo.tieguanyin.compiler.fragment.builder.Op.REPLACE
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.TypeSpec.Builder
 import javax.lang.model.element.Modifier
 
 /**
@@ -16,11 +17,12 @@ enum class Op{
     ADD, REPLACE
 }
 
-abstract class StartFragmentMethodBuilder(private val fragmentClass: FragmentClass, private val op: Op){
+abstract class StartFragmentMethodBuilder(protected val fragmentClass: FragmentClass){
 
     abstract val name: String
+    abstract val op: Op
 
-    fun build(typeBuilder: TypeSpec.Builder) {
+    open fun build(typeBuilder: TypeSpec.Builder) {
         val isReplace = op == REPLACE
 
         val methodBuilder = MethodSpec.methodBuilder(name)
@@ -64,11 +66,24 @@ abstract class StartFragmentMethodBuilder(private val fragmentClass: FragmentCla
 
 }
 
-class ReplaceMethodBuilder(fragmentClass: FragmentClass): StartFragmentMethodBuilder(fragmentClass, REPLACE) {
+class ReplaceMethodBuilder(fragmentClass: FragmentClass): StartFragmentMethodBuilder(fragmentClass) {
     override val name: String = "replace"
+    override val op: Op = REPLACE
 }
 
-class AddMethodBuilder(fragmentClass: FragmentClass): StartFragmentMethodBuilder(fragmentClass, ADD) {
+class AddMethodBuilder(fragmentClass: FragmentClass): StartFragmentMethodBuilder(fragmentClass) {
     override val name: String = "add"
+    override val op: Op = ADD
+
+    override fun build(typeBuilder: Builder) {
+        super.build(typeBuilder)
+        //  You can provide tag only when "add" a fragment.
+        typeBuilder.addMethod(MethodSpec.methodBuilder(name)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(fragmentClass.typeElement.asType().asJavaTypeName())
+                .addParameter(ACTIVITY.java, "activity")
+                .addParameter(STRING.java, "tag")
+                .addStatement("return \$L(activity, 0, tag)", name).build())
+    }
 }
 
