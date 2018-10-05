@@ -3,6 +3,8 @@ package com.bennyhuo.tieguanyin.compiler.fragment.builder
 import com.bennyhuo.aptutils.types.asJavaTypeName
 import com.bennyhuo.tieguanyin.compiler.basic.types.*
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
+import com.bennyhuo.tieguanyin.compiler.fragment.builder.Op.ADD
+import com.bennyhuo.tieguanyin.compiler.fragment.builder.Op.REPLACE
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier
@@ -10,11 +12,16 @@ import javax.lang.model.element.Modifier
 /**
  * Created by benny on 1/31/18.
  */
+enum class Op{
+    ADD, REPLACE
+}
 
-class ReplaceMethodBuilder(private val fragmentClass: FragmentClass) {
+abstract class StartFragmentMethodBuilder(private val fragmentClass: FragmentClass, private val op: Op){
+
+    abstract val name: String
 
     fun build(typeBuilder: TypeSpec.Builder) {
-        val name = "replace"
+        val isReplace = op == REPLACE
 
         val methodBuilder = MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC)
@@ -27,10 +34,10 @@ class ReplaceMethodBuilder(private val fragmentClass: FragmentClass) {
 
         methodBuilder.addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
 
-         methodBuilder.addStatement("fillIntent(intent)")
+        methodBuilder.addStatement("fillIntent(intent)")
 
         if (fragmentClass.sharedElements.isEmpty()) {
-            methodBuilder.addStatement("return \$T.showFragment((\$T) activity, true, containerId, tag, intent.getExtras(), \$T.class, null)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, fragmentClass.typeElement)
+            methodBuilder.addStatement("return \$T.showFragment((\$T) activity, \$L, containerId, tag, intent.getExtras(), \$T.class, null)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, isReplace, fragmentClass.typeElement)
         } else {
             methodBuilder.addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[SUPPORT_PAIR[STRING, STRING]].java, ARRAY_LIST.java)
                     .addStatement("\$T container = activity.findViewById(containerId)", VIEW.java)
@@ -41,7 +48,7 @@ class ReplaceMethodBuilder(private val fragmentClass: FragmentClass) {
                     methodBuilder.addStatement("sharedElements.add(new Pair<>(\$T.getTransitionName(container.findViewById(\$L)), \$S))", VIEW_COMPAT.java, sharedElement.sourceId, sharedElement.targetName)
                 }
             }
-            methodBuilder.addStatement("return \$T.showFragment((\$T) activity, true, containerId, tag, intent.getExtras(), \$T.class, sharedElements)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, fragmentClass.typeElement)
+            methodBuilder.addStatement("return \$T.showFragment((\$T) activity, \$L, containerId, tag, intent.getExtras(), \$T.class, sharedElements)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, isReplace, fragmentClass.typeElement)
         }
         methodBuilder.endControlFlow()
                 .addStatement("return null")
@@ -54,4 +61,14 @@ class ReplaceMethodBuilder(private val fragmentClass: FragmentClass) {
                 .addParameter(Int::class.javaPrimitiveType, "containerId")
                 .addStatement("return \$L(activity, containerId, null)", name).build())
     }
+
 }
+
+class ReplaceMethodBuilder(fragmentClass: FragmentClass): StartFragmentMethodBuilder(fragmentClass, REPLACE) {
+    override val name: String = "replace"
+}
+
+class AddMethodBuilder(fragmentClass: FragmentClass): StartFragmentMethodBuilder(fragmentClass, ADD) {
+    override val name: String = "add"
+}
+

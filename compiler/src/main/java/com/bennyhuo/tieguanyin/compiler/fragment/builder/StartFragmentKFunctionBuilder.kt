@@ -4,16 +4,20 @@ import com.bennyhuo.aptutils.types.asKotlinTypeName
 import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
 import com.bennyhuo.tieguanyin.compiler.basic.types.*
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
+import com.bennyhuo.tieguanyin.compiler.fragment.builder.Op.ADD
+import com.bennyhuo.tieguanyin.compiler.fragment.builder.Op.REPLACE
 import com.squareup.kotlinpoet.*
 
 /**
  * Created by benny on 1/31/18.
  */
 
-class ReplaceKFunctionBuilder(private val fragmentClass: FragmentClass) {
+abstract class StartFragmentKFunctionBuilder(private val fragmentClass: FragmentClass, private val op: Op) {
+
+    abstract val name: String
 
     fun build(fileBuilder: FileSpec.Builder) {
-        val name = "replace" + fragmentClass.simpleName
+        val isReplace = op == REPLACE
         val returnType = fragmentClass.typeElement.asType().asKotlinTypeName().asNullable()
         val funBuilderOfContext = FunSpec.builder(name)
                 .receiver(SUPPORT_ACTIVITY.kotlin)
@@ -38,7 +42,7 @@ class ReplaceKFunctionBuilder(private val fragmentClass: FragmentClass) {
 
         val sharedElements = fragmentClass.sharedElements
         if (sharedElements.isEmpty()) {
-            funBuilderOfContext.addStatement("return %T.showFragment(this, true, containerId, tag, intent.getExtras(), %T::class.java, null)", FRAGMENT_BUILDER.kotlin, fragmentClass.typeElement)
+            funBuilderOfContext.addStatement("return %T.showFragment(this, %L, containerId, tag, intent.getExtras(), %T::class.java, null)", FRAGMENT_BUILDER.kotlin, isReplace, fragmentClass.typeElement)
         } else {
             funBuilderOfContext.addStatement("val sharedElements = %T()", ARRAY_LIST[SUPPORT_PAIR[STRING, STRING]].kotlin)
                     .addStatement("val container: %T = findViewById(containerId)", VIEW.kotlin)
@@ -49,7 +53,7 @@ class ReplaceKFunctionBuilder(private val fragmentClass: FragmentClass) {
                     funBuilderOfContext.addStatement("sharedElements.add(Pair(%T.getTransitionName(container.findViewById(%L)), %S))", VIEW_COMPAT.kotlin, sharedElement.sourceId, sharedElement.targetName)
                 }
             }
-            funBuilderOfContext.addStatement("return %T.showFragment(this, true, containerId, tag, intent.getExtras(), %T::class.java, sharedElements)", FRAGMENT_BUILDER.kotlin, fragmentClass.typeElement)
+            funBuilderOfContext.addStatement("return %T.showFragment(this, %L, containerId, tag, intent.getExtras(), %T::class.java, sharedElements)", FRAGMENT_BUILDER.kotlin, isReplace, fragmentClass.typeElement)
         }
 
 
@@ -72,4 +76,13 @@ class ReplaceKFunctionBuilder(private val fragmentClass: FragmentClass) {
                 .addParameters(parameterSpecs)
                 .addStatement("return (view?.parent as? %T)?.%L(%L)", VIEW_GROUP.kotlin, name, parameterLiteral).build())
     }
+
+}
+
+class ReplaceKFunctionBuilder(fragmentClass: FragmentClass): StartFragmentKFunctionBuilder(fragmentClass, REPLACE) {
+    override val name: String = "replace" + fragmentClass.simpleName
+}
+
+class AddKFunctionBuilder(fragmentClass: FragmentClass): StartFragmentKFunctionBuilder(fragmentClass, ADD) {
+    override val name: String = "add" + fragmentClass.simpleName
 }
