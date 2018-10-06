@@ -225,7 +225,7 @@ kapt "com.bennyhuo.tieguanyin:tieguanyin-compiler:$latest_version"
 
 ## 项目状态
 
-* 当前最新版本：**2.0-beta1**
+* 当前最新版本：![Bintray](https://img.shields.io/bintray/v/bennyhuo/bennyhuo/tieguanyin-compiler.svg)
 * 当前项目的 compiler 模块已经使用 Kotlin 重构，代码较 1.0 时更紧凑和灵活，部分 Api 也做了一些调整。
 * 为了保证纯 Java 用户的正常使用，runtime 和 annotation 两个模块将一直使用纯 Java 开发。
 	
