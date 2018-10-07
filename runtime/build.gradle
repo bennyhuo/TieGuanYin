@@ -24,6 +24,8 @@ android {
 dependencies {
     compileOnly 'com.android.support:support-fragment:27.1.1'
     implementation project(":annotations")
+
+    testImplementation 'junit:junit:4.12'
 }
 
 task sourcesJar(type: Jar) {
