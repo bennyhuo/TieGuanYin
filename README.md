@@ -223,6 +223,13 @@ kapt "com.bennyhuo.tieguanyin:tieguanyin-compiler:$latest_version"
 ```
 如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
 
+最后在 `Application` 的 `onCreate` 当中调用：
+
+```java
+Tieguanyin.init(this);
+```
+即可。
+
 ## 项目状态
 
 * 当前最新版本：![Bintray](https://img.shields.io/bintray/v/bennyhuo/bennyhuo/tieguanyin-compiler.svg)
