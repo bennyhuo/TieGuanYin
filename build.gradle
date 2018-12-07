@@ -38,7 +38,7 @@ ext {
     groupId = 'com.bennyhuo.tieguanyin'
     //bintray-release PropertyFinder retiever property from project firstly,
     //so use a different name to avoid overriding
-    commonVersion = '2.0-beta2'
+    commonVersion = '2.0-beta3'
     desc = "Generate methods/functions to help start Activities or Fragments."
     website = 'https://github.com/enbandari/tieguanyin'
     dryRun = "false"
