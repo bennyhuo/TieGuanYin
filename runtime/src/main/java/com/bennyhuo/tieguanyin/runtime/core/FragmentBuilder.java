@@ -38,6 +38,8 @@ public class FragmentBuilder {
 
     private void performInject(Fragment fragment, Bundle savedInstanceState){
         try {
+            savedInstanceState = savedInstanceState == null ? fragment.getArguments() : savedInstanceState;
+            if(savedInstanceState == null) return;
             BuilderClassFinder.findBuilderClass(fragment).getDeclaredMethod("inject", Fragment.class, Bundle.class).invoke(null, fragment, savedInstanceState);
             Logger.debug("inject success: fragment=" + fragment + ", state=" + savedInstanceState);
         } catch (Exception e) {

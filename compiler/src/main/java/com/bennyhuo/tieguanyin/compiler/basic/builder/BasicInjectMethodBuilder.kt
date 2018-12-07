@@ -22,8 +22,7 @@ abstract class BasicInjectMethodBuilder(val basicClass: BasicClass) {
                 .returns(TypeName.VOID)
                 .beginControlFlow("if(instance instanceof \$T)", basicClass.typeElement)
                 .addStatement("\$T typedInstance = (\$T) instance", basicClass.typeElement, basicClass.typeElement)
-                .addStatement("\$T extras = savedInstanceState == null ? $snippetToRetrieveState", BUNDLE.java)
-                .beginControlFlow("if(extras != null)")
+                .beginControlFlow("if(savedInstanceState != null)")
 
         for (field in basicClass.fields) {
             val name = field.name
@@ -31,16 +30,16 @@ abstract class BasicInjectMethodBuilder(val basicClass: BasicClass) {
 
             when {
                 field is OptionalField && field.isPrivate -> {
-                    injectMethodBuilder.addStatement("typedInstance.set\$L(\$T.<\$T>get(extras, \$S, \$L))", name.capitalize(), RUNTIME_UTILS.java, typeName, name, field.defaultValue)
+                    injectMethodBuilder.addStatement("typedInstance.set\$L(\$T.<\$T>get(savedInstanceState, \$S, \$L))", name.capitalize(), RUNTIME_UTILS.java, typeName, name, field.defaultValue)
                 }
                 field is OptionalField && !field.isPrivate -> {
-                    injectMethodBuilder.addStatement("typedInstance.\$L = \$T.<\$T>get(extras, \$S, \$L)", name, RUNTIME_UTILS.java, typeName, name, field.defaultValue)
+                    injectMethodBuilder.addStatement("typedInstance.\$L = \$T.<\$T>get(savedInstanceState, \$S, \$L)", name, RUNTIME_UTILS.java, typeName, name, field.defaultValue)
                 }
                 field !is OptionalField && field.isPrivate -> {
-                    injectMethodBuilder.addStatement("typedInstance.set\$L(\$T.<\$T>get(extras, \$S))", name.capitalize(), RUNTIME_UTILS.java, typeName, name)
+                    injectMethodBuilder.addStatement("typedInstance.set\$L(\$T.<\$T>get(savedInstanceState, \$S))", name.capitalize(), RUNTIME_UTILS.java, typeName, name)
                 }
                 field !is OptionalField && !field.isPrivate -> {
-                    injectMethodBuilder.addStatement("typedInstance.\$L = \$T.<\$T>get(extras, \$S)", name, RUNTIME_UTILS.java, typeName, name)
+                    injectMethodBuilder.addStatement("typedInstance.\$L = \$T.<\$T>get(savedInstanceState, \$S)", name, RUNTIME_UTILS.java, typeName, name)
                 }
             }
         }

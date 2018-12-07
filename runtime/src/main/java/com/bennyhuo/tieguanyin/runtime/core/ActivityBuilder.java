@@ -38,14 +38,13 @@ public class ActivityBuilder {
     private Application.ActivityLifecycleCallbacks activityLifecycleCallbacks = new Application.ActivityLifecycleCallbacks() {
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-            currentActivityRef = new WeakReference<>(activity);
             performInject(activity, savedInstanceState);
             FragmentBuilder.INSTANCE.onActivityCreated(activity);
         }
         //region unused
         @Override
         public void onActivityStarted(Activity activity) {
-
+            currentActivityRef = new WeakReference<>(activity);
         }
 
         @Override
@@ -84,6 +83,13 @@ public class ActivityBuilder {
 
     private void performInject(Activity activity, Bundle savedInstanceState){
         try {
+            if(savedInstanceState == null){
+                Intent intent = activity.getIntent();
+                if(intent == null){
+                    return;
+                }
+                savedInstanceState = intent.getExtras();
+            }
             BuilderClassFinder.findBuilderClass(activity).getDeclaredMethod("inject", Activity.class, Bundle.class).invoke(null, activity, savedInstanceState);
         } catch (Exception e) {
             Logger.warn(e);
@@ -134,7 +140,7 @@ public class ActivityBuilder {
                 FragmentManager fragmentManager = activity.getFragmentManager();
                 Fragment fragment = fragmentManager.findFragmentByTag(ResultFragment.TAG);
                 ResultFragment resultFragment;
-                if (fragment != null && fragment instanceof ResultFragment) {
+                if (fragment instanceof ResultFragment) {
                     resultFragment = (ResultFragment) fragment;
                 } else {
                     resultFragment = new ResultFragment();

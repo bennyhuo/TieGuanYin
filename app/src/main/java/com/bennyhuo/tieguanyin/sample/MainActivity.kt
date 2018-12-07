@@ -7,17 +7,26 @@ import android.transition.ChangeBounds
 import android.transition.ChangeTransform
 import android.transition.TransitionSet
 import android.util.Log
+import com.bennyhuo.tieguanyin.annotations.Builder
+import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.sample.inner.startInnerClass
 import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
 
+@Builder
 class MainActivity : AppCompatActivity() {
+
+    @Required
+    var num: Int = 0
+
+    @Required
+    var string = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.sharedElementExitTransition = TransitionSet().addTransition(ChangeBounds()).addTransition(ChangeTransform())
         setContentView(R.layout.activity_main)
-        setTitle(this.javaClass.simpleName)
+        title = this.javaClass.simpleName
 
         openJavaActivity.setOnClickListener {
             JavaActivityBuilder.builder(1)
@@ -48,11 +57,21 @@ class MainActivity : AppCompatActivity() {
 
             startUserActivity(30, "bennyhuo", "Kotliner", "Kotlin Developer")
         }
+
+        openMainActivity.setOnClickListener {
+            startMainActivity(1024, Math.random().toString())
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d("test", "resultCode: $resultCode, data: $data")
         textView.text = "onActivityResult -- "
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        processNewIntent(intent)
+        toast("onNewIntent: num=$num, string=$string")
     }
 }

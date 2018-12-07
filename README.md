@@ -230,6 +230,32 @@ Tieguanyin.init(this);
 ```
 即可。
 
+
+### NewIntent
+
+由于 `onNewIntent` 没有相应的回调，我们无法在框架内部做到用户无感的数据注入，因此如果你需要处理这种情况，请主动调用 `processNewIntent` 方法：
+
+在 Java  中：
+
+```java
+@Override
+public void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    MyActivityBuilder.processNewIntent(this, intent);
+}
+```
+
+在 Kotlin 中：
+
+```kotlin
+override fun onNewIntent(intent: Intent?) {
+    super.onNewIntent(intent)
+    processNewIntent(intent)
+}
+```
+
+我们也提供了参数 `updateIntent`，如果你不希望在注入数据的时候同时也调用 `setIntent(intent)` 来更新 `activity` 的 `intent`，请将它置为 `false`。
+
 ## 项目状态
 
 * 当前最新版本：![Bintray](https://img.shields.io/bintray/v/bennyhuo/bennyhuo/tieguanyin-compiler.svg)
