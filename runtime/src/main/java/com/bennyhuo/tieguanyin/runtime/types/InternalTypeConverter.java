@@ -4,6 +4,8 @@ public class InternalTypeConverter<T> implements TypeConverter<T, T> {
 
     public final static InternalTypeConverter INSTANCE = new InternalTypeConverter();
 
+    private InternalTypeConverter(){  }
+
     @Override
     public T convertFrom(T t) {
         return t;

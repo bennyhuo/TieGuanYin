@@ -27,6 +27,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compileOnly 'com.android.support:support-fragment:27.1.1'
+    implementation project(":runtime")
     testImplementation 'junit:junit:4.12'
 }
 

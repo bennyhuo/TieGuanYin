@@ -64,7 +64,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         openArbitraryDataTypeActivity.setOnClickListener {
-            startArbitraryDataTypeActivity(Person(4, "kotliner"), Book(1, Person(9, "kotliner")))
+            startArbitraryDataTypeActivity(Person(4, "kotliner"), Book(1, Person(9, "kotliner"))){
+                java, kotlin, person ->
+                textView.text = "onActivityResult -- ${java.contentToString()}, ${kotlin.contentToString()}, $person"
+            }
         }
     }
 

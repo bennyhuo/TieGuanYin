@@ -2,12 +2,12 @@ package com.bennyhuo.tieguanyin.runtime;
 
 import android.content.Context;
 
+import com.bennyhuo.tieguanyin.runtime.core.ActivityBuilder;
 import com.bennyhuo.tieguanyin.runtime.types.DefaultTypeConverter;
 import com.bennyhuo.tieguanyin.runtime.types.DefaultTypeCreator;
 import com.bennyhuo.tieguanyin.runtime.types.InternalTypeConverter;
 import com.bennyhuo.tieguanyin.runtime.types.SupportedTypes;
 import com.bennyhuo.tieguanyin.runtime.types.TypeConverter;
-import com.bennyhuo.tieguanyin.runtime.core.ActivityBuilder;
 import com.bennyhuo.tieguanyin.runtime.types.TypeCreator;
 
 import java.util.Map;
@@ -33,7 +33,7 @@ public class Tieguanyin {
 
         TypeConverter<T, R> converter = (TypeConverter<T, R>) converters.get(cls);
         if(converter == null){
-            converter  = new DefaultTypeConverter();
+            converter  = new DefaultTypeConverter(cls);
             converters.put(cls, converter);
         }
         return converter;
@@ -48,8 +48,7 @@ public class Tieguanyin {
     public static <T> TypeCreator<T> findProperCreator(Class<T> cls){
         TypeCreator<T> creator = (TypeCreator<T>) creators.get(cls);
         if(creator == null){
-            creator = new DefaultTypeCreator(cls);
-            creators.put(cls, creator);
+            return DefaultTypeCreator.INSTANCE;
         }
         return creator;
     }

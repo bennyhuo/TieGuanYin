@@ -20,8 +20,9 @@ class FinishKFunctionBuilder(private val activityClass: ActivityClass) {
                         .addStatement("setResult(1, intent)")
             }
         }.forEach { resultParameter ->
+            val template = resultParameter.kotlinTemplateToBundle()
             funBuilder.addParameter(resultParameter.name, resultParameter.kotlinTypeName)
-                    .addStatement("intent.putExtra(%S, %L)", resultParameter.name, resultParameter.name)
+                    .addStatement("intent.putExtra(%S, ${template.first})", resultParameter.name, *template.second)
         }
 
         funBuilder.addStatement("%T.finishAfterTransition(this)", ACTIVITY_COMPAT.kotlin)

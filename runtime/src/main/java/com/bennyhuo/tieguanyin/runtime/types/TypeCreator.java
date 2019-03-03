@@ -1,5 +1,5 @@
 package com.bennyhuo.tieguanyin.runtime.types;
 
 public interface TypeCreator<T> {
-    T create();
+    T create(Class<T> cls);
 }

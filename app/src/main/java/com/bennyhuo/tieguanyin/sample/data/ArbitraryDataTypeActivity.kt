@@ -6,13 +6,16 @@ import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.GenerateMode.Both
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.annotations.Required
+import com.bennyhuo.tieguanyin.annotations.ResultEntity
 import com.bennyhuo.tieguanyin.sample.JavaActivityBuilder
 import com.bennyhuo.tieguanyin.sample.R
 import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
 
-@Builder(mode = Both
-        //resultTypes = [(ResultEntity(name = "java", type = Array<String>::class)), (ResultEntity(name = "kotlin", type = IntArray::class))],
+@Builder(mode = Both,
+        resultTypes = [ResultEntity(name = "java", type = Array<String>::class),
+            ResultEntity(name = "kotlin", type = IntArray::class),
+            ResultEntity(name = "person", type = Person::class)]
 )
 class ArbitraryDataTypeActivity : AppCompatActivity() {
 
@@ -35,7 +38,7 @@ class ArbitraryDataTypeActivity : AppCompatActivity() {
 
         openKotlinActivity.text = "Finish With java='I'm Kotlin!' & kotlin=12"
         openKotlinActivity.setOnClickListener {
-            //smartFinish(arrayOf("I'm Java!", "You're Kotlin!"), intArrayOf(12))
+            smartFinish(arrayOf("I'm Java!", "You're Kotlin!"), intArrayOf(12), Person(121212, "James"))
         }
 
         textView.text = "person=$person, book=$book"

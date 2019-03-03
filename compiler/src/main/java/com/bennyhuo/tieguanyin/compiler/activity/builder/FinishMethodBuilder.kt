@@ -26,8 +26,9 @@ class FinishMethodBuilder(private val activityClass: ActivityClass) {
             }
         }.forEach {
             resultParameter ->
+            val template = resultParameter.javaTemplateToBundle()
             finishMethodBuilder.addParameter(resultParameter.javaTypeName, resultParameter.name)
-            finishMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", resultParameter.name, resultParameter.name)
+            finishMethodBuilder.addStatement("intent.putExtra(\$S, ${template.first})", resultParameter.name, *template.second)
         }
 
         finishMethodBuilder.addStatement("\$T.finishAfterTransition(activity)", ACTIVITY_COMPAT.java)

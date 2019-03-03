@@ -3,7 +3,6 @@ package com.bennyhuo.tieguanyin.compiler.activity.entity
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.basic.types.BUNDLE
 import com.bennyhuo.tieguanyin.compiler.basic.types.ON_ACTIVITY_RESULT_LISTENER
-import com.bennyhuo.tieguanyin.compiler.basic.types.RUNTIME_UTILS
 import com.squareup.kotlinpoet.*
 import java.util.*
 
@@ -34,9 +33,9 @@ class KotlinOnResultListener(private val activityClass: ActivityClass) {
         argsKt.add(name)
 
         activityClass.resultParameters.forEach { resultParameter ->
-            statementBuilderKt.append("%T.get(bundle, %S),")
-            argsKt.add(RUNTIME_UTILS.kotlin)
-            argsKt.add(resultParameter.name)
+            val template = resultParameter.kotlinTemplateFromBundle("bundle")
+            statementBuilderKt.append("${template.first},")
+            argsKt.addAll(template.second)
         }
         if (statementBuilderKt.isNotEmpty()) {
             statementBuilderKt.deleteCharAt(statementBuilderKt.length - 1)

@@ -58,8 +58,12 @@ public class SupportedTypes {
         Logger.INSTANCE.warn("isInternalType, type: " + type + ", class: " + type.getClass() + ", name: " + type.asElement().name);
         if(type.isPrimitive()) return true;
         if(type instanceof Type.ClassType){
-            Logger.INSTANCE.warn("isInternalType, " + type.asElement().getQualifiedName().toString());
+            Logger.INSTANCE.warn("-- ClassType, " + type.asElement().getQualifiedName().toString());
             return internalTypeSet.contains(type.asElement().getQualifiedName().toString());
+        }
+        if(type instanceof Type.ArrayType){
+            Logger.INSTANCE.warn("-- ArrayType, " + type.asElement().getQualifiedName().toString());
+            return internalTypeSet.contains(type.toString());
         }
         return false;
     }

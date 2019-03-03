@@ -36,7 +36,8 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
             } else {
                 funBuilderOfContext.addParameter(name, className)
             }
-            funBuilderOfContext.addStatement("intent.putExtra(%S, %L)", name, name)
+            val template = field.kotlinTemplateToBundle(suggestedGetterName = name)
+            funBuilderOfContext.addStatement("intent.putExtra(%S, ${template.first})", name, *template.second)
         }
 
         funBuilderOfContext.addParameter(ParameterSpec.builder("tag", STRING.kotlin.asNullable()).defaultValue("null").build())

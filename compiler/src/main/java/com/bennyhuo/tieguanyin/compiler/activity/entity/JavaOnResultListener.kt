@@ -3,7 +3,6 @@ package com.bennyhuo.tieguanyin.compiler.activity.entity
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.basic.types.BUNDLE
 import com.bennyhuo.tieguanyin.compiler.basic.types.ON_ACTIVITY_RESULT_LISTENER
-import com.bennyhuo.tieguanyin.compiler.basic.types.RUNTIME_UTILS
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
@@ -49,10 +48,9 @@ class JavaOnResultListener(private val activityClass: ActivityClass) {
         val args = ArrayList<Any>()
         args.add(name)
         activityClass.resultParameters.forEach { resultEntity ->
-            statementBuilder.append("\$T.<\$T>get(bundle, \$S),")
-            args.add(RUNTIME_UTILS.java)
-            args.add(resultEntity.javaTypeName.box())
-            args.add(resultEntity.name)
+            val template = resultEntity.javaTemplateFromBundle("bundle")
+            statementBuilder.append("${template.first},")
+            args.addAll(template.second)
         }
         if (statementBuilder.isNotEmpty()) {
             statementBuilder.deleteCharAt(statementBuilder.length - 1)
