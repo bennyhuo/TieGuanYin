@@ -30,7 +30,8 @@ class FieldBuilder(private val basicClass: BasicClass) {
             //field
             typeBuilder.addField(FieldSpec.builder(field.asTypeName(), field.name, PRIVATE).build())
             //fillIntent
-            fillIntentMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", field.name, field.name)
+            val template = field.javaTemplateToBundle(suggestedGetterName = field.name)
+            fillIntentMethodBuilder.addStatement("intent.putExtra(\$S, ${template.first})", field.name, *template.second)
             //constructor
             createBuilderMethodBuilder.addParameter(ParameterSpec.builder(field.asTypeName(), field.name).build())
                     .addStatement("builder.\$L = \$L", field.name, field.name)
@@ -51,9 +52,10 @@ class FieldBuilder(private val basicClass: BasicClass) {
             if (field.isPrimitive) {
                 fillIntentMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", field.name, field.name)
             } else {
+                val template = field.javaTemplateToBundle(suggestedGetterName = field.name)
                 fillIntentMethodBuilder
                         .beginControlFlow("if(\$L != null)", field.name)
-                        .addStatement("intent.putExtra(\$S, \$L)", field.name, field.name)
+                        .addStatement("intent.putExtra(\$S, ${template.first})", field.name, *template.second)
                         .endControlFlow()
             }
         }

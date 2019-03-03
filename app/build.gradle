@@ -5,6 +5,16 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 apply plugin: "kotlin-kapt"
+apply plugin: "kotlin-noarg"
+apply plugin: "kotlin-allopen"
+
+noArg {
+    annotation "com.bennyhuo.tieguanyin.annotations.Data"
+}
+
+allOpen {
+    annotation "com.bennyhuo.tieguanyin.annotations.Data"
+}
 
 android {
     compileSdkVersion 27
@@ -20,7 +30,7 @@ android {
     }
     buildTypes {
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {

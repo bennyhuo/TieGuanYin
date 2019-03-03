@@ -6,6 +6,8 @@ import com.bennyhuo.aptutils.types.ClassType
 /**
  * Created by benny on 2/2/18.
  */
+val TIEGUANYIN = ClassType("com.bennyhuo.tieguanyin.runtime.Tieguanyin")
+
 val GENERATED_ANNOTATION = ClassType("com.bennyhuo.tieguanyin.annotations.Generated")
 
 val INTENT = ClassType("android.content.Intent")
@@ -38,3 +40,8 @@ val VIEW_GROUP = ClassType("android.view.ViewGroup")
 val FRAGMENT = ClassType("android.app.Fragment")
 
 val STRING = ClassType("java.lang.String")
+
+val PARCELABLE = ClassType("android.os.Parcelable")
+val PARCELABLE_ARRAY = ClassType("android.os.Parcelable[]")
+val SIZE = ClassType("android.util.Size")
+val SIZEF = ClassType("android.util.SizeF")

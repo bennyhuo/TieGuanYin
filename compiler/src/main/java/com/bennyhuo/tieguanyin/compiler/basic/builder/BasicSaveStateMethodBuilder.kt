@@ -23,13 +23,27 @@ abstract class BasicSaveStateMethodBuilder(val basicClass: BasicClass) {
 
         methodBuilder.addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
 
-        for (requiredField in basicClass.fields) {
-            val name = requiredField.name
-            if (requiredField.isPrivate) {
-                methodBuilder.addStatement("intent.putExtra(\$S, typedInstance.get\$L())", name, name.capitalize())
-            } else {
-                methodBuilder.addStatement("intent.putExtra(\$S, typedInstance.\$L)", name, name)
-            }
+        for (field in basicClass.fields) {
+            val name = field.name
+
+            val template = field.javaTemplateToBundle("typedInstance")
+            methodBuilder.addStatement("intent.putExtra(\$S, ${template.first})", name, *template.second)
+
+//            if(field.isInternalType) {
+//                if (field.isPrivate) {
+//                    methodBuilder.addStatement("intent.putExtra(\$S, typedInstance.get\$L())", name, name.capitalize())
+//                } else {
+//                    methodBuilder.addStatement("intent.putExtra(\$S, typedInstance.\$L)", name, name)
+//                }
+//            } else if(field.isAnnotatedType){
+//                if (field.isPrivate) {
+//                    methodBuilder.addStatement("intent.putExtra(\$S, Tieguanyin.<\$T, Bundle>findProperConverter(\$T.class).convertFrom(typedInstance.get\$L))", name, field.asTypeName(), field.asTypeName(), name.capitalize())
+//                } else {
+//                    methodBuilder.addStatement("intent.putExtra(\$S, Tieguanyin.<\$T, Bundle>findProperConverter(\$T.class).convertFrom(typedInstance.\$L))", name, field.asTypeName(), field.asTypeName(), name)
+//                }
+//            } else {
+//                throw UnsupportedOperationException("Unsupported type: ${field.name}")
+//            }
         }
 
         methodBuilder.addStatement("outState.putAll(intent.getExtras())").endControlFlow()

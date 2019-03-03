@@ -2,6 +2,8 @@ package com.bennyhuo.tieguanyin.compiler.basic.entity
 
 import com.bennyhuo.aptutils.types.isSameTypeWith
 import com.bennyhuo.tieguanyin.annotations.Optional
+import com.bennyhuo.tieguanyin.compiler.basic.types.RUNTIME_UTILS
+import com.bennyhuo.tieguanyin.compiler.basic.types.TIEGUANYIN
 import com.sun.tools.javac.code.Symbol
 import javax.lang.model.type.TypeKind
 
@@ -37,6 +39,18 @@ class OptionalField(symbol: Symbol.VarSymbol) : Field(symbol) {
     }
 
     override fun asKotlinTypeName() = super.asKotlinTypeName().asNullable()
+
+    override fun javaTemplateFromBundle(bundleName: String, suggestedKey: String): Pair<String, Array<out Any?>>{
+        val key = if(suggestedKey.isEmpty()) name else suggestedKey
+        return if(isInternalType){
+            "\$T.<\$T>get($bundleName, \$S, \$L)" to arrayOf(RUNTIME_UTILS.java, asTypeName().box(), key, defaultValue)
+        } else if(isAnnotatedType){
+            "\$T.findProperConverter(\$T.class).convertTo(\$T.get($bundleName, \$S, \$L))" to arrayOf(TIEGUANYIN.java, asTypeName(), RUNTIME_UTILS.java, key, defaultValue)
+        } else {
+            throw UnsupportedOperationException("Unsupported type: ${symbol.enclosingElement}: ${symbol}")
+        }
+    }
+
 
     override fun compareTo(other: Field): Int {
         return if (other is OptionalField) {

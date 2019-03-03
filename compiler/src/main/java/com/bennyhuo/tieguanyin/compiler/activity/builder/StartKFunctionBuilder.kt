@@ -32,12 +32,13 @@ class StartKFunctionBuilder(private val activityClass: ActivityClass) {
             functionBuilderOfContext.addStatement("intent.addFlags(%L)", flag)
         }
 
-        activityClass.fields.forEach { requiredField ->
+        activityClass.fields.forEach { field ->
+            val template = field.kotlinTemplateToBundle(suggestedGetterName = field.name)
             functionBuilderOfContext.addParameter(
-                    ParameterSpec.builder(requiredField.name, requiredField.asKotlinTypeName())
-                            .also { if (requiredField is OptionalField) it.defaultValue("null") }
+                    ParameterSpec.builder(field.name, field.asKotlinTypeName())
+                            .also { if (field is OptionalField) it.defaultValue("null") }
                             .build())
-                    .addStatement("intent.putExtra(%S, %L)", requiredField.name, requiredField.name)
+                    .addStatement("intent.putExtra(%S, ${template.first})", field.name, *template.second)
         }
 
         val sharedElements = activityClass.sharedElements

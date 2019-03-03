@@ -3,15 +3,17 @@ package com.bennyhuo.tieguanyin.compiler
 import com.bennyhuo.aptutils.logger.Logger
 import com.bennyhuo.aptutils.types.isSubTypeOf
 import com.bennyhuo.tieguanyin.annotations.Builder
+import com.bennyhuo.tieguanyin.annotations.Data
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
+import com.bennyhuo.tieguanyin.compiler.basic.types.DataType
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
 import com.google.auto.common.SuperficialValidation
+import com.sun.tools.javac.code.Symbol.ClassSymbol
 import com.sun.tools.javac.code.Symbol.VarSymbol
-import java.util.*
 import javax.annotation.processing.Filer
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
@@ -23,6 +25,7 @@ class ClassProcessor(val filer: Filer){
     private val fragmentClasses = HashMap<Element, FragmentClass>()
 
     fun process(env: RoundEnvironment){
+        parseDataClass(env)
         parseClass(env)
         parseFields(env)
         buildFiles()
@@ -74,4 +77,21 @@ class ClassProcessor(val filer: Filer){
                 }
         activityClasses.values.forEach { it.setUpSuperClass(activityClasses) }
     }
+
+    private fun parseDataClass(env: RoundEnvironment) {
+
+        env.getElementsAnnotatedWith(Data::class.java)
+                .filter(SuperficialValidation::validateElement)
+                .filter { it.kind.isClass }
+                .forEach { element ->
+                    try {
+                        val classSymbol = element as ClassSymbol
+                        Logger.warn("Annotated, classSymbol type: ${classSymbol.type}, ${classSymbol.type.javaClass}")
+                        DataType.dataTypes[classSymbol.type] = DataType(element as TypeElement)
+                    } catch (e: Exception) {
+                        Logger.logParsingError(element, Data::class.java, e)
+                    }
+                }
+    }
+
 }

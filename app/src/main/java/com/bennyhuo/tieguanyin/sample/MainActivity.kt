@@ -9,6 +9,9 @@ import android.transition.TransitionSet
 import android.util.Log
 import com.bennyhuo.tieguanyin.annotations.Builder
 import com.bennyhuo.tieguanyin.annotations.Required
+import com.bennyhuo.tieguanyin.sample.data.Book
+import com.bennyhuo.tieguanyin.sample.data.Person
+import com.bennyhuo.tieguanyin.sample.data.startArbitraryDataTypeActivity
 import com.bennyhuo.tieguanyin.sample.inner.startInnerClass
 import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
@@ -58,6 +61,10 @@ class MainActivity : AppCompatActivity() {
 
         openMainActivity.setOnClickListener {
             startMainActivity(1024, Math.random().toString())
+        }
+
+        openArbitraryDataTypeActivity.setOnClickListener {
+            startArbitraryDataTypeActivity(Person(4, "kotliner"), Book(1, Person(9, "kotliner")))
         }
     }
 

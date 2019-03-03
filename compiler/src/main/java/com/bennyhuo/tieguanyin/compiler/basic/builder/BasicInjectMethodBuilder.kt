@@ -1,9 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.basic.builder
 
 import com.bennyhuo.tieguanyin.compiler.basic.BasicClass
-import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
 import com.bennyhuo.tieguanyin.compiler.basic.types.BUNDLE
-import com.bennyhuo.tieguanyin.compiler.basic.types.RUNTIME_UTILS
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
@@ -26,21 +24,11 @@ abstract class BasicInjectMethodBuilder(val basicClass: BasicClass) {
 
         for (field in basicClass.fields) {
             val name = field.name
-            val typeName = field.asTypeName().box()
-
-            when {
-                field is OptionalField && field.isPrivate -> {
-                    injectMethodBuilder.addStatement("typedInstance.set\$L(\$T.<\$T>get(savedInstanceState, \$S, \$L))", name.capitalize(), RUNTIME_UTILS.java, typeName, name, field.defaultValue)
-                }
-                field is OptionalField && !field.isPrivate -> {
-                    injectMethodBuilder.addStatement("typedInstance.\$L = \$T.<\$T>get(savedInstanceState, \$S, \$L)", name, RUNTIME_UTILS.java, typeName, name, field.defaultValue)
-                }
-                field !is OptionalField && field.isPrivate -> {
-                    injectMethodBuilder.addStatement("typedInstance.set\$L(\$T.<\$T>get(savedInstanceState, \$S))", name.capitalize(), RUNTIME_UTILS.java, typeName, name)
-                }
-                field !is OptionalField && !field.isPrivate -> {
-                    injectMethodBuilder.addStatement("typedInstance.\$L = \$T.<\$T>get(savedInstanceState, \$S)", name, RUNTIME_UTILS.java, typeName, name)
-                }
+            val template = field.javaTemplateFromBundle("savedInstanceState")
+            if (field.isPrivate) {
+                injectMethodBuilder.addStatement("typedInstance.set\$L(${template.first})", name.capitalize(), *template.second)
+            } else {
+                injectMethodBuilder.addStatement("typedInstance.\$L = ${template.first}", name, *template.second)
             }
         }
         injectMethodBuilder.endControlFlow().endControlFlow()
