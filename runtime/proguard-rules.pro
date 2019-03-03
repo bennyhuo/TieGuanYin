@@ -19,3 +19,14 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class com.bennyhuo.tieguanyin.annotations.*
+
+-keepnames @com.bennyhuo.tieguanyin.annotations.Builder public class *
+-keep @com.bennyhuo.tieguanyin.annotations.Generated public class ** {  *; }
+-keepnames @com.bennyhuo.tieguanyin.annotations.Generated class ** { *; }
+# -keepnames public class **Builder { *; }
+
+-keep public class android.support.v4.app.Fragment {
+    java.lang.String mWho;
+}

@@ -1,6 +1,8 @@
 package com.bennyhuo.tieguanyin.compiler.basic
 
 import com.bennyhuo.tieguanyin.annotations.GenerateMode
+import com.bennyhuo.tieguanyin.compiler.basic.types.GENERATED_ANNOTATION
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeSpec
 import com.squareup.kotlinpoet.FileSpec
@@ -36,6 +38,7 @@ abstract class BasicClassBuilder(private val basicClass: BasicClass){
 
         val typeBuilder = TypeSpec.classBuilder(basicClass.builderClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addAnnotation(GENERATED_ANNOTATION.java as ClassName)
 
         buildCommon(typeBuilder)
 
@@ -43,6 +46,7 @@ abstract class BasicClassBuilder(private val basicClass: BasicClass){
             GenerateMode.JavaOnly -> buildJavaBuilders(typeBuilder)
             GenerateMode.KotlinOnly -> {
                 val fileSpecBuilder = FileSpec.builder(basicClass.packageName, basicClass.builderClassName)
+                        .addAnnotation(GENERATED_ANNOTATION.kotlin as com.squareup.kotlinpoet.ClassName)
                 buildKotlinBuilders(fileSpecBuilder)
                 writeKotlinToFile(filer, fileSpecBuilder.build())
             }

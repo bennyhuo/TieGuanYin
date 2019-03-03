@@ -6,6 +6,7 @@ import com.bennyhuo.aptutils.types.ClassType
 /**
  * Created by benny on 2/2/18.
  */
+val GENERATED_ANNOTATION = ClassType("com.bennyhuo.tieguanyin.annotations.Generated")
 
 val INTENT = ClassType("android.content.Intent")
 val BUNDLE = ClassType("android.os.Bundle")

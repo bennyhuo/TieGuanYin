@@ -54,8 +54,6 @@ class MainActivity : AppCompatActivity() {
 
         openInnerActivity.setOnClickListener {
             startInnerClass(2, true)
-
-            startUserActivity(30, "bennyhuo", "Kotliner", "Kotlin Developer")
         }
 
         openMainActivity.setOnClickListener {
