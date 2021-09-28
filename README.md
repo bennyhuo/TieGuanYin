@@ -210,7 +210,7 @@ public final class UserActivityBuilder {
 ```
 repositories {
     ...
-    jcenter()
+    mavenCentral()
     ...
 }
 ```
@@ -218,8 +218,8 @@ repositories {
 依赖配置：
 
 ```
-api "com.bennyhuo.tieguanyin:tieguanyin-runtime:$latest_version"
-kapt "com.bennyhuo.tieguanyin:tieguanyin-compiler:$latest_version"
+api "com.bennyhuo.tieguanyin:runtime:$latest_version"
+kapt "com.bennyhuo.tieguanyin:compiler:$latest_version"
 ```
 如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
 
