@@ -44,7 +44,9 @@ public class ListenerEnvironment {
                 // 注意这个其实是 $this 引用，指向外部类实例
                 outerRefField = cls.getDeclaredFields()[0];
                 outerRefField.setAccessible(true);
-                obj = outerRefField.get(obj);
+                Object outerObject = outerRefField.get(obj);
+                // 内联的 lambda
+                if (outerObject == obj) break;
                 cls = obj.getClass();
             }
 

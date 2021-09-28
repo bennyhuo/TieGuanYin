@@ -1,45 +1,32 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.2.61'
+    ext.kotlin_version = '1.5.30'
     repositories {
-        google()
-        jcenter()
+        maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
+        classpath 'com.android.tools.build:gradle:4.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        //这个插件目前还不支持 4.5 以上的 gradle
-        classpath 'com.novoda:bintray-release:0.8.1'
 
+        classpath("com.vanniktech:gradle-maven-publish-plugin:0.14.2")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:0.10.1")
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
 
-allprojects {
+subprojects {
     repositories {
-        google()
-        jcenter()
+        maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
     }
-}
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+    if (!name.startsWith("app")) {
+        afterEvaluate {
+            group = GROUP
+            version = VERSION_NAME
 
-def props = new Properties()
-file("jcenter.properties").withInputStream { props.load(it) }
-
-ext {
-    userName = props.getProperty("bintray.user")
-    apiKey = props.getProperty("bintray.key")
-    repoName = "bennyhuo"
-    groupId = 'com.bennyhuo.tieguanyin'
-    //bintray-release PropertyFinder retiever property from project firstly,
-    //so use a different name to avoid overriding
-    commonVersion = '2.0-beta4'
-    desc = "Generate methods/functions to help start Activities or Fragments."
-    website = 'https://github.com/enbandari/tieguanyin'
-    dryRun = "false"
+            apply plugin: "com.vanniktech.maven.publish"
+        }
+    }
 }

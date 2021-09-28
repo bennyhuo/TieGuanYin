@@ -4,41 +4,5 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
-
-javadoc {
-    options.encoding = 'UTF-8'
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-//region bintray
-apply plugin: 'com.novoda.bintray-release'
-
-publish {
-    userOrg = project.userName
-    groupId = project.groupId
-    repoName = project.repoName
-    artifactId = 'tieguanyin-annotations'
-    publishVersion = project.commonVersion
-    desc = project.desc//描述，不重要
-    website = project.website
-    bintrayUser = project.userName
-    bintrayKey = project.apiKey
-    dryRun = project.dryRun
-}
-//endregion
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
