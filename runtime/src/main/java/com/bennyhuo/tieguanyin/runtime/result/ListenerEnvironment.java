@@ -1,8 +1,6 @@
 package com.bennyhuo.tieguanyin.runtime.result;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentUtils;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.SupportFragmentUtils;
 import android.util.Log;
@@ -24,7 +22,6 @@ import java.util.ArrayList;
 public class ListenerEnvironment {
     public final OnActivityResultListener onActivityResultListener;
     private ActivityField activityField;
-    private ArrayList<FragmentField> fragmentFields = new ArrayList<>();
     private ArrayList<FragmentField> supportFragmentFields = new ArrayList<>();
     private ArrayList<ViewField> viewFields = new ArrayList<>();
 
@@ -60,9 +57,6 @@ public class ListenerEnvironment {
                     if(View.class.isAssignableFrom(field.getType())){
                         int id = ((View)field.get(obj)).getId();
                         viewFields.add(new ViewField(obj, field, id));
-                    } else if(Fragment.class.isAssignableFrom(field.getType())){
-                        String who = FragmentUtils.getWhoFromFragment((Fragment)field.get(obj));
-                        fragmentFields.add(new FragmentField(obj, field, who));
                     } else if(android.support.v4.app.Fragment.class.isAssignableFrom(field.getType())){
                         String who = SupportFragmentUtils.getWhoFromFragment((android.support.v4.app.Fragment)field.get(obj));
                         supportFragmentFields.add(new FragmentField(obj, field, who));
@@ -93,9 +87,6 @@ public class ListenerEnvironment {
         }
         for (ViewField viewField: viewFields) {
             viewField.update(resultFragment.getActivity().findViewById(viewField.id));
-        }
-        for (FragmentField fragmentField : fragmentFields) {
-            fragmentField.update(FragmentUtils.findFragmentByWho(resultFragment.getActivity().getFragmentManager(), fragmentField.who));
         }
         if(resultFragment.getActivity() instanceof FragmentActivity){
             FragmentActivity fragmentActivity = (FragmentActivity) resultFragment.getActivity();

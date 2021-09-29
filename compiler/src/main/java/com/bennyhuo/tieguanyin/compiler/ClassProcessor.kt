@@ -8,6 +8,7 @@ import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
+import com.bennyhuo.tieguanyin.compiler.basic.types.useAndroidx
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
 import com.google.auto.common.SuperficialValidation
 import com.sun.tools.javac.code.Symbol.VarSymbol
@@ -17,15 +18,20 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
+import kotlin.system.measureNanoTime
 
 class ClassProcessor(val filer: Filer){
     private val activityClasses = HashMap<Element, ActivityClass>()
     private val fragmentClasses = HashMap<Element, FragmentClass>()
 
     fun process(env: RoundEnvironment){
-        parseClass(env)
-        parseFields(env)
-        buildFiles()
+        measureNanoTime {
+            parseClass(env)
+            parseFields(env)
+            buildFiles()
+        }.let {
+            Logger.warn("Cost time: ${it}ns")
+        }
     }
 
     private fun buildFiles() {
@@ -64,6 +70,13 @@ class ClassProcessor(val filer: Filer){
                         if (element.asType().isSubTypeOf("android.app.Activity")) {
                             activityClasses[element] = ActivityClass(element as TypeElement)
                         } else if (element.asType().isSubTypeOf("android.support.v4.app.Fragment")) {
+                            useAndroidx = false
+                            Logger.warn(element, "use support")
+
+                            fragmentClasses[element] = FragmentClass(element as TypeElement)
+                        } else if (element.asType().isSubTypeOf("androidx.fragment.app.Fragment")) {
+                            useAndroidx = true
+                            Logger.warn(element, "use Androidx")
                             fragmentClasses[element] = FragmentClass(element as TypeElement)
                         } else {
                             Logger.error(element, "Unsupported type: %s", element.simpleName)

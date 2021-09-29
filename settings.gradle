@@ -1,1 +1,4 @@
-include ':app', ':runtime', ':compiler', ':annotations', ':app-java', ':runtime-kt'
+include ':app', ':app-java', ':app-androidx'
+include ':compiler', ':annotations', ':runtime', ':runtime-androidx', ':runtime-kt'
+
+includeBuild(file("../Apt-Utils"))

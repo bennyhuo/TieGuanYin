@@ -8,7 +8,7 @@ plugins {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':annotations')
-    implementation 'com.bennyhuo.aptutils:aptutils:1.6'
+    implementation 'com.bennyhuo:aptutils:1.8'
     implementation 'com.google.auto:auto-common:0.8'
     implementation 'com.squareup:javapoet:1.9.0'
     implementation 'com.squareup:kotlinpoet:1.0.0-RC1'

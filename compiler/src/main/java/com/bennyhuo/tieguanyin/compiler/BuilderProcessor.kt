@@ -26,7 +26,7 @@ class BuilderProcessor : AbstractProcessor() {
 
     override fun getSupportedAnnotationTypes() = supportedAnnotations.mapTo(HashSet<String>(), Class<*>::getCanonicalName)
 
-    override fun getSupportedSourceVersion() = SourceVersion.RELEASE_7
+    override fun getSupportedSourceVersion() = SourceVersion.RELEASE_8
 
     override fun process(annotations: Set<TypeElement>, env: RoundEnvironment): Boolean {
         ClassProcessor(AptContext.filer).process(env)

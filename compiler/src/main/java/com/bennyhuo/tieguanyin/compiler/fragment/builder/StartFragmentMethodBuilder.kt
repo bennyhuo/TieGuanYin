@@ -31,7 +31,7 @@ abstract class StartFragmentMethodBuilder(protected val fragmentClass: FragmentC
                 .addParameter(ACTIVITY.java, "activity")
                 .addParameter(Int::class.javaPrimitiveType, "containerId")
                 .addParameter(STRING.java, "tag")
-                .beginControlFlow("if(activity instanceof \$T)", SUPPORT_ACTIVITY.java)
+                .beginControlFlow("if(activity instanceof \$T)", FRAGMENT_ACTIVITY.java)
                 .addStatement("\$T.INSTANCE.init(activity)", ACTIVITY_BUILDER.java)
 
         methodBuilder.addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
@@ -39,9 +39,9 @@ abstract class StartFragmentMethodBuilder(protected val fragmentClass: FragmentC
         methodBuilder.addStatement("fillIntent(intent)")
 
         if (fragmentClass.sharedElements.isEmpty()) {
-            methodBuilder.addStatement("return \$T.showFragment((\$T) activity, \$L, containerId, tag, intent.getExtras(), \$T.class, null)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, isReplace, fragmentClass.typeElement)
+            methodBuilder.addStatement("return \$T.showFragment((\$T) activity, \$L, containerId, tag, intent.getExtras(), \$T.class, null)", FRAGMENT_BUILDER.java, FRAGMENT_ACTIVITY.java, isReplace, fragmentClass.typeElement)
         } else {
-            methodBuilder.addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[SUPPORT_PAIR[STRING, STRING]].java, ARRAY_LIST.java)
+            methodBuilder.addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[PAIR[STRING, STRING]].java, ARRAY_LIST.java)
                     .addStatement("\$T container = activity.findViewById(containerId)", VIEW.java)
             for (sharedElement in fragmentClass.sharedElements) {
                 if (sharedElement.sourceId == 0) {
@@ -50,7 +50,7 @@ abstract class StartFragmentMethodBuilder(protected val fragmentClass: FragmentC
                     methodBuilder.addStatement("sharedElements.add(new Pair<>(\$T.getTransitionName(container.findViewById(\$L)), \$S))", VIEW_COMPAT.java, sharedElement.sourceId, sharedElement.targetName)
                 }
             }
-            methodBuilder.addStatement("return \$T.showFragment((\$T) activity, \$L, containerId, tag, intent.getExtras(), \$T.class, sharedElements)", FRAGMENT_BUILDER.java, SUPPORT_ACTIVITY.java, isReplace, fragmentClass.typeElement)
+            methodBuilder.addStatement("return \$T.showFragment((\$T) activity, \$L, containerId, tag, intent.getExtras(), \$T.class, sharedElements)", FRAGMENT_BUILDER.java, FRAGMENT_ACTIVITY.java, isReplace, fragmentClass.typeElement)
         }
         methodBuilder.endControlFlow()
                 .addStatement("return null")

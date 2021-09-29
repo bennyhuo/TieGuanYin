@@ -21,7 +21,7 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
         val isReplace = op == REPLACE
         val returnType = fragmentClass.typeElement.asType().asKotlinTypeName().asNullable()
         val funBuilderOfContext = FunSpec.builder(name)
-                .receiver(SUPPORT_ACTIVITY.kotlin)
+                .receiver(FRAGMENT_ACTIVITY.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(returnType)
                 .addParameter("containerId", INT)
@@ -45,7 +45,7 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
         if (sharedElements.isEmpty()) {
             funBuilderOfContext.addStatement("return %T.showFragment(this, %L, containerId, tag, intent.getExtras(), %T::class.java, null)", FRAGMENT_BUILDER.kotlin, isReplace, fragmentClass.typeElement)
         } else {
-            funBuilderOfContext.addStatement("val sharedElements = %T()", ARRAY_LIST[SUPPORT_PAIR[STRING, STRING]].kotlin)
+            funBuilderOfContext.addStatement("val sharedElements = %T()", ARRAY_LIST[PAIR[STRING, STRING]].kotlin)
                     .addStatement("val container: %T = findViewById(containerId)", VIEW.kotlin)
             for (sharedElement in sharedElements) {
                 if (sharedElement.sourceName != null) {
@@ -68,10 +68,10 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
                 .addModifiers(KModifier.PUBLIC)
                 .returns(returnType)
                 .addParameters(parameterSpecs)
-                .addStatement("return (context as? %T)?.%L(id %L)", SUPPORT_ACTIVITY.kotlin, name, if (parameterLiteral.isBlank()) parameterLiteral else ", $parameterLiteral").build())
+                .addStatement("return (context as? %T)?.%L(id %L)", FRAGMENT_ACTIVITY.kotlin, name, if (parameterLiteral.isBlank()) parameterLiteral else ", $parameterLiteral").build())
 
         fileBuilder.addFunction(FunSpec.builder(name)
-                .receiver(SUPPORT_FRAGMENT.kotlin)
+                .receiver(FRAGMENT.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(returnType)
                 .addParameters(parameterSpecs)
@@ -80,7 +80,7 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
         when(op){
             Op.ADD -> {
                 fileBuilder.addFunction(FunSpec.builder(name)
-                        .receiver(SUPPORT_ACTIVITY.kotlin)
+                        .receiver(FRAGMENT_ACTIVITY.kotlin)
                         .addModifiers(KModifier.PUBLIC)
                         .returns(returnType)
                         .addParameter("tag", STRING.kotlin)

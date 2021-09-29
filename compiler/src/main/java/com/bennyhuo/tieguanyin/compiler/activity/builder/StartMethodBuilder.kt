@@ -45,7 +45,7 @@ class StartMethodBuilder(private val activityClass: ActivityClass, private val n
             methodBuilderOfContext.addStatement("\$T options = null", BUNDLE.java)
                     .beginControlFlow("if(context instanceof \$T)", ACTIVITY.java)
                     .addStatement("\$T activity = (\$T) context", ACTIVITY.java, ACTIVITY.java)
-                    .addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[SUPPORT_PAIR[VIEW, STRING]].java, ARRAY_LIST.java)
+                    .addStatement("\$T sharedElements = new \$T<>()", ARRAY_LIST[PAIR[VIEW, STRING]].java, ARRAY_LIST.java)
 
             var firstNeedTransitionNameMap = true
             for (sharedElement in sharedElements) {

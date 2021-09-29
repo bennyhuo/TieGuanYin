@@ -48,7 +48,7 @@ class StartKFunctionBuilder(private val activityClass: ActivityClass) {
             optionsName = "options"
             functionBuilderOfContext.addStatement("var options: %T? = null", BUNDLE.kotlin)
                     .beginControlFlow("if(this is %T)", ACTIVITY.kotlin)
-                    .addStatement("val sharedElements = %T()", ARRAY_LIST[SUPPORT_PAIR[VIEW, STRING]].kotlin)
+                    .addStatement("val sharedElements = %T()", ARRAY_LIST[PAIR[VIEW, STRING]].kotlin)
 
             var firstNeedTransitionNameMap = true
             for (sharedElement in sharedElements) {
