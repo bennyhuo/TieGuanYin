@@ -22,11 +22,10 @@
 
 -keep class com.bennyhuo.tieguanyin.annotations.*
 
--keepnames @com.bennyhuo.tieguanyin.annotations.Builder public class *
--keep @com.bennyhuo.tieguanyin.annotations.Generated public class ** {  *; }
--keepnames @com.bennyhuo.tieguanyin.annotations.Generated class ** { *; }
-# -keepnames public class **Builder { *; }
+-keep @com.bennyhuo.tieguanyin.annotations.Generated public class ** {
+    public static void inject(android.app.Activity, android.os.Bundle);
+}
 
--keep public class android.support.v4.app.Fragment {
+-keep public class androidx.fragment.app.Fragment {
     java.lang.String mWho;
 }

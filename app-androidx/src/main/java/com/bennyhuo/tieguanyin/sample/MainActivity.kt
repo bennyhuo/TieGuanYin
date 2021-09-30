@@ -24,17 +24,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.sharedElementExitTransition = TransitionSet().addTransition(ChangeBounds()).addTransition(ChangeTransform())
+        window.sharedElementExitTransition =
+            TransitionSet().addTransition(ChangeBounds()).addTransition(ChangeTransform())
         setContentView(R.layout.activity_main)
         title = this.javaClass.simpleName
 
         openJavaActivity.setOnClickListener {
             JavaActivityBuilder.builder(1)
-                    .isJava(true)
-                    .start(this){
-                        hello, javaMethod, kotlin ->
+                .isJava(true)
+                .start(this) { hello, javaMethod, kotlin ->
 
-                    }
+                }
         }
 
         openKotlinActivity.setOnClickListener {
@@ -58,6 +58,12 @@ class MainActivity : AppCompatActivity() {
 
         openMainActivity.setOnClickListener {
             startMainActivity(1024, Math.random().toString())
+        }
+
+        openParcelableActivity.setOnClickListener {
+            startParcelableActivity(UserInfo("benny", 1, Company("yfd", "Beijing"))) {
+                toast(it.toString())
+            }
         }
     }
 
