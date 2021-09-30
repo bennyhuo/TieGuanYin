@@ -53,11 +53,9 @@ abstract class BasicClass(val typeElement: TypeElement) {
         generateBuilder.sharedElementsWithName.mapTo(declaredSharedElements) { SharedElementEntity(it) }
     }
 
-    var fields: TreeSet<Field> = TreeSet()
-        private set
+    val fields: TreeSet<Field> = TreeSet()
 
-    var sharedElements: List<SharedElementEntity> = ArrayList(declaredSharedElements)
-        private set
+    val sharedElements = ArrayList(declaredSharedElements)
 
     fun <T: BasicClass> setUpSuperClass(classes: Map<Element, T>): T?{
         val typeMirror = typeElement.superclass?: return null
