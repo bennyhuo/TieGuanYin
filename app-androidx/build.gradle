@@ -1,10 +1,10 @@
-apply plugin: 'com.android.application'
-
-apply plugin: 'kotlin-android'
-
-apply plugin: 'kotlin-android-extensions'
-
-apply plugin: "kotlin-kapt"
+plugins {
+    id("com.google.devtools.ksp") version("1.5.31-1.0.0")
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    //id "kotlin-kapt"
+}
 
 android {
     compileSdkVersion 30
@@ -35,6 +35,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets.debug.java.srcDirs += "build/generated/ksp/debug/"
+    sourceSets.alpha.java.srcDirs += "build/generated/ksp/alpha/"
 }
 
 dependencies {
@@ -46,7 +49,8 @@ dependencies {
     implementation project(':runtime-androidx')
     implementation project(':runtime-kt')
     implementation project(':annotations')
-    kapt project(':compiler')
+    //kapt project(':compiler')
+    ksp(project(":compiler-ksp"))
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

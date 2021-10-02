@@ -1,2 +1,3 @@
 include ':app', ':app-java', ':app-androidx'
-include ':compiler', ':annotations', ':runtime', ':runtime-androidx', ':runtime-kt'
+include ':compiler', ':compiler-ksp'
+include ':annotations', ':runtime', ':runtime-androidx', ':runtime-kt'
