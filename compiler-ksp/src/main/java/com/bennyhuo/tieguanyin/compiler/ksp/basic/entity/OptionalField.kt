@@ -11,7 +11,7 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 
 class OptionalField(symbol: KSPropertyDeclaration) : Field(symbol) {
 
-    var defaultValue: Any? = null
+    var defaultValue: Any
         private set
 
     override val prefix = "OPTIONAL_"
@@ -29,7 +29,7 @@ class OptionalField(symbol: KSPropertyDeclaration) : Field(symbol) {
             builtIns.floatType -> "${optional.floatValue}f"
             builtIns.doubleType -> optional.doubleValue
             builtIns.stringType -> """"${optional.stringValue}""""
-            else -> null
+            else -> "null"
         }
     }
 

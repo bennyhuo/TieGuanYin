@@ -9,16 +9,18 @@ import com.bennyhuo.tieguanyin.compiler.ksp.fragment.builder.InjectMethodBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.builder.ReplaceKFunctionBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.builder.ReplaceMethodBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.builder.SaveStateMethodBuilder
-import com.squareup.javapoet.TypeSpec.Builder
 import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.TypeSpec
 
 class FragmentClassBuilder(private val fragmentClass: FragmentClass): BasicClassBuilder(fragmentClass) {
 
-    override fun buildCommon(typeBuilder: Builder) {
-        ConstantBuilder(fragmentClass).build(typeBuilder)
-        FieldBuilder(fragmentClass).build(typeBuilder)
-        InjectMethodBuilder(fragmentClass).build(typeBuilder)
-        SaveStateMethodBuilder(fragmentClass).build(typeBuilder)
+    override fun buildCommon(typeBuilder: TypeSpec.Builder) {
+        val companionObject = TypeSpec.companionObjectBuilder()
+        ConstantBuilder(fragmentClass).build(companionObject)
+        FieldBuilder(fragmentClass).build(typeBuilder, companionObject)
+        InjectMethodBuilder(fragmentClass).build(companionObject)
+        SaveStateMethodBuilder(fragmentClass).build(companionObject)
+        typeBuilder.addType(companionObject.build())
     }
 
     override fun buildKotlinBuilders(fileBuilder: FileSpec.Builder) {
@@ -26,7 +28,7 @@ class FragmentClassBuilder(private val fragmentClass: FragmentClass): BasicClass
         AddKFunctionBuilder(fragmentClass).build(fileBuilder)
     }
 
-    override fun buildJavaBuilders(typeBuilder: Builder) {
+    override fun buildJavaBuilders(typeBuilder: TypeSpec.Builder) {
         ReplaceMethodBuilder(fragmentClass).build(typeBuilder)
         AddMethodBuilder(fragmentClass).build(typeBuilder)
     }

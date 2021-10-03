@@ -13,10 +13,7 @@ import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 
 class ResultParameter(val name: String, val type: KSType) : Comparable<ResultParameter> {
 
-    val javaTypeName: JavaTypeName by lazy { type.toJavaTypeName() }
-
     val kotlinTypeName: KotlinTypeName by lazy {
-        logger.warn("$name -> $type")
         type.toTypeName()
     }
 
@@ -27,6 +24,7 @@ class ResultParameter(val name: String, val type: KSType) : Comparable<ResultPar
 fun ResultEntity.asResultParameter(): ResultParameter {
     return ResultParameter(name, try {
         type.toKsType()
+
     } catch (e: UndeclaredThrowableException) {
         val cause = e.cause
         if (cause is TypeNotFoundException) {

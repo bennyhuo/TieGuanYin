@@ -3,56 +3,77 @@ package com.bennyhuo.tieguanyin.compiler.ksp.basic.builder
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.BasicClass
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.OptionalField
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.INTENT
-import com.squareup.javapoet.*
-import javax.lang.model.element.Modifier.*
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.TypeSpec
 
 class FieldBuilder(private val basicClass: BasicClass) {
 
-    fun build(typeBuilder: TypeSpec.Builder) {
-        val builderClassTypeName = ClassName.get(basicClass.packageName, basicClass.builderClassName)
+    fun build(typeBuilder: TypeSpec.Builder, companionTypeBuilder: TypeSpec.Builder) {
+        val builderClassTypeName = ClassName(basicClass.packageName, basicClass.builderClassName)
 
         val groupedFields = basicClass.fields.groupBy { it is OptionalField }
         val requiredFields = groupedFields[false] ?: emptyList()
         val optionalFields = groupedFields[true] ?: emptyList()
 
-        typeBuilder.addMethod(MethodSpec.constructorBuilder().addModifiers(PRIVATE).build())
+        typeBuilder.addFunction(
+            FunSpec.constructorBuilder().addModifiers(KModifier.PRIVATE).build()
+        )
 
-        val createBuilderMethodBuilder = MethodSpec.methodBuilder("builder")
-                .addModifiers(PUBLIC, STATIC)
-                .returns(builderClassTypeName)
-                .addStatement("\$T builder = new \$T()", builderClassTypeName, builderClassTypeName)
+        val createBuilderMethodBuilder = FunSpec.builder("builder")
+            .returns(builderClassTypeName)
+            .addStatement("val builder = %T()", builderClassTypeName)
 
-        val fillIntentMethodBuilder = MethodSpec.methodBuilder("fillIntent")
-                .addModifiers(PRIVATE)
-                .addParameter(INTENT.java, "intent")
+        val fillIntentMethodBuilder = FunSpec.builder("fillIntent")
+            .addModifiers(KModifier.PRIVATE)
+            .addParameter("intent", INTENT.kotlin)
 
         requiredFields.forEach { field ->
             //field
-            typeBuilder.addField(FieldSpec.builder(field.asTypeName(), field.name, PRIVATE).build())
+            typeBuilder.addProperty(
+                PropertySpec.builder(
+                    field.name,
+                    field.asTypeName().copy(nullable = true)
+                ).mutable(true).initializer("null").build()
+            )
             //fillIntent
-            fillIntentMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", field.name, field.name)
+            fillIntentMethodBuilder.addStatement("intent.putExtra(%S, %L)", field.name, field.name)
             //constructor
-            createBuilderMethodBuilder.addParameter(ParameterSpec.builder(field.asTypeName(), field.name).build())
-                    .addStatement("builder.\$L = \$L", field.name, field.name)
+            createBuilderMethodBuilder.addParameter(field.name, field.asTypeName())
+                .addStatement("builder.%L = %L", field.name, field.name)
         }
 
         optionalFields.forEach { field ->
             //field
-            typeBuilder.addField(FieldSpec.builder(field.asTypeName(), field.name, PRIVATE).build())
+            typeBuilder.addProperty(
+                PropertySpec.builder(
+                    field.name,
+                    field.asTypeName().copy(nullable = true)
+                ).mutable(true).initializer("null").build()
+            )
             //setter
-            typeBuilder.addMethod(MethodSpec.methodBuilder(field.name)
-                    .addModifiers(PUBLIC)
-                    .addParameter(field.asTypeName(), field.name)
+            typeBuilder.addFunction(
+                FunSpec.builder(field.name)
+                    .addParameter(field.name, field.asTypeName())
                     .addStatement("this.${field.name} = ${field.name}")
                     .addStatement("return this")
                     .returns(builderClassTypeName)
-                    .build())
+                    .build()
+            )
             //fillIntent
-            fillIntentMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", field.name, field.name)
+            fillIntentMethodBuilder.addStatement("intent.putExtra(%S, %L)", field.name, field.name)
         }
 
-        typeBuilder.addMethod(createBuilderMethodBuilder.addStatement("return builder").build())
-        typeBuilder.addMethod(fillIntentMethodBuilder.build())
+        companionTypeBuilder.addFunction(
+            createBuilderMethodBuilder
+                .addStatement("return builder")
+                .addAnnotation(JvmStatic::class)
+                .build()
+        )
+
+        typeBuilder.addFunction(fillIntentMethodBuilder.build())
     }
 
 }

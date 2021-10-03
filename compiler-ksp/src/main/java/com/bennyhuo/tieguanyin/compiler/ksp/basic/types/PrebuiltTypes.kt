@@ -26,10 +26,10 @@ val ON_FRAGMENT_CREATE_LISTENER = ClassType("com.bennyhuo.tieguanyin.runtime.cor
 val VIEW = ClassType("android.view.View")
 val VIEW_GROUP = ClassType("android.view.ViewGroup")
 
-val ARRAY_LIST = ClassType("java.util.ArrayList")
-val HASH_MAP = ClassType("java.util.HashMap")
+val ARRAY_LIST = ClassType("kotlin.collections.ArrayList")
+val HASH_MAP = ClassType("kotlin.collections.HashMap")
 
-val STRING = ClassType("java.lang.String")
+val STRING = ClassType("kotlin.String")
 
 var useAndroidx: Boolean? = null
     set(value) {

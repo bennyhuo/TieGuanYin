@@ -5,6 +5,7 @@ import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.compiler.ksp.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.Field
+import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.OptionalField
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.useAndroidx
 import com.bennyhuo.tieguanyin.compiler.ksp.core.logger
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.FragmentClass
@@ -55,7 +56,7 @@ class ClassProcessor {
                 val parent = element.parent!!
                 (activityClasses[parent]
                     ?: fragmentClasses[parent])
-                    ?.addSymbol(Field(element))
+                    ?.addSymbol(OptionalField(element))
                     ?: logger.error("Field $element annotated as Optional while $parent not annotated.", element)
             }
     }

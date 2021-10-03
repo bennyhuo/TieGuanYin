@@ -9,20 +9,13 @@ import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 
 class ClassType(private val jvmClassName: String, private vararg val typeParameterClassTypes: ClassType) {
 
-    val java: JavaTypeName by lazy {
-        val className = JavaClassName.bestGuess(jvmClassName)
-        if(typeParameterClassTypes.isNotEmpty()) {
-            ParameterizedTypeName.get(className, *(Array(typeParameterClassTypes.size) { i -> typeParameterClassTypes[i].java }))
-        }
-        className
-
-    }
     val kotlin: KotlinTypeName by lazy {
         val className = KotlinClassName.bestGuess(jvmClassName)
         if (typeParameterClassTypes.isNotEmpty()) {
             className.parameterizedBy(*(Array(typeParameterClassTypes.size) { i -> typeParameterClassTypes[i].kotlin }))
+        } else {
+            className
         }
-        className
     }
 
     fun parameterized(vararg typeParameterClassTypes: ClassType) =
@@ -31,6 +24,6 @@ class ClassType(private val jvmClassName: String, private vararg val typeParamet
     operator fun get(vararg typeParameterClassTypes: ClassType) = ClassType(jvmClassName, *typeParameterClassTypes)
 
     override fun toString(): String {
-        return jvmClassName
+        return "${jvmClassName}[${typeParameterClassTypes.joinToString()}]"
     }
 }

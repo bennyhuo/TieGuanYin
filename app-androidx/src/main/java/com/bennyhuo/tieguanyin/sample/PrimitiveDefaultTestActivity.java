@@ -23,7 +23,7 @@ public class PrimitiveDefaultTestActivity extends Activity{
     @Optional(longValue = 5)
     long longValue;
 
-    @Optional(floatValue = 6f)
+    @Optional(floatValue = 6)
     float floatValue;
 
     @Optional(doubleValue = 7)
