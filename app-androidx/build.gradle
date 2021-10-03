@@ -36,8 +36,8 @@ android {
         }
     }
 
-    sourceSets.debug.java.srcDirs += "build/generated/ksp/debug/"
-    sourceSets.alpha.java.srcDirs += "build/generated/ksp/alpha/"
+    sourceSets.debug.java.srcDirs += "build/generated/ksp/debug/kotlin"
+    sourceSets.alpha.java.srcDirs += "build/generated/ksp/alpha/kotlin"
 }
 
 dependencies {
