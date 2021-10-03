@@ -1,8 +1,5 @@
-package com.bennyhuo.tieguanyin.annotations;
+package com.bennyhuo.tieguanyin.annotations
 
-public @interface ResultEntity {
+import kotlin.reflect.KClass
 
-  String name();
-
-  Class<?> type();
-}
+annotation class ResultEntity(val name: String, val type: KClass<*>)

@@ -32,11 +32,8 @@ public class UserActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         EditUserActivityBuilder.builder(30, "Kotlin", "bennyhuo", "Kotlin Developer")
-                .start(this, new EditUserActivityBuilder.OnEditUserActivityResultListener() {
-                    @Override
-                    public void onResult(int age, String company, String name, String title) {
+                .start(this, (age, company, name, title) -> {
 
-                    }
                 });
 
     }

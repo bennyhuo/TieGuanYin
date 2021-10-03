@@ -1,43 +1,33 @@
-package com.bennyhuo.tieguanyin.annotations;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.bennyhuo.tieguanyin.annotations
 
 /**
  * Created by benny on 1/29/18.
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
-public @interface Builder {
-    GenerateMode mode() default GenerateMode.Auto;
-    SharedElement[] sharedElements() default {};
-    SharedElementByNames[] sharedElementsByNames() default {};
-    SharedElementWithName[] sharedElementsWithName() default {};
-
+@Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.BINARY)
+annotation class Builder(
+    val mode: GenerateMode = GenerateMode.Auto,
+    val sharedElements: Array<SharedElement> = [],
+    val sharedElementsByNames: Array<SharedElementByNames> = [],
+    val sharedElementsWithName: Array<SharedElementWithName> = [],
     /**
      * For Activities Only
      */
-    ResultEntity[] resultTypes() default {};
-
+    val resultTypes: Array<ResultEntity> = [],
     /**
      * For Activities Only
      */
-    PendingTransition pendingTransition() default @PendingTransition;
-
+    val pendingTransition: PendingTransition = PendingTransition(),
     /**
      * For Activities Only
      */
-    PendingTransition pendingTransitionOnFinish() default @PendingTransition;
-
+    val pendingTransitionOnFinish: PendingTransition = PendingTransition(),
     /**
      * For Activities Only
      */
-    String[] categories() default {};
-
+    val categories: Array<String> = [],
     /**
      * For Activities Only
      */
-    int[] flags() default {};
-}
+    val flags: IntArray = []
+)

@@ -1,10 +1,6 @@
-package com.bennyhuo.tieguanyin.annotations;
+package com.bennyhuo.tieguanyin.annotations
 
 /**
  * Created by benny on 2/13/18.
  */
-
-public @interface SharedElementByNames {
-    String source();
-    String target();
-}
+annotation class SharedElementByNames(val source: String, val target: String)

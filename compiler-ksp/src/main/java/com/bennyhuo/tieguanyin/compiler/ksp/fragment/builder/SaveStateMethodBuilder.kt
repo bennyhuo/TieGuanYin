@@ -10,6 +10,6 @@ import com.bennyhuo.tieguanyin.compiler.ksp.fragment.FragmentClass
 class SaveStateMethodBuilder(fragmentClass: FragmentClass)
     : BasicSaveStateMethodBuilder(fragmentClass) {
 
-    override val instanceType = FRAGMENT.java
+    override val instanceType = FRAGMENT.kotlin
 
 }

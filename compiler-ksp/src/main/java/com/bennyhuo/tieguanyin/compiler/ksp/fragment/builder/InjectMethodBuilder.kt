@@ -8,10 +8,8 @@ import com.bennyhuo.tieguanyin.compiler.ksp.fragment.FragmentClass
  * Created by benny on 1/31/18.
  */
 
-class InjectMethodBuilder(private val fragmentClass: FragmentClass): BasicInjectMethodBuilder(fragmentClass) {
+class InjectMethodBuilder(fragmentClass: FragmentClass): BasicInjectMethodBuilder(fragmentClass) {
 
-    override val instanceType = FRAGMENT.java
-
-    override val snippetToRetrieveState = "typedInstance.getArguments() : savedInstanceState"
+    override val instanceType = FRAGMENT.kotlin
 
 }

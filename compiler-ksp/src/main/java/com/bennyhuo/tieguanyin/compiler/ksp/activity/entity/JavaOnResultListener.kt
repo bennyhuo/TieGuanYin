@@ -4,12 +4,12 @@ import com.bennyhuo.tieguanyin.compiler.ksp.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.BUNDLE
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.ON_ACTIVITY_RESULT_LISTENER
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.RUNTIME_UTILS
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.TypeSpec
-import java.util.*
-import javax.lang.model.element.Modifier
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.UNIT
+import java.util.ArrayList
 
 class JavaOnResultListener(private val activityClass: ActivityClass) {
 
@@ -18,51 +18,58 @@ class JavaOnResultListener(private val activityClass: ActivityClass) {
      */
     val name = "on" + activityClass.simpleName + "ResultListener"
 
-    val typeName = ClassName.get(activityClass.packageName, activityClass.builderClassName,
-            "On" + activityClass.simpleName + "ResultListener")
+    val typeName = ClassName(
+        activityClass.packageName, activityClass.builderClassName,
+        "On" + activityClass.simpleName + "ResultListener"
+    )
 
     fun buildInterface(): TypeSpec {
-        val interfaceOnResultMethodBuilder = MethodSpec.methodBuilder("onResult")
-                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                .returns(TypeName.VOID)
+        val interfaceOnResultMethodBuilder = FunSpec.builder("onResult")
+            .addModifiers(KModifier.ABSTRACT)
+            .returns(UNIT)
 
         activityClass.resultParameters.forEach { resultParameter ->
-            interfaceOnResultMethodBuilder.addParameter(resultParameter.javaTypeName, resultParameter.name)
+            interfaceOnResultMethodBuilder.addParameter(
+                resultParameter.name,
+                resultParameter.kotlinTypeName
+            )
         }
 
         return TypeSpec.interfaceBuilder(typeName)
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addMethod(interfaceOnResultMethodBuilder.build())
-                .build()
+            .addModifiers(KModifier.FUN)
+            .addFunction(interfaceOnResultMethodBuilder.build())
+            .build()
     }
 
+    /**
+     * @return object: onSampleActivityResultListener{ override fun onResult(bundle: Bundle){ if(not null) invoke. } }
+     */
     fun buildObject(): TypeSpec {
-        val onResultMethodBuilder = MethodSpec.methodBuilder("onResult")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(BUNDLE.java, "bundle")
-                .returns(TypeName.VOID)
+        val onResultFunBuilderKt = FunSpec.builder("onResult")
+            .addModifiers(KModifier.OVERRIDE)
+            .addParameter("bundle", BUNDLE.kotlin)
+            .returns(UNIT)
 
-        onResultMethodBuilder.beginControlFlow("if(\$L != null)", name)
-        val statementBuilder = StringBuilder()
+        onResultFunBuilderKt.beginControlFlow("if(%L != null)", name)
+        val statementBuilderKt = StringBuilder()
+        val argsKt = ArrayList<Any>()
+        argsKt.add(name)
 
-        val args = ArrayList<Any>()
-        args.add(name)
-        activityClass.resultParameters.forEach { resultEntity ->
-            statementBuilder.append("\$T.<\$T>get(bundle, \$S),")
-            args.add(RUNTIME_UTILS.java)
-            args.add(resultEntity.javaTypeName.box())
-            args.add(resultEntity.name)
+        activityClass.resultParameters.forEach { resultParameter ->
+            statementBuilderKt.append("%T.get(bundle, %S),")
+            argsKt.add(RUNTIME_UTILS.kotlin)
+            argsKt.add(resultParameter.name)
         }
-        if (statementBuilder.isNotEmpty()) {
-            statementBuilder.deleteCharAt(statementBuilder.length - 1)
+        if (statementBuilderKt.isNotEmpty()) {
+            statementBuilderKt.deleteCharAt(statementBuilderKt.length - 1)
         }
-        onResultMethodBuilder.addStatement("\$L.onResult($statementBuilder)", *args.toTypedArray())
-        onResultMethodBuilder.endControlFlow()
+        onResultFunBuilderKt.addStatement("%L.onResult($statementBuilderKt)", *argsKt.toTypedArray())
+        onResultFunBuilderKt.endControlFlow()
 
-        return TypeSpec.anonymousClassBuilder(name)
-                .addSuperinterface(ON_ACTIVITY_RESULT_LISTENER.java)
-                .addMethod(onResultMethodBuilder.build())
-                .build()
+        return TypeSpec.anonymousClassBuilder()
+            .superclass(ON_ACTIVITY_RESULT_LISTENER.kotlin)
+            .addSuperclassConstructorParameter(name)
+            .addFunction(onResultFunBuilderKt.build())
+            .build()
     }
 }

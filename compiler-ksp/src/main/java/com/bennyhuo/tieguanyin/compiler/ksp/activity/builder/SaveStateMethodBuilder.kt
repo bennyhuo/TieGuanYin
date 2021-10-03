@@ -10,6 +10,6 @@ import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.ACTIVITY
 class SaveStateMethodBuilder(activityClass: ActivityClass)
     : BasicSaveStateMethodBuilder(activityClass) {
 
-    override val instanceType = ACTIVITY.java
+    override val instanceType = ACTIVITY.kotlin
 
 }

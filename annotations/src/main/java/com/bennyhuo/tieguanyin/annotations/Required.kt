@@ -1,15 +1,8 @@
-package com.bennyhuo.tieguanyin.annotations;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.bennyhuo.tieguanyin.annotations
 
 /**
  * Created by benny on 1/29/18.
  */
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.CLASS)
-public @interface Required {
-
-}
+@Target(AnnotationTarget.FIELD)
+@Retention(AnnotationRetention.BINARY)
+annotation class Required 

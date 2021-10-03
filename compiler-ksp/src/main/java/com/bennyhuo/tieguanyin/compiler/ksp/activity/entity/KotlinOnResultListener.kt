@@ -4,7 +4,12 @@ import com.bennyhuo.tieguanyin.compiler.ksp.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.BUNDLE
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.ON_ACTIVITY_RESULT_LISTENER
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.RUNTIME_UTILS
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.LambdaTypeName
+import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.UNIT
 import java.util.*
 
 class KotlinOnResultListener(private val activityClass: ActivityClass) {
@@ -22,7 +27,7 @@ class KotlinOnResultListener(private val activityClass: ActivityClass) {
     /**
      * @return object: onSampleActivityResultListener{ override fun onResult(bundle: Bundle){ if(not null) invoke. } }
      */
-    fun buildObject(): com.squareup.kotlinpoet.TypeSpec {
+    fun buildObject(): TypeSpec {
         val onResultFunBuilderKt = FunSpec.builder("onResult")
                 .addModifiers(KModifier.OVERRIDE)
                 .addParameter("bundle", BUNDLE.kotlin)
@@ -44,7 +49,7 @@ class KotlinOnResultListener(private val activityClass: ActivityClass) {
         onResultFunBuilderKt.addStatement("%L($statementBuilderKt)", *argsKt.toTypedArray())
         onResultFunBuilderKt.endControlFlow()
 
-        return com.squareup.kotlinpoet.TypeSpec.anonymousClassBuilder()
+        return TypeSpec.anonymousClassBuilder()
                 .superclass(ON_ACTIVITY_RESULT_LISTENER.kotlin)
                 .addSuperclassConstructorParameter(name)
                 .addFunction(onResultFunBuilderKt.build())

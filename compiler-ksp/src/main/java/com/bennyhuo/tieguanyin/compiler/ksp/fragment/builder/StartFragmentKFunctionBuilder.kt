@@ -12,6 +12,7 @@ import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.STRING
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.VIEW
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.VIEW_COMPAT
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.VIEW_GROUP
+import com.bennyhuo.tieguanyin.compiler.ksp.core.logger
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.FragmentClass
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.builder.Op.ADD
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.builder.Op.REPLACE

@@ -4,39 +4,48 @@ import com.bennyhuo.tieguanyin.compiler.ksp.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.ACTIVITY_COMPAT
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.INTENT
 import com.bennyhuo.tieguanyin.compiler.ksp.utils.isDefault
-import com.bennyhuo.tieguanyin.compiler.ksp.utils.toJavaTypeName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.TypeSpec
-import javax.lang.model.element.Modifier
+import com.bennyhuo.tieguanyin.compiler.ksp.utils.toKotlinTypeName
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.UNIT
 
 class FinishMethodBuilder(private val activityClass: ActivityClass) {
 
     fun build(typeBuilder: TypeSpec.Builder) {
-        val finishMethodBuilder = MethodSpec.methodBuilder("smartFinish")
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .returns(TypeName.VOID)
-                .addParameter(activityClass.typeElement.toJavaTypeName(), "activity")
+        val finishMethodBuilder = FunSpec.builder("smartFinish")
+            .addAnnotation(JvmStatic::class)
+            .returns(UNIT)
+            .addParameter("activity", activityClass.typeElement.toKotlinTypeName())
 
         //handle result parameters.
-        activityClass.resultParameters.also{
-            if(it.isNotEmpty()){
-                finishMethodBuilder.addStatement("\$T intent = new \$T()", INTENT.java, INTENT.java)
-                        .addStatement("activity.setResult(1, intent)")
+        activityClass.resultParameters.also {
+            if (it.isNotEmpty()) {
+                finishMethodBuilder.addStatement("val intent = %T()", INTENT.kotlin)
+                    .addStatement("activity.setResult(1, intent)")
             }
-        }.forEach {
-            resultParameter ->
-            finishMethodBuilder.addParameter(resultParameter.javaTypeName, resultParameter.name)
-            finishMethodBuilder.addStatement("intent.putExtra(\$S, \$L)", resultParameter.name, resultParameter.name)
+        }.forEach { resultParameter ->
+            finishMethodBuilder.addParameter(resultParameter.name, resultParameter.kotlinTypeName)
+            finishMethodBuilder.addStatement(
+                "intent.putExtra(%S, %L)",
+                resultParameter.name,
+                resultParameter.name
+            )
         }
 
-        finishMethodBuilder.addStatement("\$T.finishAfterTransition(activity)", ACTIVITY_COMPAT.java)
+        finishMethodBuilder.addStatement(
+            "%T.finishAfterTransition(activity)",
+            ACTIVITY_COMPAT.kotlin
+        )
 
         //handle pending transitions.
         val pendingTransitionOnFinish = activityClass.pendingTransitionOnFinish
         if (!pendingTransitionOnFinish.isDefault()) {
-            finishMethodBuilder.addStatement("activity.overridePendingTransition(\$L, \$L)", pendingTransitionOnFinish.enterAnim, pendingTransitionOnFinish.exitAnim)
+            finishMethodBuilder.addStatement(
+                "activity.overridePendingTransition(%L, %L)",
+                pendingTransitionOnFinish.enterAnim,
+                pendingTransitionOnFinish.exitAnim
+            )
         }
-        typeBuilder.addMethod(finishMethodBuilder.build())
+        typeBuilder.addFunction(finishMethodBuilder.build())
     }
 }

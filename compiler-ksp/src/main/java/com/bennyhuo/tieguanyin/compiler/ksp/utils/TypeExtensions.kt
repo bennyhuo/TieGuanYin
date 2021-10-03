@@ -44,6 +44,15 @@ fun KSClassDeclaration.superType(): KSClassDeclaration? {
 
 fun KSType.toJavaTypeName() = declaration.castAs<KSClassDeclaration>().toJavaTypeName()
 
-fun KSClassDeclaration.toJavaTypeName() = ClassName.bestGuess(qualifiedName!!.asString())
+fun KSClassDeclaration.toJavaTypeName(): ClassName {
+    logger.warn("toJava: $this ${qualifiedName?.asString()} ----->")
+    val javaTypeName = qualifiedName!!.let {
+        if (it.asString().startsWith("kotlin")) {
+            KspContext.resolver.mapKotlinNameToJava(it) ?: it
+        } else it
+    }
+    logger.warn("toJava: ${qualifiedName?.asString()} -> ${javaTypeName.asString()}")
+    return ClassName.bestGuess(javaTypeName.asString())
+}
 
 fun KSClassDeclaration.toKotlinTypeName() = asStarProjectedType().toTypeName()

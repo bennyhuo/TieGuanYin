@@ -11,17 +11,22 @@ import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.StartKFunctionBuild
 import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.StartMethodBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.BasicClassBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.builder.FieldBuilder
-import com.squareup.javapoet.TypeSpec.Builder
 import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.TypeSpec
 
 class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClassBuilder(activityClass) {
 
-    override fun buildCommon(typeBuilder: Builder) {
-        ConstantBuilder(activityClass).build(typeBuilder)
-        FieldBuilder(activityClass).build(typeBuilder)
-        InjectMethodBuilder(activityClass).build(typeBuilder)
-        SaveStateMethodBuilder(activityClass).build(typeBuilder)
-        NewIntentMethodBuilder(activityClass).build(typeBuilder)
+    override fun buildCommon(typeBuilder: TypeSpec.Builder) {
+        val companionObject = TypeSpec.companionObjectBuilder()
+        ConstantBuilder(activityClass).build(companionObject)
+
+        FieldBuilder(activityClass).build(typeBuilder, companionObject)
+        InjectMethodBuilder(activityClass).build(companionObject)
+        SaveStateMethodBuilder(activityClass).build(companionObject)
+        NewIntentMethodBuilder(activityClass).build(companionObject)
+        FinishMethodBuilder(activityClass).build(companionObject)
+
+        typeBuilder.addType(companionObject.build())
     }
 
     override fun buildKotlinBuilders(fileBuilder: FileSpec.Builder) {
@@ -30,9 +35,9 @@ class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClas
         NewIntentKFunctionBuilder(activityClass).build(fileBuilder)
     }
 
-    override fun buildJavaBuilders(typeBuilder: Builder) {
+    override fun buildJavaBuilders(typeBuilder: TypeSpec.Builder) {
         StartMethodBuilder(activityClass, METHOD_NAME).build(typeBuilder)
-        FinishMethodBuilder(activityClass).build(typeBuilder)
+
     }
 
     companion object {

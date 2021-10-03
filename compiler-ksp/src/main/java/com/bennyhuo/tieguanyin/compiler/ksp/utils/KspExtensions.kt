@@ -33,6 +33,12 @@ private fun Any.asByte(): Byte = if (this is Int) this.toByte() else this as Byt
 
 private fun Any.asShort(): Short = if (this is Int) this.toShort() else this as Short
 
+private fun Any.asLong(): Long = if (this is Int) this.toLong() else this as Long
+
+private fun Any.asFloat(): Float = if (this is Int) this.toFloat() else this as Float
+
+private fun Any.asDouble(): Double = if (this is Int) this.toDouble() else this as Double
+
 class TypeNotFoundException(val ksType: KSType, cause: Throwable): Exception(cause)
 
 private fun KSType.asClass() = try {
@@ -127,9 +133,16 @@ private fun KSAnnotation.createInvocationHandler(clazz: Class<*>): InvocationHan
                             val value = { result.asShort() }
                             cache.getOrPut(Pair(method.returnType, result), value)
                         }
-                        method.returnType.name == "int" -> {
-                            logger.warn("int -- $result")
-                            val value = { result.castAs<Int>() }
+                        method.returnType.name == "long" -> {
+                            val value = { result.asLong() }
+                            cache.getOrPut(Pair(method.returnType, result), value)
+                        }
+                        method.returnType.name == "float" -> {
+                            val value = { result.asFloat() }
+                            cache.getOrPut(Pair(method.returnType, result), value)
+                        }
+                        method.returnType.name == "double" -> {
+                            val value = { result.asDouble() }
                             cache.getOrPut(Pair(method.returnType, result), value)
                         }
                         else -> result // original value

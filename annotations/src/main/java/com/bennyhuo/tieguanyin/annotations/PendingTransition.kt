@@ -1,12 +1,10 @@
-package com.bennyhuo.tieguanyin.annotations;
+package com.bennyhuo.tieguanyin.annotations
 
 /**
  * Created by benny on 18/04/2018.
  */
-public @interface PendingTransition {
-    int DEFAULT = -1;
-
-    int enterAnim() default DEFAULT;
-    int exitAnim() default DEFAULT;
-
+annotation class PendingTransition(val enterAnim: Int = DEFAULT, val exitAnim: Int = DEFAULT) {
+    companion object {
+        const val DEFAULT = -1
+    }
 }
