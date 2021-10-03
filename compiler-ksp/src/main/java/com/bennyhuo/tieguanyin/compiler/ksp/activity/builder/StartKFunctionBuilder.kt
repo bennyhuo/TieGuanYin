@@ -34,8 +34,8 @@ class StartKFunctionBuilder(private val activityClass: ActivityClass) {
         val functionBuilderOfContext = FunSpec.builder(name)
             .receiver(CONTEXT.kotlin)
             .addModifiers(KModifier.PUBLIC)
-            .addCode("%T.INSTANCE.init(this)", ACTIVITY_BUILDER.kotlin)
-            .addCode(
+            .addStatement("%T.INSTANCE.init(this)", ACTIVITY_BUILDER.kotlin)
+            .addStatement(
                 "val intent = %T(this, %T::class.java)",
                 INTENT.kotlin,
                 activityClass.typeElement.toKotlinTypeName()
