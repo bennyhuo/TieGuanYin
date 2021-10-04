@@ -1,11 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.ksp.basic.entity
 
-import com.bennyhuo.tieguanyin.compiler.ksp.core.KspContext
-import com.bennyhuo.tieguanyin.compiler.ksp.core.logger
-import com.bennyhuo.tieguanyin.compiler.ksp.utils.toJavaTypeName
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.Modifier
-import com.squareup.javapoet.ClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 
 /**
