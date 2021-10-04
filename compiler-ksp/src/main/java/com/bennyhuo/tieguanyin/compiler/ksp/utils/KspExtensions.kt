@@ -42,7 +42,6 @@ private fun Any.asDouble(): Double = if (this is Int) this.toDouble() else this 
 class TypeNotFoundException(val ksType: KSType, cause: Throwable): Exception(cause)
 
 private fun KSType.asClass() = try {
-    logger.warn("asClass = ${this.declaration.qualifiedName!!.asString()}")
     Class.forName(this.declaration.qualifiedName!!.asString())
 } catch (e: Exception) {
     throw TypeNotFoundException(this, e)
@@ -90,8 +89,6 @@ private fun KSAnnotation.createInvocationHandler(clazz: Class<*>): InvocationHan
                         "$methodName=$value"
                     }.toList()
         } else {
-            logger.warn("invoke: $method, $arguments")
-
             val argument = try {
                 arguments.first { it.name?.asString() == method.name }
             } catch (e: NullPointerException) {

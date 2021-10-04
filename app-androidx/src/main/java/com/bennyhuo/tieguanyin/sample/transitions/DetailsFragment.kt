@@ -34,7 +34,7 @@ class DetailsFragment : Fragment() {
         ViewCompat.setTransitionName(textView, "fragment")
         textView.text = text
         textView.setOnClickListener {
-            JavaFragmentBuilder.builder("Hello").num(1).num2(2.0).replace(this.activity, R.id.fragmentContainer)
+            JavaFragmentBuilder.builder("Hello").num(1).num2(2.0).replace(requireActivity(), R.id.fragmentContainer)
         }
     }
 }

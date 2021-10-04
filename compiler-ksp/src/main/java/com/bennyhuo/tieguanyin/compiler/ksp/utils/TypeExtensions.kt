@@ -7,7 +7,6 @@ import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Nullability
-import com.squareup.javapoet.ClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import kotlin.reflect.KClass
 
@@ -40,19 +39,6 @@ fun KSClassDeclaration.superType(): KSClassDeclaration? {
         .filterIsInstance<KSClassDeclaration>()
         .filter { it.classKind == ClassKind.CLASS }
         .firstOrNull()
-}
-
-fun KSType.toJavaTypeName() = declaration.castAs<KSClassDeclaration>().toJavaTypeName()
-
-fun KSClassDeclaration.toJavaTypeName(): ClassName {
-    logger.warn("toJava: $this ${qualifiedName?.asString()} ----->")
-    val javaTypeName = qualifiedName!!.let {
-        if (it.asString().startsWith("kotlin")) {
-            KspContext.resolver.mapKotlinNameToJava(it) ?: it
-        } else it
-    }
-    logger.warn("toJava: ${qualifiedName?.asString()} -> ${javaTypeName.asString()}")
-    return ClassName.bestGuess(javaTypeName.asString())
 }
 
 fun KSClassDeclaration.toKotlinTypeName() = asStarProjectedType().toTypeName()

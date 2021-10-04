@@ -1,14 +1,11 @@
 package com.bennyhuo.tieguanyin.compiler.ksp.basic.entity
 
 import com.bennyhuo.tieguanyin.annotations.ResultEntity
-import com.bennyhuo.tieguanyin.compiler.ksp.core.logger
 import com.bennyhuo.tieguanyin.compiler.ksp.utils.TypeNotFoundException
-import com.bennyhuo.tieguanyin.compiler.ksp.utils.toJavaTypeName
 import com.bennyhuo.tieguanyin.compiler.ksp.utils.toKsType
 import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.ksp.toTypeName
 import java.lang.reflect.UndeclaredThrowableException
-import com.squareup.javapoet.TypeName as JavaTypeName
 import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 
 class ResultParameter(val name: String, val type: KSType) : Comparable<ResultParameter> {

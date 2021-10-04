@@ -6,7 +6,6 @@ import com.bennyhuo.tieguanyin.annotations.ResultEntity
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.BasicClass
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.ResultParameter
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.asResultParameter
-import com.bennyhuo.tieguanyin.compiler.ksp.core.logger
 import com.bennyhuo.tieguanyin.compiler.ksp.utils.getFirstAnnotationByType
 import com.bennyhuo.tieguanyin.compiler.ksp.utils.isDefault
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -36,8 +35,6 @@ class ActivityClass(type: KSClassDeclaration): BasicClass(type) {
 
         declaredPendingTransition = generateBuilder.pendingTransition
         declaredPendingTransitionOnFinish = generateBuilder.pendingTransitionOnFinish
-
-        logger.warn("generateBuilder: ${generateBuilder.javaClass}")
 
         if (generateBuilder.resultTypes.isNotEmpty()) {
             generateBuilder.resultTypes.mapTo(declaredResultParameters, ResultEntity::asResultParameter)

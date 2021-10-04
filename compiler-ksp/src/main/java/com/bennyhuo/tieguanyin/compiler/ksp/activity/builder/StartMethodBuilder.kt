@@ -5,7 +5,6 @@ import com.bennyhuo.tieguanyin.compiler.ksp.activity.entity.JavaOnResultListener
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.ACTIVITY
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.ACTIVITY_BUILDER
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.ARRAY_LIST
-import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.BUNDLE
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.CONTEXT
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.HASH_MAP
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.INTENT
@@ -93,6 +92,8 @@ class StartMethodBuilder(private val activityClass: ActivityClass, private val n
                 ACTIVITY_BUILDER.kotlin
             ).nextControlFlow("else").addStatement("null")
                 .endControlFlow()
+        } else {
+            methodBuilderOfContext.addStatement("val options = null")
         }
 
         val pendingTransition = activityClass.pendingTransition

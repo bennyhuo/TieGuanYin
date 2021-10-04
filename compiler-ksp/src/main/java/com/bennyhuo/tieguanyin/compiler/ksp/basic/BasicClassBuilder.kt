@@ -11,7 +11,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 abstract class BasicClassBuilder(private val basicClass: BasicClass) {
 
     private fun writeKotlinToFile(fileSpec: FileSpec) {
-        fileSpec.writeTo(KspContext.environment.codeGenerator, false)
+        fileSpec.writeTo(KspContext.environment.codeGenerator, false, listOf(basicClass.typeElement.containingFile!!))
     }
 
     fun build() {
