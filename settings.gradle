@@ -1,3 +1,11 @@
 include ':app', ':app-java', ':app-androidx'
 include ':compiler', ':compiler-ksp'
 include ':annotations', ':runtime', ':runtime-androidx', ':runtime-kt'
+
+//includeBuild(file("../ksp")) {
+//    dependencySubstitution {
+//        substitute(module("com.google.devtools.ksp:symbol-processing-api")).using(project(":api"))
+//        substitute(module("com.google.devtools.ksp:symbol-processing")).using(project(":symbol-processing"))
+//        substitute(module("com.google.devtools.ksp:symbol-processing-gradle-plugin")).using(project(":gradle-plugin"))
+//    }
+//}
