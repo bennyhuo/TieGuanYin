@@ -1,9 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.ksp.utils
 
-import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.javapoet.ClassName as JavaClassName
-import com.squareup.javapoet.TypeName as JavaTypeName
 import com.squareup.kotlinpoet.ClassName as KotlinClassName
 import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 

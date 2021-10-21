@@ -1,11 +1,7 @@
 package com.bennyhuo.tieguanyin.compiler.ksp.utils
 
-import com.bennyhuo.tieguanyin.compiler.ksp.core.KspContext
-import com.bennyhuo.tieguanyin.compiler.ksp.core.logger
-import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
-import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSValueArgument
 import java.lang.reflect.InvocationHandler
@@ -39,12 +35,21 @@ private fun Any.asFloat(): Float = if (this is Int) this.toFloat() else this as 
 
 private fun Any.asDouble(): Double = if (this is Int) this.toDouble() else this as Double
 
-class TypeNotFoundException(val ksType: KSType, cause: Throwable): Exception(cause)
+// for Class/KClass member
+class KsTypeNotPresentException(val ksType: KSType, cause: Throwable): RuntimeException(cause)
+// for Class[]/Array<KClass<*>> member.
+class KsTypesNotPresentException(val ksTypes: List<KSType>, cause: Throwable): RuntimeException(cause)
 
 private fun KSType.asClass() = try {
     Class.forName(this.declaration.qualifiedName!!.asString())
 } catch (e: Exception) {
-    throw TypeNotFoundException(this, e)
+    throw KsTypeNotPresentException(this, e)
+}
+
+private fun List<KSType>.asClasses() = try {
+    this.map(KSType::asClass)
+} catch (e: Exception) {
+    throw KsTypesNotPresentException(this, e)
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -58,9 +63,7 @@ private fun List<*>.asArray(method: Method) =
         "float" -> (this as List<Float>).toFloatArray()
         "int" -> (this as List<Int>).toIntArray()
         "long" -> (this as List<Long>).toLongArray()
-        "java.lang.Class" -> (this as List<KSType>).map {
-            Class.forName(it.declaration.qualifiedName!!.asString())
-        }.toTypedArray()
+        "java.lang.Class" -> (this as List<KSType>).asClasses().toTypedArray()
         "java.lang.String" -> (this as List<String>).toTypedArray()
         else -> { // arrays of enums or annotations
             when {

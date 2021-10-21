@@ -1,11 +1,10 @@
 package com.bennyhuo.tieguanyin.compiler.ksp.basic.entity
 
 import com.bennyhuo.tieguanyin.annotations.ResultEntity
-import com.bennyhuo.tieguanyin.compiler.ksp.utils.TypeNotFoundException
+import com.bennyhuo.tieguanyin.compiler.ksp.utils.KsTypeNotPresentException
 import com.bennyhuo.tieguanyin.compiler.ksp.utils.toKsType
 import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.ksp.toTypeName
-import java.lang.reflect.UndeclaredThrowableException
 import com.squareup.kotlinpoet.TypeName as KotlinTypeName
 
 class ResultParameter(val name: String, val type: KSType) : Comparable<ResultParameter> {
@@ -21,11 +20,9 @@ class ResultParameter(val name: String, val type: KSType) : Comparable<ResultPar
 fun ResultEntity.asResultParameter(): ResultParameter {
     return ResultParameter(name, try {
         type.toKsType()
-
-    } catch (e: UndeclaredThrowableException) {
-        val cause = e.cause
-        if (cause is TypeNotFoundException) {
-            cause.ksType
+    } catch (e: Exception) {
+        if (e is KsTypeNotPresentException) {
+            e.ksType
         } else {
             throw e
         }
