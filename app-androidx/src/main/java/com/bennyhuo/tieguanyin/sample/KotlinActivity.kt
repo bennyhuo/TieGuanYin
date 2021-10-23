@@ -31,7 +31,7 @@ class KotlinActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setTitle(this.javaClass.simpleName)
         openJavaActivity.setOnClickListener {
-            JavaActivityBuilder.builder(1234)
+            JavaActivityBuilder.builder(1234, 222)
                     .start(this@KotlinActivity) { javaMethod, java, kotlin ->
                         toast("Result From JavaActivity: javaMethod=$javaMethod, java=$java, kotlin=$kotlin")
                     }

@@ -12,7 +12,6 @@ import javax.lang.model.element.TypeElement
 
 /**
  * Created by benny on 10/2/16.
- *  注解处理器入口，注意google 的 auto-service 不支持
  */
 class BuilderProcessor : AbstractProcessor() {
 
@@ -24,12 +23,14 @@ class BuilderProcessor : AbstractProcessor() {
         AptContext.init(env)
     }
 
-    override fun getSupportedAnnotationTypes() = supportedAnnotations.mapTo(HashSet<String>(), Class<*>::getCanonicalName)
+    override fun getSupportedAnnotationTypes() = supportedAnnotations.map { it.canonicalName }.toSet()
 
     override fun getSupportedSourceVersion() = SourceVersion.RELEASE_8
 
     override fun process(annotations: Set<TypeElement>, env: RoundEnvironment): Boolean {
-        ClassProcessor(AptContext.filer).process(env)
+        if (annotations.isNotEmpty()) {
+            ClassProcessor(AptContext.filer).process(env)
+        }
         return true
     }
 

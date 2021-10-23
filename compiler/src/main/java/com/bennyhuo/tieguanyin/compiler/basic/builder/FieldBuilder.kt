@@ -6,7 +6,7 @@ import com.bennyhuo.tieguanyin.compiler.basic.types.INTENT
 import com.squareup.javapoet.*
 import javax.lang.model.element.Modifier.*
 
-class FieldBuilder(private val basicClass: BasicClass) {
+class FieldBuilder(private val basicClass: BasicClass<*>) {
 
     fun build(typeBuilder: TypeSpec.Builder) {
         val builderClassTypeName = ClassName.get(basicClass.packageName, basicClass.builderClassName)

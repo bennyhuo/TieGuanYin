@@ -1,37 +1,28 @@
 package com.bennyhuo.tieguanyin.compiler
 
+import com.bennyhuo.aptutils.AptContext
 import com.bennyhuo.aptutils.logger.Logger
 import com.bennyhuo.aptutils.types.isSubTypeOf
 import com.bennyhuo.tieguanyin.annotations.Builder
-import com.bennyhuo.tieguanyin.annotations.Optional
-import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.compiler.activity.ActivityClass
-import com.bennyhuo.tieguanyin.compiler.basic.entity.Field
-import com.bennyhuo.tieguanyin.compiler.basic.entity.OptionalField
+import com.bennyhuo.tieguanyin.compiler.basic.types.FRAGMENT_CLASS_NAME
 import com.bennyhuo.tieguanyin.compiler.basic.types.useAndroidx
 import com.bennyhuo.tieguanyin.compiler.fragment.FragmentClass
-import com.google.auto.common.SuperficialValidation
-import com.sun.tools.javac.code.Symbol.VarSymbol
+import com.squareup.kotlinpoet.ClassName
 import java.util.*
 import javax.annotation.processing.Filer
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
-import kotlin.system.measureNanoTime
 
 class ClassProcessor(val filer: Filer){
     private val activityClasses = HashMap<Element, ActivityClass>()
     private val fragmentClasses = HashMap<Element, FragmentClass>()
 
-    fun process(env: RoundEnvironment){
-        measureNanoTime {
-            parseClass(env)
-            parseFields(env)
-            buildFiles()
-        }.let {
-            Logger.warn("Cost time: ${it}ns")
-        }
+    fun process(env: RoundEnvironment) {
+        checkAndroidx()
+        parseClass(env)
+        buildFiles()
     }
 
     private fun buildFiles() {
@@ -39,52 +30,33 @@ class ClassProcessor(val filer: Filer){
         fragmentClasses.values.map(FragmentClass::builder).forEach { it.build(filer) }
     }
 
-    private fun parseFields(env: RoundEnvironment) {
-        env.getElementsAnnotatedWith(Required::class.java)
-                .filter { SuperficialValidation.validateElement(it) }
-                .filter { it.kind == ElementKind.FIELD }
-                .forEach { element ->
-                    (activityClasses[element.enclosingElement]
-                            ?: fragmentClasses[element.enclosingElement])
-                            ?.addSymbol(Field(element as VarSymbol))
-                            ?: Logger.error(element, "Field " + element + " annotated as Required while " + element.enclosingElement + " not annotated.")
-                }
-
-        env.getElementsAnnotatedWith(Optional::class.java)
-                .filter { SuperficialValidation.validateElement(it) }
-                .filter { it.kind == ElementKind.FIELD }
-                .forEach { element ->
-                    (activityClasses[element.enclosingElement]
-                            ?: fragmentClasses[element.enclosingElement])
-                            ?.addSymbol(OptionalField(element as VarSymbol))
-                            ?: Logger.error(element, "Field " + element + " annotated as Optional while " + element.enclosingElement + " not annotated.")
-                }
-    }
-
     private fun parseClass(env: RoundEnvironment) {
         env.getElementsAnnotatedWith(Builder::class.java)
-                .filter(SuperficialValidation::validateElement)
-                .filter { it.kind.isClass }
+                .filterIsInstance<TypeElement>()
                 .forEach { element ->
                     try {
-                        if (element.asType().isSubTypeOf("android.app.Activity")) {
-                            activityClasses[element] = ActivityClass(element as TypeElement)
-                        } else if (element.asType().isSubTypeOf("android.support.v4.app.Fragment")) {
-                            useAndroidx = false
-                            Logger.warn(element, "use support")
-
-                            fragmentClasses[element] = FragmentClass(element as TypeElement)
-                        } else if (element.asType().isSubTypeOf("androidx.fragment.app.Fragment")) {
-                            useAndroidx = true
-                            Logger.warn(element, "use Androidx")
-                            fragmentClasses[element] = FragmentClass(element as TypeElement)
-                        } else {
-                            Logger.error(element, "Unsupported type: %s", element.simpleName)
+                        val type = element.asType()
+                        when {
+                            type.isSubTypeOf("android.app.Activity") -> {
+                                activityClasses[element] = ActivityClass.create(element)
+                            }
+                            type.isSubTypeOf(FRAGMENT_CLASS_NAME) -> {
+                                fragmentClasses[element] = FragmentClass.create(element)
+                            }
+                            else -> {
+                                Logger.error(element, "Unsupported type: %s", element.simpleName)
+                            }
                         }
                     } catch (e: Exception) {
                         Logger.logParsingError(element, Builder::class.java, e)
+                        throw e
                     }
                 }
-        activityClasses.values.forEach { it.setUpSuperClass(activityClasses) }
+    }
+
+    private fun checkAndroidx() {
+        val androidxVisibleForTesting = ClassName("androidx.annotation", "VisibleForTesting")
+        useAndroidx = AptContext.elements.getTypeElement(
+            androidxVisibleForTesting.reflectionName()) != null
     }
 }

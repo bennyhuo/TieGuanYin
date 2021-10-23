@@ -2,24 +2,26 @@ package com.bennyhuo.tieguanyin.compiler.basic.entity
 
 import com.bennyhuo.aptutils.types.asKotlinTypeName
 import com.squareup.javapoet.ClassName
-import com.sun.tools.javac.code.Symbol
+import javax.lang.model.element.Modifier
+import javax.lang.model.element.VariableElement
+import javax.lang.model.type.PrimitiveType
 
 /**
  * Created by benny on 1/29/18.
  */
 
-open class Field(private val symbol: Symbol.VarSymbol) : Comparable<Field> {
-    val name = symbol.qualifiedName.toString()
+open class Field(private val element: VariableElement) : Comparable<Field> {
+    val name = element.simpleName.toString()
 
     open val prefix = "REQUIRED_"
 
-    val isPrivate = symbol.isPrivate
+    val isPrivate = Modifier.PRIVATE in element.modifiers
 
-    val isPrimitive = symbol.type.isPrimitive
+    val isPrimitive = element.asType() is PrimitiveType
 
-    fun asTypeName() = ClassName.get(symbol.type)
+    fun asTypeName() = ClassName.get(element.asType())
 
-    open fun asKotlinTypeName() = symbol.type.asKotlinTypeName()
+    open fun asKotlinTypeName() = element.asType().asKotlinTypeName()
 
     override fun compareTo(other: Field): Int {
         return name.compareTo(other.name)

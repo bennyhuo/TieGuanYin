@@ -55,6 +55,9 @@ val ANDROIDX_FRAGMENT = ClassType("androidx.fragment.app.Fragment")
 val FRAGMENT: ClassType
     get() = if (useAndroidx == true) ANDROIDX_FRAGMENT else SUPPORT_FRAGMENT
 
+val FRAGMENT_CLASS_NAME: String
+    get() = if (useAndroidx == true) "androidx.fragment.app.Fragment" else "android.support.v4.app.Fragment"
+
 
 val SUPPORT_FRAGMENT_ACTIVITY = ClassType("android.support.v4.app.FragmentActivity")
 val ANDROIDX_FRAGMENT_ACTIVITY = ClassType("androidx.fragment.app.FragmentActivity")

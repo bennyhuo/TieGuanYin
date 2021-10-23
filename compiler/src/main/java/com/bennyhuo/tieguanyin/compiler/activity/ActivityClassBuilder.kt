@@ -6,7 +6,8 @@ import com.bennyhuo.tieguanyin.compiler.basic.builder.FieldBuilder
 import com.squareup.javapoet.TypeSpec.Builder
 import com.squareup.kotlinpoet.FileSpec
 
-class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClassBuilder(activityClass) {
+class ActivityClassBuilder(private val activityClass: ActivityClass)
+    : BasicClassBuilder<ActivityClass>(activityClass) {
 
     override fun buildCommon(typeBuilder: Builder) {
         ConstantBuilder(activityClass).build(typeBuilder)

@@ -26,7 +26,7 @@ import kotlin.jvm.functions.Function2;
 /**
  * Created by benny on 1/29/18.
  */
-@Builder(resultTypes = {@ResultEntity(name = "javaMethod", type = String.class), @ResultEntity(name = "kotlin", type=int.class)})
+@Builder(resultTypes = {@ResultEntity(name = "javaMethod", type = String.class), @ResultEntity(name = "kotlin", type=Integer.class)})
 public class JavaActivity extends AbsActivity {
 
     @Required
@@ -88,8 +88,8 @@ public class JavaActivity extends AbsActivity {
     }
 
 //    @Builder
-//    public static class InnerActivity extends Activity{
+//    public static class InnerActivity extends Activity {
 //        @Required
-//        int num;
+//        Integer num;
 //    }
 }

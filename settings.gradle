@@ -1,4 +1,4 @@
-include ':app', ':app-java', ':app-androidx'
+include ':app', ':app-java', ':app-androidx', ':sample-common'
 include ':compiler', ':compiler-ksp'
 include ':annotations', ':runtime', ':runtime-androidx', ':runtime-kt'
 

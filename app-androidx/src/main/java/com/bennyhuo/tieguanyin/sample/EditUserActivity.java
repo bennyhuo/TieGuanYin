@@ -12,7 +12,7 @@ import com.bennyhuo.tieguanyin.annotations.ResultEntity;
 
 @Builder(mode = GenerateMode.Both,
         resultTypes = {@ResultEntity(name = "name", type = String.class),
-                @ResultEntity(name = "age", type = int.class),
+                @ResultEntity(name = "age", type = Integer.class),
                 @ResultEntity(name = "title", type = String.class),
                 @ResultEntity(name = "company", type = String.class)})
 public class EditUserActivity extends Activity {
