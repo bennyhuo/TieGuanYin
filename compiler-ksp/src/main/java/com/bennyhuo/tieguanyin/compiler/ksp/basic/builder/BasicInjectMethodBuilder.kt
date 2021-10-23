@@ -22,7 +22,7 @@ abstract class BasicInjectMethodBuilder(val basicClass: BasicClass) {
             .returns(UNIT)
             .beginControlFlow(
                 "if(instance is %T)",
-                basicClass.typeElement.toKotlinTypeName()
+                basicClass.declaration.toKotlinTypeName()
             )
             .beginControlFlow("if(savedInstanceState != null)")
 

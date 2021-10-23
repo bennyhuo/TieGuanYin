@@ -34,7 +34,7 @@ abstract class StartFragmentMethodBuilder(protected val fragmentClass: FragmentC
         val isReplace = op == REPLACE
 
         val methodBuilder = FunSpec.builder(name)
-            .returns(fragmentClass.typeElement.toKotlinTypeName().copy(nullable = true))
+            .returns(fragmentClass.declaration.toKotlinTypeName().copy(nullable = true))
             .addParameter("activity", ACTIVITY.kotlin)
             .addParameter("containerId", Int::class)
             .addParameter("tag", STRING.kotlin.copy(nullable = true))
@@ -50,7 +50,7 @@ abstract class StartFragmentMethodBuilder(protected val fragmentClass: FragmentC
                 "return %T.showFragment(activity, %L, containerId, tag, intent.extras, %T::class.java, null)",
                 FRAGMENT_BUILDER.kotlin,
                 isReplace,
-                fragmentClass.typeElement.toKotlinTypeName()
+                fragmentClass.declaration.toKotlinTypeName()
             )
         } else {
             methodBuilder.addStatement(
@@ -78,7 +78,7 @@ abstract class StartFragmentMethodBuilder(protected val fragmentClass: FragmentC
                 "return %T.showFragment(activity, %L, containerId, tag, intent.getExtras(), %T::class.java, sharedElements)",
                 FRAGMENT_BUILDER.kotlin,
                 isReplace,
-                fragmentClass.typeElement.toKotlinTypeName()
+                fragmentClass.declaration.toKotlinTypeName()
             )
         }
         methodBuilder.endControlFlow()
@@ -87,7 +87,7 @@ abstract class StartFragmentMethodBuilder(protected val fragmentClass: FragmentC
         typeBuilder.addFunction(methodBuilder.build())
         typeBuilder.addFunction(
             FunSpec.builder(name)
-                .returns(fragmentClass.typeElement.toKotlinTypeName().copy(nullable = true))
+                .returns(fragmentClass.declaration.toKotlinTypeName().copy(nullable = true))
                 .addParameter("activity", ACTIVITY.kotlin)
                 .addParameter("containerId", Int::class)
                 .addStatement("return %L(activity, containerId, null)", name).build()
@@ -111,7 +111,7 @@ class AddMethodBuilder(fragmentClass: FragmentClass) : StartFragmentMethodBuilde
         //  You can provide tag only when "add" a fragment.
         typeBuilder.addFunction(
             FunSpec.builder(name)
-                .returns(fragmentClass.typeElement.toKotlinTypeName().copy(nullable = true))
+                .returns(fragmentClass.declaration.toKotlinTypeName().copy(nullable = true))
                 .addParameter("activity", ACTIVITY.kotlin)
                 .addParameter("tag", STRING.kotlin)
                 .addStatement("return %L(activity, 0, tag)", name).build()

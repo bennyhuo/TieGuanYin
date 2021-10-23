@@ -13,7 +13,7 @@ class FinishKFunctionBuilder(private val activityClass: ActivityClass) {
 
     fun build(fileSpecBuilder: FileSpec.Builder) {
         val funBuilder = FunSpec.builder("smartFinish")
-                .receiver(activityClass.typeElement.asType().toTypeName())
+                .receiver(activityClass.declaration.asType().toTypeName())
 
         activityClass.resultParameters.also {
             if (it.isNotEmpty()) {

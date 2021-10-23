@@ -33,7 +33,7 @@ class StartMethodBuilder(private val activityClass: ActivityClass, private val n
         methodBuilderOfContext.addStatement(
             "val intent = %T(context, %T::class.java)",
             INTENT.kotlin,
-            activityClass.typeElement.toKotlinTypeName()
+            activityClass.declaration.toKotlinTypeName()
         )
 
         val methodBuilderOfView = FunSpec.builder(name)

@@ -6,15 +6,18 @@ import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.compiler.ksp.activity.ActivityClass
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.Field
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.OptionalField
+import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.FRAGMENT_CLASS_NAME
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.useAndroidx
 import com.bennyhuo.tieguanyin.compiler.ksp.core.logger
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.FragmentClass
 import com.bennyhuo.tieguanyin.compiler.ksp.utils.asType
 import com.bennyhuo.tieguanyin.compiler.ksp.utils.isSubTypeOf
+import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.squareup.kotlinpoet.ClassName
 import java.util.*
 import kotlin.system.measureNanoTime
 
@@ -24,8 +27,8 @@ class ClassProcessor {
 
     fun process(resolver: Resolver){
         measureNanoTime {
+            checkAndroidx(resolver)
             parseClass(resolver)
-            parseFields(resolver)
             buildFiles()
         }.let {
             logger.warn("Cost time: ${it}ns")
@@ -37,51 +40,33 @@ class ClassProcessor {
         fragmentClasses.values.map(FragmentClass::builder).forEach { it.build() }
     }
 
-    private fun parseFields(resolver: Resolver) {
-        resolver.getSymbolsWithAnnotation(Required::class.qualifiedName!!)
-            .filterIsInstance<KSPropertyDeclaration>()
-            .filter { it.parent != null }
-            .forEach { element ->
-                val parent = element.parent!!
-                    (activityClasses[parent]
-                            ?: fragmentClasses[parent])
-                            ?.addSymbol(Field(element))
-                            ?: logger.error("Field $element annotated as Required while $parent not annotated.", element)
-                }
-
-        resolver.getSymbolsWithAnnotation(Optional::class.qualifiedName!!)
-            .filterIsInstance<KSPropertyDeclaration>()
-            .filter { it.parent != null }
-            .forEach { element ->
-                val parent = element.parent!!
-                (activityClasses[parent]
-                    ?: fragmentClasses[parent])
-                    ?.addSymbol(OptionalField(element))
-                    ?: logger.error("Field $element annotated as Optional while $parent not annotated.", element)
-            }
-    }
-
     private fun parseClass(resolver: Resolver) {
         resolver.getSymbolsWithAnnotation(Builder::class.qualifiedName!!)
                 .filterIsInstance<KSClassDeclaration>()
-                .forEach { element ->
+                .forEach { declaration ->
                     try {
-                        if (element.asType().isSubTypeOf("android.app.Activity")) {
-                            activityClasses[element] = ActivityClass(element)
-                        } else if (element.asType().isSubTypeOf("android.support.v4.app.Fragment")) {
-                            useAndroidx = false
-                            fragmentClasses[element] = FragmentClass(element)
-                        } else if (element.asType().isSubTypeOf("androidx.fragment.app.Fragment")) {
-                            useAndroidx = true
-                            fragmentClasses[element] = FragmentClass(element)
-                        } else {
-                            logger.error("Unsupported type: %s", element)
+                        val type = declaration.asStarProjectedType()
+                        when {
+                            type.isSubTypeOf("android.app.Activity") -> {
+                                activityClasses[declaration] = ActivityClass.create(declaration)
+                            }
+                            type.isSubTypeOf(FRAGMENT_CLASS_NAME) -> {
+                                fragmentClasses[declaration] = FragmentClass.create(declaration)
+                            }
+                            else -> {
+                                logger.error("Unsupported type: %s", declaration)
+                            }
                         }
                     } catch (e: Exception) {
-                        logger.error(e.toString(), element)
+                        logger.error(e.toString(), declaration)
                         throw e
                     }
                 }
-        activityClasses.values.forEach { it.setUpSuperClass(activityClasses) }
+    }
+
+    private fun checkAndroidx(resolver: Resolver) {
+        val androidxVisibleForTesting = ClassName("androidx.annotation", "VisibleForTesting")
+        useAndroidx = resolver.getClassDeclarationByName(
+            androidxVisibleForTesting.reflectionName()) != null
     }
 }

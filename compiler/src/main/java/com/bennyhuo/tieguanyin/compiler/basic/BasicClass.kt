@@ -44,10 +44,6 @@ abstract class BasicClass(val typeElement: TypeElement, builder: Builder) {
 
     val isAbstract = typeElement.modifiers.contains(Modifier.ABSTRACT)
 
-    val fields: TreeSet<Field> = TreeSet()
-
-    val sharedElements = ArrayList(declaredSharedElements)
-
     init {
         generateMode = if (builder.mode == GenerateMode.Auto) {
             //如果有这个注解，说明就是 Kotlin 类
@@ -58,9 +54,36 @@ abstract class BasicClass(val typeElement: TypeElement, builder: Builder) {
         builder.sharedElements.mapTo(declaredSharedElements) { SharedElementEntity(it) }
         builder.sharedElementsByNames.mapTo(declaredSharedElements) { SharedElementEntity(it) }
         builder.sharedElementsWithName.mapTo(declaredSharedElements) { SharedElementEntity(it) }
+    }
 
-        parseFields()
+    val sharedElements = ArrayList(declaredSharedElements)
+
+    val fields: TreeSet<Field> = TreeSet()
+
+    init {
+        initFields()
         initSuperClass()
+    }
+
+    private fun initFields() {
+        typeElement.enclosedElements
+            .filterIsInstance<VariableElement>()
+            .forEach {
+                val optional = it.getAnnotation(Optional::class.java)
+                if (optional == null) {
+                    val required = it.getAnnotation(Required::class.java)
+                    if (required != null) {
+                        addField(Field(it))
+                    }
+                } else {
+                    addField(OptionalField(it, optional))
+                }
+            }
+    }
+
+    private fun addField(field: Field) {
+        declaredFields.add(field)
+        fields.add(field)
     }
 
     private fun initSuperClass() {
@@ -77,27 +100,6 @@ abstract class BasicClass(val typeElement: TypeElement, builder: Builder) {
     }
 
     abstract fun createSuperClass(superClassElement: TypeElement): BasicClass?
-
-    private fun addSymbol(field: Field) {
-        declaredFields.add(field)
-        fields.add(field)
-    }
-
-    private fun parseFields() {
-        typeElement.enclosedElements
-            .filterIsInstance<VariableElement>()
-            .forEach {
-                val optional = it.getAnnotation(Optional::class.java)
-                if (optional == null) {
-                    val required = it.getAnnotation(Required::class.java)
-                    if (required != null) {
-                        addSymbol(Field(it))
-                    }
-                } else {
-                    addSymbol(OptionalField(it, optional))
-                }
-            }
-    }
 
     companion object {
         @Suppress("UNCHECKED_CAST")

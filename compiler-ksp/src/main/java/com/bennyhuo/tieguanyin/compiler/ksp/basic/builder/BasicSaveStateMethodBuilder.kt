@@ -21,7 +21,7 @@ abstract class BasicSaveStateMethodBuilder(val basicClass: BasicClass) {
             .addParameter("outState", BUNDLE.kotlin)
             .beginControlFlow(
                 "if(instance is %T)",
-                basicClass.typeElement.toKotlinTypeName()
+                basicClass.declaration.toKotlinTypeName()
             )
 
         methodBuilder.addStatement("val intent = %T()", INTENT.kotlin)

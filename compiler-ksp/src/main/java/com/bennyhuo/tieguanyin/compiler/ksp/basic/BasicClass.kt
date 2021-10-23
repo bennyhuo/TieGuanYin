@@ -1,75 +1,91 @@
 package com.bennyhuo.tieguanyin.compiler.ksp.basic
 
 import com.bennyhuo.tieguanyin.annotations.Builder
-import com.bennyhuo.tieguanyin.annotations.GenerateMode
+import com.bennyhuo.tieguanyin.annotations.Optional
+import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.Field
+import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.OptionalField
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.SharedElementEntity
-import com.bennyhuo.tieguanyin.compiler.ksp.utils.getFirstAnnotationByType
+import com.bennyhuo.tieguanyin.compiler.ksp.utils.getFirstAnnotationByTypeOrNull
 import com.bennyhuo.tieguanyin.compiler.ksp.utils.superType
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSNode
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.Modifier
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.reflect.KClass
 
-abstract class BasicClass(val typeElement: KSClassDeclaration) {
+abstract class BasicClass(val declaration: KSClassDeclaration, builder: Builder) {
 
-    val simpleName = typeElement.simpleName.asString()
+    val simpleName = declaration.simpleName.asString()
 
     val builderClassName: String by lazy {
         val list = ArrayList<String>()
         list += simpleName
-        var element = typeElement.parentDeclaration
+        var element = declaration.parentDeclaration
         while (element as? KSClassDeclaration != null){
             list += element.simpleName.asString()
             element = element.parentDeclaration
         }
         list.reversed().joinToString("_") + POSIX
     }
-    val packageName: String = typeElement.packageName.asString()
+    val packageName: String = declaration.packageName.asString()
 
     private val declaredFields = TreeSet<Field>()
     private val declaredSharedElements = ArrayList<SharedElementEntity>()
 
-    val generateMode: GenerateMode
+    var superClass: BasicClass? = null
+        private set
 
-    private var superClass: BasicClass? = null
-
-    val isAbstract = Modifier.ABSTRACT in typeElement.modifiers
+    val isAbstract = Modifier.ABSTRACT in declaration.modifiers
 
     init {
-        val generateBuilder = typeElement.getFirstAnnotationByType(Builder::class)
-        generateMode = GenerateMode.KotlinOnly
-
-        generateBuilder.sharedElements.mapTo(declaredSharedElements) { SharedElementEntity(it) }
-        generateBuilder.sharedElementsByNames.mapTo(declaredSharedElements) { SharedElementEntity(it) }
-        generateBuilder.sharedElementsWithName.mapTo(declaredSharedElements) { SharedElementEntity(it) }
+        builder.sharedElements.mapTo(declaredSharedElements) { SharedElementEntity(it) }
+        builder.sharedElementsByNames.mapTo(declaredSharedElements) { SharedElementEntity(it) }
+        builder.sharedElementsWithName.mapTo(declaredSharedElements) { SharedElementEntity(it) }
     }
-
-    val fields: TreeSet<Field> = TreeSet()
 
     val sharedElements = ArrayList(declaredSharedElements)
 
-    fun <T: BasicClass> setUpSuperClass(classes: Map<KSNode, T>): T?{
-        val superTypeElement = typeElement.superType()?: return null
-        return classes[superTypeElement].also { superClass ->
-            superClass?.also {
-                fields.addAll(it.fields)
-                sharedElements += it.sharedElements
-            }
-            this.superClass = superClass
-        }
+    val fields: TreeSet<Field> = TreeSet()
+    init {
+        initFields()
+        initSuperClass()
     }
 
-    fun addSymbol(field: Field) {
+    private fun initFields() {
+        declaration.declarations
+            .filterIsInstance<KSPropertyDeclaration>()
+            .forEach {
+                val optional = it.getFirstAnnotationByTypeOrNull(Optional::class)
+                if (optional == null) {
+                    val required = it.getFirstAnnotationByTypeOrNull(Required::class)
+                    if (required != null) {
+                        addField(Field(it))
+                    }
+                } else {
+                    addField(OptionalField(it, optional))
+                }
+            }
+    }
+
+    private fun addField(field: Field) {
         declaredFields.add(field)
         fields.add(field)
     }
 
+    private fun initSuperClass() {
+        val superClassDeclaration = declaration.superType() ?: return
+        val superClass = createSuperClass(superClassDeclaration)
+        if (superClass != null) {
+            fields.addAll(superClass.fields)
+            sharedElements += superClass.sharedElements
+            this.superClass = superClass
+        }
+    }
+
+    abstract fun createSuperClass(superClassDeclaration: KSClassDeclaration): BasicClass?
+
     companion object {
-        @Suppress("UNCHECKED_CAST")
-        val META_DATA = Class.forName("kotlin.Metadata").kotlin as KClass<Annotation>
         const val POSIX = "Builder"
     }
 }

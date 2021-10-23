@@ -2,14 +2,13 @@ package com.bennyhuo.tieguanyin.compiler.ksp.basic.entity
 
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.compiler.ksp.core.KspContext
-import com.bennyhuo.tieguanyin.compiler.ksp.utils.getFirstAnnotationByType
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 
 /**
  * Created by benny on 1/31/18.
  */
 
-class OptionalField(symbol: KSPropertyDeclaration) : Field(symbol) {
+class OptionalField(declaration: KSPropertyDeclaration, optional: Optional) : Field(declaration) {
 
     var defaultValue: Any
         private set
@@ -17,9 +16,8 @@ class OptionalField(symbol: KSPropertyDeclaration) : Field(symbol) {
     override val prefix = "OPTIONAL_"
 
     init {
-        val optional = symbol.getFirstAnnotationByType(Optional::class)
         val builtIns = KspContext.builtIns
-        defaultValue = when (symbol.type.resolve()) {
+        defaultValue = when (declaration.type.resolve()) {
             builtIns.booleanType -> optional.booleanValue
             builtIns.charType -> "'${optional.charValue}'"
             builtIns.byteType -> "${optional.byteValue}.toByte()"

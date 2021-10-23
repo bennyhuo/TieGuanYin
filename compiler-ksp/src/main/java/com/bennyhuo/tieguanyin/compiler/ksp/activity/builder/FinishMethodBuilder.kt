@@ -15,7 +15,7 @@ class FinishMethodBuilder(private val activityClass: ActivityClass) {
         val finishMethodBuilder = FunSpec.builder("smartFinish")
             .addAnnotation(JvmStatic::class)
             .returns(UNIT)
-            .addParameter("activity", activityClass.typeElement.toKotlinTypeName())
+            .addParameter("activity", activityClass.declaration.toKotlinTypeName())
 
         //handle result parameters.
         activityClass.resultParameters.also {

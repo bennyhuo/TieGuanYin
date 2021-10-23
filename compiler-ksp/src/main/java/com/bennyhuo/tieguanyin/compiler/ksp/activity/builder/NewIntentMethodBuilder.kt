@@ -13,7 +13,7 @@ class NewIntentMethodBuilder(private val activityClass: ActivityClass) {
         val newIntentMethodBuilder = FunSpec.builder("processNewIntent")
             .addAnnotation(JvmStatic::class)
             .returns(UNIT)
-            .addParameter("activity", activityClass.typeElement.toKotlinTypeName())
+            .addParameter("activity", activityClass.declaration.toKotlinTypeName())
             .addParameter("intent", INTENT.kotlin.copy(nullable = true))
 
         newIntentMethodBuilder.addStatement("processNewIntent(activity, intent, true)")
@@ -22,7 +22,7 @@ class NewIntentMethodBuilder(private val activityClass: ActivityClass) {
         val newIntentWithUpdateIntentMethodBuilder = FunSpec.builder("processNewIntent")
             .addAnnotation(JvmStatic::class)
             .returns(UNIT)
-            .addParameter("activity", activityClass.typeElement.toKotlinTypeName())
+            .addParameter("activity", activityClass.declaration.toKotlinTypeName())
             .addParameter("intent", INTENT.kotlin.copy(nullable = true))
             .addParameter("updateIntent", Boolean::class)
 

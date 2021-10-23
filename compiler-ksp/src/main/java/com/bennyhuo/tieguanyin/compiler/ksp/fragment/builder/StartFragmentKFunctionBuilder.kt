@@ -34,7 +34,7 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
 
     open fun build(fileBuilder: FileSpec.Builder) {
         val isReplace = op == REPLACE
-        val returnType = fragmentClass.typeElement.toKotlinTypeName().copy(nullable = true)
+        val returnType = fragmentClass.declaration.toKotlinTypeName().copy(nullable = true)
         val funBuilderOfContext = FunSpec.builder(name)
                 .receiver(FRAGMENT_ACTIVITY.kotlin)
                 .addModifiers(KModifier.PUBLIC)
@@ -58,7 +58,7 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
 
         val sharedElements = fragmentClass.sharedElements
         if (sharedElements.isEmpty()) {
-            funBuilderOfContext.addStatement("return %T.showFragment(this, %L, containerId, tag, intent.getExtras(), %T::class.java, null)", FRAGMENT_BUILDER.kotlin, isReplace, fragmentClass.typeElement.toKotlinTypeName())
+            funBuilderOfContext.addStatement("return %T.showFragment(this, %L, containerId, tag, intent.getExtras(), %T::class.java, null)", FRAGMENT_BUILDER.kotlin, isReplace, fragmentClass.declaration.toKotlinTypeName())
         } else {
             funBuilderOfContext.addStatement("val sharedElements = %T()", ARRAY_LIST[PAIR[STRING, STRING]].kotlin)
                     .addStatement("val container: %T = findViewById(containerId)", VIEW.kotlin)
@@ -69,7 +69,7 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
                     funBuilderOfContext.addStatement("sharedElements.add(Pair(%T.getTransitionName(container.findViewById(%L)), %S))", VIEW_COMPAT.kotlin, sharedElement.sourceId, sharedElement.targetName)
                 }
             }
-            funBuilderOfContext.addStatement("return %T.showFragment(this, %L, containerId, tag, intent.getExtras(), %T::class.java, sharedElements)", FRAGMENT_BUILDER.kotlin, isReplace, fragmentClass.typeElement.toKotlinTypeName())
+            funBuilderOfContext.addStatement("return %T.showFragment(this, %L, containerId, tag, intent.getExtras(), %T::class.java, sharedElements)", FRAGMENT_BUILDER.kotlin, isReplace, fragmentClass.declaration.toKotlinTypeName())
         }
 
 

@@ -31,44 +31,35 @@ val HASH_MAP = ClassType("kotlin.collections.HashMap")
 
 val STRING = ClassType("kotlin.String")
 
-var useAndroidx: Boolean? = null
-    set(value) {
-        if (field == null) {
-            field = value
-        } else if(field != value) {
-            if (field == true) {
-                throw IllegalStateException("Androidx is enabled, but support fragments are found.")
-            } else {
-                throw IllegalStateException("Use support libraries, but androidx fragments are found.")
-            }
-        }
-    }
+var useAndroidx: Boolean = true
 
 val SUPPORT_PAIR = ClassType("android.support.v4.util.Pair")
 val ANDROIDX_PAIR = ClassType("androidx.core.util.Pair")
 val PAIR: ClassType
-    get() = if (useAndroidx == true) ANDROIDX_PAIR else SUPPORT_PAIR
+    get() = if (useAndroidx) ANDROIDX_PAIR else SUPPORT_PAIR
 
 
 val SUPPORT_FRAGMENT = ClassType("android.support.v4.app.Fragment")
 val ANDROIDX_FRAGMENT = ClassType("androidx.fragment.app.Fragment")
 val FRAGMENT: ClassType
-    get() = if (useAndroidx == true) ANDROIDX_FRAGMENT else SUPPORT_FRAGMENT
+    get() = if (useAndroidx) ANDROIDX_FRAGMENT else SUPPORT_FRAGMENT
+val FRAGMENT_CLASS_NAME: String
+    get() = if (useAndroidx) "androidx.fragment.app.Fragment" else "android.support.v4.app.Fragment"
 
 
 val SUPPORT_FRAGMENT_ACTIVITY = ClassType("android.support.v4.app.FragmentActivity")
 val ANDROIDX_FRAGMENT_ACTIVITY = ClassType("androidx.fragment.app.FragmentActivity")
 val FRAGMENT_ACTIVITY: ClassType
-    get() = if (useAndroidx == true) ANDROIDX_FRAGMENT_ACTIVITY else SUPPORT_FRAGMENT_ACTIVITY
+    get() = if (useAndroidx) ANDROIDX_FRAGMENT_ACTIVITY else SUPPORT_FRAGMENT_ACTIVITY
 
 
 val SUPPORT_VIEW_COMPAT = ClassType("android.support.v4.view.ViewCompat")
 val ANDROIDX_VIEW_COMPAT = ClassType("androidx.core.view.ViewCompat")
 val VIEW_COMPAT: ClassType
-    get() = if (useAndroidx == true) ANDROIDX_VIEW_COMPAT else SUPPORT_VIEW_COMPAT
+    get() = if (useAndroidx) ANDROIDX_VIEW_COMPAT else SUPPORT_VIEW_COMPAT
 
 val SUPPORT_ACTIVITY_COMPAT = ClassType("android.support.v4.app.ActivityCompat")
 val ANDROIDX_ACTIVITY_COMPAT = ClassType("androidx.core.app.ActivityCompat")
 val ACTIVITY_COMPAT: ClassType
-    get() = if (useAndroidx == true) ANDROIDX_ACTIVITY_COMPAT else SUPPORT_ACTIVITY_COMPAT
+    get() = if (useAndroidx) ANDROIDX_ACTIVITY_COMPAT else SUPPORT_ACTIVITY_COMPAT
 

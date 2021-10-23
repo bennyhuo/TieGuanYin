@@ -38,7 +38,7 @@ class StartKFunctionBuilder(private val activityClass: ActivityClass) {
             .addStatement(
                 "val intent = %T(this, %T::class.java)",
                 INTENT.kotlin,
-                activityClass.typeElement.toKotlinTypeName()
+                activityClass.declaration.toKotlinTypeName()
             )
 
         activityClass.categories.forEach { category ->

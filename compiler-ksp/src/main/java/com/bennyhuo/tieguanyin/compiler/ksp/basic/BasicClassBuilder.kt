@@ -12,7 +12,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 abstract class BasicClassBuilder(private val basicClass: BasicClass) {
 
     private fun writeKotlinToFile(fileSpec: FileSpec) {
-        fileSpec.writeTo(KspContext.environment.codeGenerator, false, listOf(basicClass.typeElement.containingFile!!))
+        fileSpec.writeTo(KspContext.environment.codeGenerator, false, listOf(basicClass.declaration.containingFile!!))
     }
 
     fun build() {
@@ -34,7 +34,7 @@ abstract class BasicClassBuilder(private val basicClass: BasicClass) {
             fileSpecBuilder.addType(typeBuilder.build())
             writeKotlinToFile(fileSpecBuilder.build())
         } catch (e: Exception) {
-            logger.error(e.toString(), basicClass.typeElement)
+            logger.error(e.toString(), basicClass.declaration)
             throw e
         }
     }

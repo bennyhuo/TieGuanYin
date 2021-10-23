@@ -11,7 +11,7 @@ class NewIntentKFunctionBuilder(private val activityClass: ActivityClass) {
 
     fun build(builder: FileSpec.Builder) {
         val newIntentFunBuilder = FunSpec.builder("processNewIntent")
-                .receiver(activityClass.typeElement.toKotlinTypeName())
+                .receiver(activityClass.declaration.toKotlinTypeName())
                 .addParameter("intent", INTENT.kotlin.copy(nullable = true))
                 .addParameter(ParameterSpec.builder("updateIntent", Boolean::class.java).defaultValue("true").build())
 
