@@ -11,7 +11,7 @@ import javax.annotation.processing.Filer
 import javax.lang.model.element.Modifier
 import javax.tools.StandardLocation
 
-abstract class BasicClassBuilder<T: BasicClass<T>>(private val basicClass: T) {
+abstract class BasicClassBuilder(private val basicClass: BasicClass) {
 
     private fun writeJavaToFile(filer: Filer, typeSpec: TypeSpec) {
         val file = JavaFile.builder(basicClass.packageName, typeSpec).build()

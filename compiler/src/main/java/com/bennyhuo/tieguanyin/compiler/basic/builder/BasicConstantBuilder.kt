@@ -6,7 +6,7 @@ import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier
 
-abstract class BasicConstantBuilder(private val basicClass: BasicClass<*>) {
+abstract class BasicConstantBuilder(private val basicClass: BasicClass) {
     open fun build(typeBuilder: TypeSpec.Builder) {
         basicClass.fields.forEach { field ->
             typeBuilder.addField(FieldSpec.builder(String::class.java,

@@ -18,7 +18,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import kotlin.collections.ArrayList
 
-abstract class BasicClass<T: BasicClass<T>>(val typeElement: TypeElement, builder: Builder) {
+abstract class BasicClass(val typeElement: TypeElement, builder: Builder) {
 
     val simpleName = typeElement.simpleName()
 
@@ -39,7 +39,7 @@ abstract class BasicClass<T: BasicClass<T>>(val typeElement: TypeElement, builde
 
     val generateMode: GenerateMode
 
-    var superClass: T? = null
+    var superClass: BasicClass? = null
         private set
 
     val isAbstract = typeElement.modifiers.contains(Modifier.ABSTRACT)
@@ -76,7 +76,7 @@ abstract class BasicClass<T: BasicClass<T>>(val typeElement: TypeElement, builde
         }
     }
 
-    abstract fun createSuperClass(superClassElement: TypeElement): T?
+    abstract fun createSuperClass(superClassElement: TypeElement): BasicClass?
 
     private fun addSymbol(field: Field) {
         declaredFields.add(field)

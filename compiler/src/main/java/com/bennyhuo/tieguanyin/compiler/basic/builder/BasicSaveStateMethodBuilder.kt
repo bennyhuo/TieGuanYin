@@ -8,7 +8,7 @@ import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import javax.lang.model.element.Modifier
 
-abstract class BasicSaveStateMethodBuilder(val basicClass: BasicClass<*>) {
+abstract class BasicSaveStateMethodBuilder(val basicClass: BasicClass) {
 
     abstract val instanceType: TypeName
 

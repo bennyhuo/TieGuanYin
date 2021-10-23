@@ -7,7 +7,7 @@ import com.squareup.javapoet.TypeSpec.Builder
 import com.squareup.kotlinpoet.FileSpec
 
 class FragmentClassBuilder(private val fragmentClass: FragmentClass)
-    : BasicClassBuilder<FragmentClass>(fragmentClass) {
+    : BasicClassBuilder(fragmentClass) {
 
     override fun buildCommon(typeBuilder: Builder) {
         ConstantBuilder(fragmentClass).build(typeBuilder)

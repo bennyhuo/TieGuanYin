@@ -15,7 +15,7 @@ import javax.lang.model.element.TypeElement
  */
 class ActivityClass
 private constructor(type: TypeElement, builder: Builder)
-    : BasicClass<ActivityClass>(type, builder) {
+    : BasicClass(type, builder) {
 
     companion object {
         private val activityClassCache = WeakHashMap<TypeElement, ActivityClass>()
@@ -73,7 +73,7 @@ private constructor(type: TypeElement, builder: Builder)
         get() = resultParameters.isNotEmpty()
 
     init {
-        val superActivityClass = superClass
+        val superActivityClass = superClass as? ActivityClass
         if (superActivityClass != null) {
             categories += superActivityClass.categories
             flags += superActivityClass.flags

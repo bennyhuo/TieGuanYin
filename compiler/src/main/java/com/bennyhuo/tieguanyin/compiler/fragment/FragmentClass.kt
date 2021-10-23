@@ -10,7 +10,7 @@ import javax.lang.model.element.TypeElement
  */
 class FragmentClass
 private constructor(type: TypeElement, builder: Builder)
-    : BasicClass<FragmentClass>(type, builder) {
+    : BasicClass(type, builder) {
 
     companion object {
         private val fragmentClassCache = WeakHashMap<TypeElement, FragmentClass>()
