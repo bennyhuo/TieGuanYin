@@ -1,9 +1,10 @@
-package com.bennyhuo.tieguanyin.annotations
+package com.bennyhuo.tieguanyin.annotations;
 
 /**
  * Created by benny on 2/3/18.
  */
-enum class GenerateMode {
+
+public enum GenerateMode {
     /**
      * Generate Java utility method for Java developers only.
      */
@@ -12,7 +13,9 @@ enum class GenerateMode {
     /**
      * Generate Kotlin utility functions for Kotlin developers only.
      */
-    KotlinOnly, Both,
+    KotlinOnly,
+
+    Both,
 
     /**
      * Generate methods according to the source file.
