@@ -1,7 +1,6 @@
 package com.bennyhuo.tieguanyin.compiler.ksp.utils
 
 import com.bennyhuo.tieguanyin.compiler.ksp.core.KspContext
-import com.bennyhuo.tieguanyin.compiler.ksp.core.logger
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -14,7 +13,6 @@ inline fun <reified T> Any?.safeCastAs() = this as? T
 inline fun <reified T> Any.castAs() = this as T
 
 fun KClass<*>.toKsType(): KSType {
-    logger.warn(this.toString())
     return KspContext.resolver
         .getClassDeclarationByName(qualifiedName!!)!!
         .asType(emptyList())
