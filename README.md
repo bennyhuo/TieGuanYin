@@ -231,7 +231,6 @@ repositories {
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-android-extensions'
 
     // for ksp
     id("com.google.devtools.ksp").version("1.5.31-1.0.1")
@@ -239,14 +238,16 @@ plugins {
     id "kotlin-kapt"
 }
 
-// for android support
-api "com.bennyhuo.tieguanyin:runtime:$latest_version"
-// for androidx
-api "com.bennyhuo.tieguanyin:runtime-androidx:$latest_version"
-// for kapt
-kapt "com.bennyhuo.tieguanyin:compiler:$latest_version"
-// for ksp
-ksp "com.bennyhuo.tieguanyin:compiler:$latest_version"
+dependencies {
+    // for android support
+    api "com.bennyhuo.tieguanyin:runtime:$latest_version"
+    // for androidx
+    api "com.bennyhuo.tieguanyin:runtime-androidx:$latest_version"
+    // for kapt
+    kapt "com.bennyhuo.tieguanyin:compiler:$latest_version"
+    // for ksp
+    ksp "com.bennyhuo.tieguanyin:compiler:$latest_version"
+}
 ```
 
 当前版本：2.0.0
