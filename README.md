@@ -249,7 +249,7 @@ kapt "com.bennyhuo.tieguanyin:compiler:$latest_version"
 ksp "com.bennyhuo.tieguanyin:compiler:$latest_version"
 ```
 
-当然版本：2.0.0-SNAPSHOT
+当前版本：2.0.0
 
 注意，kapt 和 ksp 选一个即可；如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
 
