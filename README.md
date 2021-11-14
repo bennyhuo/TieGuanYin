@@ -208,6 +208,16 @@ public final class UserActivityBuilder {
 仓库配置：
 
 ```
+// snapshot
+repositories {
+    ...
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    ...
+}
+
+// release
 repositories {
     ...
     mavenCentral()
@@ -218,10 +228,30 @@ repositories {
 依赖配置：
 
 ```
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+
+    // for ksp
+    id("com.google.devtools.ksp").version("1.5.31-1.0.1")
+    // for kapt
+    id "kotlin-kapt"
+}
+
+// for android support
 api "com.bennyhuo.tieguanyin:runtime:$latest_version"
+// for androidx
+api "com.bennyhuo.tieguanyin:runtime-androidx:$latest_version"
+// for kapt
 kapt "com.bennyhuo.tieguanyin:compiler:$latest_version"
+// for ksp
+ksp "com.bennyhuo.tieguanyin:compiler:$latest_version"
 ```
-如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
+
+当然版本：2.0.0-SNAPSHOT
+
+注意，kapt 和 ksp 选一个即可；如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
 
 最后在 `Application` 的 `onCreate` 当中调用：
 
@@ -256,12 +286,6 @@ override fun onNewIntent(intent: Intent?) {
 
 我们也提供了参数 `updateIntent`，如果你不希望在注入数据的时候同时也调用 `setIntent(intent)` 来更新 `activity` 的 `intent`，请将它置为 `false`。
 
-## 项目状态
-
-* 当前最新版本：![Bintray](https://img.shields.io/bintray/v/bennyhuo/bennyhuo/tieguanyin-compiler.svg)
-* 当前项目的 compiler 模块已经使用 Kotlin 重构，代码较 1.0 时更紧凑和灵活，部分 Api 也做了一些调整。
-* 为了保证纯 Java 用户的正常使用，runtime 和 annotation 两个模块将一直使用纯 Java 开发。
-	
 ## 其他相关
 
 * **[Apt-Utils](https://github.com/enbandari/Apt-Utils)**：解决了类型在 Java 和 Kotlin 之间的统一性和兼容性问题，提供了注解处理器一些常用的工具方法，尤其适合同时生成 Java 和 Kotlin 代码的注解处理器项目。

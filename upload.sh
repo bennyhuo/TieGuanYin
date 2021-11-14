@@ -5,3 +5,4 @@ clear
 ./gradlew :runtime-androidx:publishAllPublicationsToMavenCentralRepository
 ./gradlew :runtime-kt:publishAllPublicationsToMavenCentralRepository
 ./gradlew :compiler:publishAllPublicationsToMavenCentralRepository
+./gradlew :compiler-ksp:publishAllPublicationsToMavenCentralRepository
