@@ -3,7 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-android-extensions'
 
-    id("com.google.devtools.ksp") version("1.5.31-1.0.0")
+    id("com.google.devtools.ksp").version("$ksp_version")
     id "kotlin-kapt"
 }
 

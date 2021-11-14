@@ -20,18 +20,19 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.squareup.kotlinpoet.ClassName
 import java.util.*
 import kotlin.system.measureNanoTime
+import kotlin.system.measureTimeMillis
 
 class ClassProcessor {
     private val activityClasses = HashMap<KSNode, ActivityClass>()
     private val fragmentClasses = HashMap<KSNode, FragmentClass>()
 
-    fun process(resolver: Resolver){
-        measureNanoTime {
+    fun process(resolver: Resolver) {
+        measureTimeMillis {
             checkAndroidx(resolver)
             parseClass(resolver)
             buildFiles()
         }.let {
-            logger.warn("Cost time: ${it}ns")
+            logger.info("TGY-compiler Cost ${it}ms")
         }
     }
 
@@ -42,31 +43,32 @@ class ClassProcessor {
 
     private fun parseClass(resolver: Resolver) {
         resolver.getSymbolsWithAnnotation(Builder::class.qualifiedName!!)
-                .filterIsInstance<KSClassDeclaration>()
-                .forEach { declaration ->
-                    try {
-                        val type = declaration.asStarProjectedType()
-                        when {
-                            type.isSubTypeOf("android.app.Activity") -> {
-                                activityClasses[declaration] = ActivityClass.create(declaration)
-                            }
-                            type.isSubTypeOf(FRAGMENT_CLASS_NAME) -> {
-                                fragmentClasses[declaration] = FragmentClass.create(declaration)
-                            }
-                            else -> {
-                                logger.error("Unsupported type: %s", declaration)
-                            }
+            .filterIsInstance<KSClassDeclaration>()
+            .forEach { declaration ->
+                try {
+                    val type = declaration.asStarProjectedType()
+                    when {
+                        type.isSubTypeOf("android.app.Activity") -> {
+                            activityClasses[declaration] = ActivityClass.create(declaration)
                         }
-                    } catch (e: Exception) {
-                        logger.error(e.toString(), declaration)
-                        throw e
+                        type.isSubTypeOf(FRAGMENT_CLASS_NAME) -> {
+                            fragmentClasses[declaration] = FragmentClass.create(declaration)
+                        }
+                        else -> {
+                            logger.error("Unsupported type: %s", declaration)
+                        }
                     }
+                } catch (e: Exception) {
+                    logger.error(e.toString(), declaration)
+                    throw e
                 }
+            }
     }
 
     private fun checkAndroidx(resolver: Resolver) {
         val androidxVisibleForTesting = ClassName("androidx.annotation", "VisibleForTesting")
         useAndroidx = resolver.getClassDeclarationByName(
-            androidxVisibleForTesting.reflectionName()) != null
+            androidxVisibleForTesting.reflectionName()
+        ) != null
     }
 }

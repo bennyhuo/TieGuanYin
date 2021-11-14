@@ -9,9 +9,8 @@ dependencies {
 
     implementation 'com.squareup:kotlinpoet:1.10.0'
     implementation 'com.squareup:kotlinpoet-ksp:1.10.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    implementation("com.google.devtools.ksp:symbol-processing-api:1.5.31-1.0.0")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation("com.google.devtools.ksp:symbol-processing-api:$ksp_version")
 }
 
 sourceCompatibility = "1.8"
