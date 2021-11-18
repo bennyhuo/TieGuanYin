@@ -246,7 +246,7 @@ dependencies {
     // for kapt
     kapt "com.bennyhuo.tieguanyin:compiler:$latest_version"
     // for ksp
-    ksp "com.bennyhuo.tieguanyin:compiler:$latest_version"
+    ksp "com.bennyhuo.tieguanyin:compiler-ksp:$latest_version"
 }
 ```
 
