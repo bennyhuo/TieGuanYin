@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bennyhuo.tieguanyin.annotations.PendingTransition;
+import com.bennyhuo.tieguanyin.runtime.ActivityBuilderCallback;
 import com.bennyhuo.tieguanyin.runtime.result.ListenerEnvironment;
 import com.bennyhuo.tieguanyin.runtime.result.ResultFragment;
 import com.bennyhuo.tieguanyin.runtime.utils.Logger;
@@ -32,6 +33,7 @@ public class ActivityBuilder {
     public final static ActivityBuilder INSTANCE = new ActivityBuilder();
     private Application application;
     private WeakReference<Activity> currentActivityRef;
+    private ActivityBuilderCallback builderCallback;
 
     private ArrayList<ListenerEnvironment> listenerEnvironments = new ArrayList<>();
 
@@ -79,6 +81,10 @@ public class ActivityBuilder {
         if(this.application != null) return;
         this.application = (Application) context.getApplicationContext();
         this.application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
+    }
+
+    public void setBuilderCallback(ActivityBuilderCallback builderCallback) {
+        this.builderCallback = builderCallback;
     }
 
     private void performInject(Activity activity, Bundle savedInstanceState){
@@ -132,6 +138,9 @@ public class ActivityBuilder {
     }
 
     public void startActivityForResult(Context context, Intent intent, Bundle options, int enterAnim, int exitAnim, OnActivityResultListener onActivityResultListener) {
+        if (builderCallback != null) {
+            builderCallback.beforeStartActivity(context, intent);
+        }
         if(context instanceof Activity){
             Activity activity = (Activity)context;
             if(onActivityResultListener == null){
@@ -163,6 +172,9 @@ public class ActivityBuilder {
     }
 
     public void startActivity(Context context, Intent intent, Bundle options, int enterAnim, int exitAnim){
+        if (builderCallback != null) {
+            builderCallback.beforeStartActivity(context, intent);
+        }
         if(context instanceof Activity) {
             Activity activity = (Activity) context;
             ActivityCompat.startActivity(activity, intent, options);
