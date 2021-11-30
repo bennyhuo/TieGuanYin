@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         title = this.javaClass.simpleName
 
         openJavaActivity.setOnClickListener {
-            JavaActivityBuilder.builder(1)
+            JavaActivityBuilder.builder(1, 2)
                     .isJava(true)
                     .start(this){
                         hello, javaMethod, kotlin ->
