@@ -3,7 +3,6 @@ package com.bennyhuo.tieguanyin.runtime.result;
 import android.app.Activity;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.SupportFragmentUtils;
-import android.util.Log;
 import android.view.View;
 
 import com.bennyhuo.tieguanyin.runtime.core.OnActivityResultListener;
@@ -37,7 +36,6 @@ public class ListenerEnvironment {
             Field outerRefField;
 
             while (!cls.isAnonymousClass()){
-                Log.e("listenerEnv", "find probable class: " + cls.toString());
                 // 注意这个其实是 $this 引用，指向外部类实例
                 outerRefField = cls.getDeclaredFields()[0];
                 outerRefField.setAccessible(true);
@@ -51,7 +49,6 @@ public class ListenerEnvironment {
                 Class enclosingClass = cls.getEnclosingClass();
                 Object enclosingObj = null;
                 boolean hasRefOfEnclosingClass = false;
-                Log.d("listenerEnv", cls.toString());
                 for (Field field : cls.getDeclaredFields()) {
                     field.setAccessible(true);
                     if(View.class.isAssignableFrom(field.getType())){

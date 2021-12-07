@@ -1,12 +1,7 @@
 package com.bennyhuo.tieguanyin.runtime.result;
 
 import android.app.Activity;
-import android.util.Log;
 import android.view.View;
-
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.SupportFragmentUtils;
 
 import com.bennyhuo.tieguanyin.runtime.core.OnActivityResultListener;
 import com.bennyhuo.tieguanyin.runtime.result.fields.ActivityField;
@@ -16,6 +11,10 @@ import com.bennyhuo.tieguanyin.runtime.utils.Logger;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.SupportFragmentUtils;
 
 /**
  * Created by benny on 2/6/18.
@@ -39,7 +38,6 @@ public class ListenerEnvironment {
             Field outerRefField;
 
             while (!cls.isAnonymousClass()){
-                Log.e("listenerEnv", "find probable class: " + cls.toString());
                 // 注意这个其实是 $this 引用，指向外部类实例
                 outerRefField = cls.getDeclaredFields()[0];
                 outerRefField.setAccessible(true);
@@ -53,7 +51,6 @@ public class ListenerEnvironment {
                 Class enclosingClass = cls.getEnclosingClass();
                 Object enclosingObj = null;
                 boolean hasRefOfEnclosingClass = false;
-                Log.d("listenerEnv", cls.toString());
                 for (Field field : cls.getDeclaredFields()) {
                     field.setAccessible(true);
                     if(View.class.isAssignableFrom(field.getType())){

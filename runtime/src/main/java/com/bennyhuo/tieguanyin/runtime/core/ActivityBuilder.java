@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -127,7 +126,7 @@ public class ActivityBuilder {
         for (ListenerEnvironment listenerEnvironment : listenerEnvironments) {
             if(listenerEnvironment.onActivityResultListener.hashCode() == hashCode) {
                 if(resultFragment.getActivity() == null){
-                    Log.e("listenerEnv", "activity == null");
+                    Logger.error("findProbableOnResultListener: activity == null");
                 } else {
                     listenerEnvironment.update(resultFragment);
                 }

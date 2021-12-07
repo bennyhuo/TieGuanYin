@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -128,7 +127,7 @@ public class ActivityBuilder {
         for (ListenerEnvironment listenerEnvironment : listenerEnvironments) {
             if(listenerEnvironment.onActivityResultListener.hashCode() == hashCode) {
                 if(resultFragment.getActivity() == null){
-                    Log.e("listenerEnv", "activity == null");
+                    Logger.error("findProbableOnResultListener: activity == null");
                 } else {
                     listenerEnvironment.update(resultFragment);
                 }
