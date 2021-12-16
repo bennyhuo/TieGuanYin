@@ -24,6 +24,12 @@
 
 -keep @com.bennyhuo.tieguanyin.annotations.Generated public class ** {
     public static void inject(android.app.Activity, android.os.Bundle);
+    public static void saveState(android.app.Activity, android.os.Bundle);
+}
+
+-keep @com.bennyhuo.tieguanyin.annotations.Generated public class ** {
+    public static void inject(androidx.fragment.app.Fragment, android.os.Bundle);
+    public static void saveState(androidx.fragment.app.Fragment, android.os.Bundle);
 }
 
 -keep public class androidx.fragment.app.Fragment {
