@@ -11,21 +11,22 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.CLASS)
 public @interface Optional {
+    @Deprecated
     String stringValue() default "";
-
+    @Deprecated
     char charValue() default '0';
-
+    @Deprecated
     byte byteValue() default 0;
-
+    @Deprecated
     short shortValue() default 0;
-
+    @Deprecated
     int intValue() default 0;
-
+    @Deprecated
     long longValue() default 0;
-
+    @Deprecated
     float floatValue() default 0f;
-
+    @Deprecated
     double doubleValue() default 0.0;
-
+    @Deprecated
     boolean booleanValue() default false;
 }

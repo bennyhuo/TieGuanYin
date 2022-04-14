@@ -3,6 +3,7 @@ package com.bennyhuo.tieguanyin.compiler.ksp.basic.entity
 import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.compiler.ksp.core.KspContext
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.Modifier
 
 /**
  * Created by benny on 1/31/18.
@@ -10,24 +11,52 @@ import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 
 class OptionalField(declaration: KSPropertyDeclaration, optional: Optional) : Field(declaration) {
 
-    var defaultValue: Any
+    var defaultValue: Any?
         private set
 
     override val prefix = "OPTIONAL_"
 
     init {
         val builtIns = KspContext.builtIns
-        defaultValue = when (declaration.type.resolve()) {
-            builtIns.booleanType -> optional.booleanValue
-            builtIns.charType -> "'${optional.charValue}'"
-            builtIns.byteType -> "${optional.byteValue}.toByte()"
-            builtIns.shortType -> "${optional.shortValue}.toShort()"
-            builtIns.intType -> optional.intValue
-            builtIns.longType -> "${optional.longValue}L"
-            builtIns.floatType -> "${optional.floatValue}f"
-            builtIns.doubleType -> optional.doubleValue
-            builtIns.stringType -> """"${optional.stringValue}""""
-            else -> "null"
+        defaultValue = when (val ksType = declaration.type.resolve()) {
+            builtIns.booleanType -> returnIfNotEquals(optional.booleanValue, false) { true }
+            builtIns.charType -> returnIfNotEquals(optional.charValue.code, 0) {
+                "'${optional.charValue}'"
+            }
+            builtIns.byteType -> returnIfNotEquals(optional.byteValue, 0) {
+                "${optional.byteValue}.toByte()"
+            }
+            builtIns.shortType -> returnIfNotEquals(optional.shortValue, 0) {
+                "${optional.shortValue}.toShort()"
+            }
+            builtIns.intType -> returnIfNotEquals(optional.intValue, 0) {
+                optional.intValue
+            }
+            builtIns.longType -> returnIfNotEquals(optional.longValue, 0L) {
+                "${optional.longValue}L"
+            }
+            builtIns.floatType -> returnIfNotEquals(optional.floatValue, 0f) {
+                "${optional.floatValue}f"
+            }
+            builtIns.doubleType -> returnIfNotEquals(optional.doubleValue, 0.0) {
+                optional.doubleValue
+            }
+            builtIns.stringType -> {
+                val defaultStringValue = returnIfNotEquals(
+                    optional.stringValue.replace(" ", "·"), ""
+                ) {
+                    """"${optional.stringValue.replace(" ", "·")}""""
+                }
+
+                if (Modifier.LATEINIT in declaration.modifiers) {
+                    defaultStringValue ?: "\"\""
+                } else {
+                    defaultStringValue
+                }
+            }
+            else -> {
+                "null"
+            }
         }
     }
 
@@ -40,5 +69,12 @@ class OptionalField(declaration: KSPropertyDeclaration, optional: Optional) : Fi
             //如果与 RequiredField 比较，Optional 永远排在后面
             1
         }
+    }
+
+    private fun returnIfNotEquals(value: Any, expect: Any, expression: () -> Any): Any? {
+        if (value != expect) {
+            return expression()
+        }
+        return null
     }
 }
