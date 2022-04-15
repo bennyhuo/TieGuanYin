@@ -39,7 +39,7 @@ class FieldBuilder(private val basicClass: BasicClass) {
                 ).mutable(true).initializer("null").build()
             )
             //fillIntent
-            fillIntentMethodBuilder.addStatement("intent.putExtra(%S, %L)", field.name, field.name)
+            fillIntentMethodBuilder.addStatement("intent.putExtra(%S, %L)", field.key, field.name)
             //constructor
             createBuilderMethodBuilder.addParameter(field.name, field.asTypeName())
                 .addStatement("builder.%L = %L", field.name, field.name)
@@ -63,7 +63,7 @@ class FieldBuilder(private val basicClass: BasicClass) {
                     .build()
             )
             //fillIntent
-            fillIntentMethodBuilder.addStatement("intent.putExtra(%S, %L)", field.name, field.name)
+            fillIntentMethodBuilder.addStatement("intent.putExtra(%S, %L)", field.key, field.name)
         }
 
         companionTypeBuilder.addFunction(

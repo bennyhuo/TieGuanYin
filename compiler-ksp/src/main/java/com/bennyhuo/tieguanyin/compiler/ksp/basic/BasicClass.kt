@@ -60,7 +60,7 @@ abstract class BasicClass(val declaration: KSClassDeclaration, builder: Builder)
                 if (optional == null) {
                     val required = it.getFirstAnnotationByTypeOrNull(Required::class)
                     if (required != null) {
-                        addField(Field(it))
+                        addField(Field(required.key, it))
                     }
                 } else {
                     addField(OptionalField(it, optional))

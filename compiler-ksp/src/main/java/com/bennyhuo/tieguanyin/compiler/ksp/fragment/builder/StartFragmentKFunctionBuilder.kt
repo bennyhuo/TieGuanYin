@@ -45,13 +45,14 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
 
         for (field in fragmentClass.fields) {
             val name = field.name
+            val key = field.key
             val className = field.asKotlinTypeName()
             if (field is OptionalField) {
                 funBuilderOfContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build())
             } else {
                 funBuilderOfContext.addParameter(name, className)
             }
-            funBuilderOfContext.addStatement("intent.putExtra(%S, %L)", name, name)
+            funBuilderOfContext.addStatement("intent.putExtra(%S, %L)", key, name)
         }
 
         funBuilderOfContext.addParameter(ParameterSpec.builder("tag", STRING.kotlin.copy(nullable = true)).defaultValue("null").build())

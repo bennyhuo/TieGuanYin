@@ -29,4 +29,6 @@ public @interface Optional {
     double doubleValue() default 0.0;
     @Deprecated
     boolean booleanValue() default false;
+
+    String key() default "";
 }

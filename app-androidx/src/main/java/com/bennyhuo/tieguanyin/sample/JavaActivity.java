@@ -32,7 +32,7 @@ public class JavaActivity extends AbsActivity {
     @Required
     int num;
 
-    @Optional
+    @Optional(key = "is_java")
     boolean isJava;
 
     @Override

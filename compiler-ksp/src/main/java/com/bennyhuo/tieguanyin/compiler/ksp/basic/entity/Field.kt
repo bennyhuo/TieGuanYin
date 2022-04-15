@@ -8,8 +8,14 @@ import com.squareup.kotlinpoet.ksp.toTypeName
  * Created by benny on 1/29/18.
  */
 
-open class Field(private val declaration: KSPropertyDeclaration) : Comparable<Field> {
+open class Field(
+    key: String,
+    private val declaration: KSPropertyDeclaration
+) : Comparable<Field> {
+
     val name = declaration.simpleName.asString()
+
+    val key = key.takeIf { it.isNotBlank() } ?: name
 
     open val prefix = "REQUIRED_"
 

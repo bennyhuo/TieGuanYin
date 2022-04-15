@@ -28,6 +28,7 @@ abstract class BasicInjectMethodBuilder(val basicClass: BasicClass) {
 
         for (field in basicClass.fields) {
             val name = field.name
+            val key = field.key
             when (field) {
                 is OptionalField -> {
                     val defaultValue = field.defaultValue
@@ -35,7 +36,7 @@ abstract class BasicInjectMethodBuilder(val basicClass: BasicClass) {
                         injectMethodBuilder
                             .addStatement(
                                 "val %N: %T = %T.get(savedInstanceState, %S)",
-                                name, field.asTypeName(), RUNTIME_UTILS.kotlin, name,
+                                name, field.asTypeName(), RUNTIME_UTILS.kotlin, key,
                             )
                             .beginControlFlow("if (%N != null)", name)
                             .addStatement("instance.%N = %N", name, name)
@@ -45,7 +46,7 @@ abstract class BasicInjectMethodBuilder(val basicClass: BasicClass) {
                             "instance.%N = %T.get(savedInstanceState, %S, %L)",
                             name,
                             RUNTIME_UTILS.kotlin,
-                            name,
+                            key,
                             defaultValue
                         )
                     }
@@ -55,7 +56,7 @@ abstract class BasicInjectMethodBuilder(val basicClass: BasicClass) {
                         "instance.%L = %T.get(savedInstanceState, %S)",
                         name,
                         RUNTIME_UTILS.kotlin,
-                        name
+                        key
                     )
                 }
             }

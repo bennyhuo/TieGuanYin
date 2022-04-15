@@ -13,7 +13,7 @@ abstract class BasicConstantBuilder(private val basicClass: BasicClass) {
                 PropertySpec.builder(
                     field.prefix + field.name.camelToUnderline(),
                     String::class, KModifier.CONST
-                ).initializer("%S", field.name).build()
+                ).initializer("%S", field.key).build()
             )
         }
     }

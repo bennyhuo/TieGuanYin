@@ -53,7 +53,7 @@ class StartKFunctionBuilder(private val activityClass: ActivityClass) {
                 ParameterSpec.builder(requiredField.name, requiredField.asKotlinTypeName())
                     .also { if (requiredField is OptionalField) it.defaultValue("null") }
                     .build())
-                .addStatement("intent.putExtra(%S, %L)", requiredField.name, requiredField.name)
+                .addStatement("intent.putExtra(%S, %L)", requiredField.key, requiredField.name)
         }
 
         val sharedElements = activityClass.sharedElements

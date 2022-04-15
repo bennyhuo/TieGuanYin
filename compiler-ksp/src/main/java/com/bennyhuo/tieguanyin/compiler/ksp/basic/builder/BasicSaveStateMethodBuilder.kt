@@ -27,8 +27,9 @@ abstract class BasicSaveStateMethodBuilder(val basicClass: BasicClass) {
         methodBuilder.addStatement("val intent = %T()", INTENT.kotlin)
 
         for (requiredField in basicClass.fields) {
-            val name = requiredField.name
-            methodBuilder.addStatement("intent.putExtra(%S, instance.%L)", name, name)
+            methodBuilder.addStatement("intent.putExtra(%S, instance.%L)",
+                requiredField.key, requiredField.name
+            )
         }
 
         methodBuilder.addStatement("outState.putAll(intent.getExtras())").endControlFlow()

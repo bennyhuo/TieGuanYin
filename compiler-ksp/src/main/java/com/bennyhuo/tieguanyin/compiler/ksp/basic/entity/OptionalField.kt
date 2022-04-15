@@ -9,7 +9,9 @@ import com.google.devtools.ksp.symbol.Modifier
  * Created by benny on 1/31/18.
  */
 
-class OptionalField(declaration: KSPropertyDeclaration, optional: Optional) : Field(declaration) {
+class OptionalField(
+    declaration: KSPropertyDeclaration, optional: Optional
+) : Field(optional.key, declaration) {
 
     var defaultValue: Any?
         private set
