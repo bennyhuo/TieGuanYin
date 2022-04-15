@@ -6,6 +6,7 @@ import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.FinishMethodBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.InjectMethodBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.NewIntentKFunctionBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.NewIntentMethodBuilder
+import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.OnIntentKFunctionBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.SaveStateMethodBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.StartKFunctionBuilder
 import com.bennyhuo.tieguanyin.compiler.ksp.activity.builder.StartMethodBuilder
@@ -25,6 +26,7 @@ class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClas
         SaveStateMethodBuilder(activityClass).build(companionObject)
         NewIntentMethodBuilder(activityClass).build(companionObject)
         FinishMethodBuilder(activityClass).build(companionObject)
+        OnIntentKFunctionBuilder(activityClass).build(typeBuilder)
 
         typeBuilder.addType(companionObject.build())
     }
