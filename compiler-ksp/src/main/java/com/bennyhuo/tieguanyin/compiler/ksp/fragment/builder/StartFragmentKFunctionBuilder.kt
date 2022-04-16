@@ -1,16 +1,9 @@
 package com.bennyhuo.tieguanyin.compiler.ksp.fragment.builder
 
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.entity.OptionalField
-import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.ACTIVITY_BUILDER
-import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.ARRAY_LIST
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.FRAGMENT
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.FRAGMENT_ACTIVITY
-import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.FRAGMENT_BUILDER
-import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.INTENT
-import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.PAIR
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.STRING
-import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.VIEW
-import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.VIEW_COMPAT
 import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.VIEW_GROUP
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.FragmentClass
 import com.bennyhuo.tieguanyin.compiler.ksp.fragment.builder.Op.ADD
@@ -29,55 +22,56 @@ import com.squareup.kotlinpoet.ParameterSpec
 
 abstract class StartFragmentKFunctionBuilder(private val fragmentClass: FragmentClass) {
 
-    abstract val name: String
+    abstract val prefix: String
     abstract val op: Op
 
+    val name: String by lazy {
+        "${prefix}${fragmentClass.simpleName}"
+    }
+
     open fun build(fileBuilder: FileSpec.Builder) {
-        val isReplace = op == REPLACE
         val returnType = fragmentClass.declaration.toKotlinTypeName().copy(nullable = true)
-        val funBuilderOfContext = FunSpec.builder(name)
+        val funBuilderOfActivity = FunSpec.builder(name)
                 .receiver(FRAGMENT_ACTIVITY.kotlin)
                 .addModifiers(KModifier.PUBLIC)
                 .returns(returnType)
                 .addParameter("containerId", INT)
-                .addStatement("%T.INSTANCE.init(this)", ACTIVITY_BUILDER.kotlin)
-                .addStatement("val intent = %T()", INTENT.kotlin)
 
-        for (field in fragmentClass.fields) {
-            val name = field.name
-            val key = field.key
-            val className = field.asKotlinTypeName()
-            if (field is OptionalField) {
-                funBuilderOfContext.addParameter(ParameterSpec.builder(name, className).defaultValue("null").build())
-            } else {
-                funBuilderOfContext.addParameter(name, className)
-            }
-            funBuilderOfContext.addStatement("intent.putExtra(%S, %L)", key, name)
+        val groupedFields = fragmentClass.fields.groupBy { it is OptionalField }
+        val requiredFields = groupedFields[false] ?: emptyList()
+        val optionalFields = groupedFields[true] ?: emptyList()
+
+        fragmentClass.fields.forEach { requiredField ->
+            funBuilderOfActivity.addParameter(
+                ParameterSpec.builder(requiredField.name, requiredField.asKotlinTypeName())
+                    .also {
+                        if (requiredField is OptionalField) it.defaultValue("null")
+                    }.build()
+            )
         }
 
-        funBuilderOfContext.addParameter(ParameterSpec.builder("tag", STRING.kotlin.copy(nullable = true)).defaultValue("null").build())
+        funBuilderOfActivity.addStatement(
+            "val builder = %L.builder(%L)",
+            fragmentClass.builderClassName,
+            requiredFields.joinToString { it.name }
+        )
 
-        val sharedElements = fragmentClass.sharedElements
-        if (sharedElements.isEmpty()) {
-            funBuilderOfContext.addStatement("return %T.showFragment(this, %L, containerId, tag, intent.getExtras(), %T::class.java, null)", FRAGMENT_BUILDER.kotlin, isReplace, fragmentClass.declaration.toKotlinTypeName())
-        } else {
-            funBuilderOfContext.addStatement("val sharedElements = %T()", ARRAY_LIST[PAIR[STRING, STRING]].kotlin)
-                    .addStatement("val container: %T = findViewById(containerId)", VIEW.kotlin)
-            for (sharedElement in sharedElements) {
-                if (sharedElement.sourceName != null) {
-                    funBuilderOfContext.addStatement("sharedElements.add(Pair(%S, %S))", sharedElement.sourceName, sharedElement.targetName)
-                } else {
-                    funBuilderOfContext.addStatement("sharedElements.add(Pair(%T.getTransitionName(container.findViewById(%L)), %S))", VIEW_COMPAT.kotlin, sharedElement.sourceId, sharedElement.targetName)
-                }
-            }
-            funBuilderOfContext.addStatement("return %T.showFragment(this, %L, containerId, tag, intent.getExtras(), %T::class.java, sharedElements)", FRAGMENT_BUILDER.kotlin, isReplace, fragmentClass.declaration.toKotlinTypeName())
+        optionalFields.forEach {
+            funBuilderOfActivity.addStatement("builder.%N(%N)", it.name, it.name)
         }
 
+        funBuilderOfActivity.addParameter(
+            ParameterSpec.builder("tag", STRING.kotlin.copy(nullable = true))
+                .defaultValue("null")
+                .build()
+        )
 
-        val parameterSpecs = funBuilderOfContext.parameters.let { it.subList(1, it.size) }
+        funBuilderOfActivity.addStatement("return builder.%L(this, containerId, tag)", prefix)
+
+        val parameterSpecs = funBuilderOfActivity.parameters.let { it.subList(1, it.size) }
         val parameterLiteral = parameterSpecs.joinToString { it.name }
 
-        fileBuilder.addFunction(funBuilderOfContext.build())
+        fileBuilder.addFunction(funBuilderOfActivity.build())
 
         fileBuilder.addFunction(FunSpec.builder(name)
                 .receiver(VIEW_GROUP.kotlin)
@@ -112,11 +106,11 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
 }
 
 class ReplaceKFunctionBuilder(fragmentClass: FragmentClass): StartFragmentKFunctionBuilder(fragmentClass) {
-    override val name: String = "replace" + fragmentClass.simpleName
+    override val prefix: String = "replace"
     override val op: Op = REPLACE
 }
 
 class AddKFunctionBuilder(fragmentClass: FragmentClass): StartFragmentKFunctionBuilder(fragmentClass) {
-    override val name: String = "add" + fragmentClass.simpleName
+    override val prefix: String = "add"
     override val op: Op = ADD
 }

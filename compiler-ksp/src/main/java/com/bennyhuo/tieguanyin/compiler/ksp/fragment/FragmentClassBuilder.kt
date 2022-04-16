@@ -14,22 +14,21 @@ import com.squareup.kotlinpoet.TypeSpec
 
 class FragmentClassBuilder(private val fragmentClass: FragmentClass): BasicClassBuilder(fragmentClass) {
 
-    override fun buildCommon(typeBuilder: TypeSpec.Builder) {
+    override fun buildBuilderClass(typeBuilder: TypeSpec.Builder) {
         val companionObject = TypeSpec.companionObjectBuilder()
         ConstantBuilder(fragmentClass).build(companionObject)
         FieldBuilder(fragmentClass).build(typeBuilder, companionObject)
         InjectMethodBuilder(fragmentClass).build(companionObject)
         SaveStateMethodBuilder(fragmentClass).build(companionObject)
+
+        ReplaceMethodBuilder(fragmentClass).build(typeBuilder)
+        AddMethodBuilder(fragmentClass).build(typeBuilder)
+
         typeBuilder.addType(companionObject.build())
     }
 
-    override fun buildKotlinBuilders(fileBuilder: FileSpec.Builder) {
+    override fun buildKotlinExtensions(fileBuilder: FileSpec.Builder) {
         ReplaceKFunctionBuilder(fragmentClass).build(fileBuilder)
         AddKFunctionBuilder(fragmentClass).build(fileBuilder)
-    }
-
-    override fun buildJavaBuilders(typeBuilder: TypeSpec.Builder) {
-        ReplaceMethodBuilder(fragmentClass).build(typeBuilder)
-        AddMethodBuilder(fragmentClass).build(typeBuilder)
     }
 }

@@ -17,7 +17,7 @@ import com.squareup.kotlinpoet.TypeSpec
 
 class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClassBuilder(activityClass) {
 
-    override fun buildCommon(typeBuilder: TypeSpec.Builder) {
+    override fun buildBuilderClass(typeBuilder: TypeSpec.Builder) {
         val companionObject = TypeSpec.companionObjectBuilder()
         ConstantBuilder(activityClass).build(companionObject)
 
@@ -27,19 +27,15 @@ class ActivityClassBuilder(private val activityClass: ActivityClass) : BasicClas
         NewIntentMethodBuilder(activityClass).build(companionObject)
         FinishMethodBuilder(activityClass).build(companionObject)
         OnIntentKFunctionBuilder(activityClass).build(typeBuilder)
+        StartMethodBuilder(activityClass, METHOD_NAME).build(typeBuilder)
 
         typeBuilder.addType(companionObject.build())
     }
 
-    override fun buildKotlinBuilders(fileBuilder: FileSpec.Builder) {
+    override fun buildKotlinExtensions(fileBuilder: FileSpec.Builder) {
         StartKFunctionBuilder(activityClass).build(fileBuilder)
         FinishKFunctionBuilder(activityClass).build(fileBuilder)
         NewIntentKFunctionBuilder(activityClass).build(fileBuilder)
-    }
-
-    override fun buildJavaBuilders(typeBuilder: TypeSpec.Builder) {
-        StartMethodBuilder(activityClass, METHOD_NAME).build(typeBuilder)
-
     }
 
     companion object {

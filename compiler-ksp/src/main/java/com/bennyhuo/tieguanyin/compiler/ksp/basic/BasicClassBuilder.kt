@@ -26,10 +26,8 @@ abstract class BasicClassBuilder(private val basicClass: BasicClass) {
                 .addModifiers(KModifier.PUBLIC, KModifier.FINAL)
                 .addAnnotation(GENERATED_ANNOTATION.kotlin as ClassName)
 
-            buildCommon(typeBuilder)
-            buildJavaBuilders(typeBuilder)
-
-            buildKotlinBuilders(fileSpecBuilder)
+            buildBuilderClass(typeBuilder)
+            buildKotlinExtensions(fileSpecBuilder)
 
             fileSpecBuilder.addType(typeBuilder.build())
             writeKotlinToFile(fileSpecBuilder.build())
@@ -39,8 +37,7 @@ abstract class BasicClassBuilder(private val basicClass: BasicClass) {
         }
     }
 
-    abstract fun buildCommon(typeBuilder: TypeSpec.Builder)
-    abstract fun buildKotlinBuilders(fileBuilder: FileSpec.Builder)
-    abstract fun buildJavaBuilders(typeBuilder: TypeSpec.Builder)
+    abstract fun buildBuilderClass(typeBuilder: TypeSpec.Builder)
+    abstract fun buildKotlinExtensions(fileBuilder: FileSpec.Builder)
 
 }
