@@ -1,5 +1,6 @@
 package com.bennyhuo.tieguanyin.sample
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -8,18 +9,26 @@ import android.transition.ChangeTransform
 import android.transition.TransitionSet
 import android.util.Log
 import com.bennyhuo.tieguanyin.annotations.Builder
+import com.bennyhuo.tieguanyin.annotations.Optional
 import com.bennyhuo.tieguanyin.annotations.Required
 import com.bennyhuo.tieguanyin.sample.inner.startInnerClass
 import com.bennyhuo.tieguanyin.utils.toast
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.coroutines.suspendCoroutine
+
+suspend fun JavaActivityBuilder.start(context: Context) = suspendCoroutine<Unit> {
+    start(context) { hello, javaMethod, kotlin ->
+
+    }
+}
 
 @Builder
 class MainActivity : AppCompatActivity() {
 
-    @Required
+    @Optional
     var num: Int = 0
 
-    @Required
+    @Optional
     var string = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
