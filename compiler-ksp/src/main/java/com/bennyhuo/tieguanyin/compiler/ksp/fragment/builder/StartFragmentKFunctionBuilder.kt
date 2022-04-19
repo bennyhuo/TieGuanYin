@@ -41,11 +41,12 @@ abstract class StartFragmentKFunctionBuilder(private val fragmentClass: Fragment
         val requiredFields = groupedFields[false] ?: emptyList()
         val optionalFields = groupedFields[true] ?: emptyList()
 
-        fragmentClass.fields.forEach { requiredField ->
+        fragmentClass.fields.forEach { field ->
             funBuilderOfActivity.addParameter(
-                ParameterSpec.builder(requiredField.name, requiredField.asKotlinTypeName())
+                ParameterSpec.builder(field.name, field.asKotlinTypeName())
+                    .addKdoc(field.docString)
                     .also {
-                        if (requiredField is OptionalField) it.defaultValue("null")
+                        if (field is OptionalField) it.defaultValue("null")
                     }.build()
             )
         }

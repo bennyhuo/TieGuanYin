@@ -30,11 +30,12 @@ class StartKFunctionBuilder(private val activityClass: ActivityClass) {
         val requiredFields = groupedFields[false] ?: emptyList()
         val optionalFields = groupedFields[true] ?: emptyList()
 
-        activityClass.fields.forEach { requiredField ->
+        activityClass.fields.forEach { field ->
             functionBuilderOfContext.addParameter(
-                ParameterSpec.builder(requiredField.name, requiredField.asKotlinTypeName())
+                ParameterSpec.builder(field.name, field.asKotlinTypeName())
+                    .addKdoc(field.docString)
                     .also {
-                        if (requiredField is OptionalField) it.defaultValue("null")
+                        if (field is OptionalField) it.defaultValue("null")
                     }.build()
             )
         }

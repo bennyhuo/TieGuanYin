@@ -6,6 +6,7 @@ import com.bennyhuo.tieguanyin.compiler.ksp.basic.types.INTENT
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 
@@ -41,8 +42,11 @@ class FieldBuilder(private val basicClass: BasicClass) {
             //fillIntent
             fillIntentMethodBuilder.addStatement("intent.putExtra(%S, %L)", field.key, field.name)
             //constructor
-            createBuilderMethodBuilder.addParameter(field.name, field.asTypeName())
-                .addStatement("builder.%L = %L", field.name, field.name)
+            createBuilderMethodBuilder.addParameter(
+                ParameterSpec.builder(field.name, field.asTypeName())
+                    .addKdoc(field.docString)
+                    .build()
+            ).addStatement("builder.%L = %L", field.name, field.name)
         }
 
         optionalFields.forEach { field ->
@@ -56,7 +60,11 @@ class FieldBuilder(private val basicClass: BasicClass) {
             //setter
             typeBuilder.addFunction(
                 FunSpec.builder(field.name)
-                    .addParameter(field.name, field.asTypeName())
+                    .addParameter(
+                        ParameterSpec.builder(field.name, field.asTypeName())
+                            .addKdoc(field.docString)
+                            .build()
+                    )
                     .addStatement("this.${field.name} = ${field.name}")
                     .addStatement("return this")
                     .returns(builderClassTypeName)

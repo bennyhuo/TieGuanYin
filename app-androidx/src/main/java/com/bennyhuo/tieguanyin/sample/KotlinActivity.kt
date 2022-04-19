@@ -20,9 +20,15 @@ import kotlinx.android.synthetic.main.activity_main.*
 )
 class KotlinActivity : AppCompatActivity() {
 
+    /**
+     * This is a number.
+     */
     @Required
     var num: Int = 0
 
+    /**
+     * This is a boolean.
+     */
     @Optional
     var java: Boolean = false
 
