@@ -250,7 +250,7 @@ dependencies {
 }
 ```
 
-当前版本：2.0.1
+当前版本：kapt 2.0.1/ksp 2.1.0
 
 注意，kapt 和 ksp 选一个即可；如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
 
@@ -287,14 +287,20 @@ override fun onNewIntent(intent: Intent?) {
 
 我们也提供了参数 `updateIntent`，如果你不希望在注入数据的时候同时也调用 `setIntent(intent)` 来更新 `activity` 的 `intent`，请将它置为 `false`。
 
+## 更新日志
+
+### compiler-ksp & annotations 2.1.0
+
+1. 废弃 Optional 注解当中的默认值字段，数值、字符串的默认值可以直接在声明处指定。
+2. 为生成的代码添加字段文档
+3. 优化生成的函数，统一调用路径
+4. 为 Builder 类型添加 onIntent 回调，方便调用者自定义 intent
+5. 参数和返回值的常量字段名改为全大写
+
 ## 其他相关
 
 * **[Apt-Utils](https://github.com/enbandari/Apt-Utils)**：解决了类型在 Java 和 Kotlin 之间的统一性和兼容性问题，提供了注解处理器一些常用的工具方法，尤其适合同时生成 Java 和 Kotlin 代码的注解处理器项目。
 * **[Apt-Tutorials](https://github.com/enbandari/Apt-Tutorials)**：基于本项目简化后并录制的一套**注解处理器**的教学视频。
-	
-## 为什么叫这个名字？
-	
-因为我比较喜好喝茶，这个框架开发期间主要喝铁观音。相应的，之前有一段时间常喝茉莉花，在公司内部做了一套框架被我命名为 "Jasmine"。
 
 ## License
 
