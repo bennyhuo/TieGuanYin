@@ -1,8 +1,6 @@
 package com.bennyhuo.tieguanyin.runtime.result;
 
 import android.app.Activity;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.SupportFragmentUtils;
 import android.view.View;
 
 import com.bennyhuo.tieguanyin.runtime.core.OnActivityResultListener;
@@ -14,6 +12,10 @@ import com.bennyhuo.tieguanyin.runtime.utils.Logger;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentUtils;
+
 /**
  * Created by benny on 2/6/18.
  */
@@ -21,8 +23,8 @@ import java.util.ArrayList;
 public class ListenerEnvironment {
     public final OnActivityResultListener onActivityResultListener;
     private ActivityField activityField;
-    private ArrayList<FragmentField> supportFragmentFields = new ArrayList<>();
-    private ArrayList<ViewField> viewFields = new ArrayList<>();
+    private final ArrayList<FragmentField> fragmentFields = new ArrayList<>();
+    private final ArrayList<ViewField> viewFields = new ArrayList<>();
 
     public ListenerEnvironment(OnActivityResultListener onActivityResultListener) {
         this.onActivityResultListener = onActivityResultListener;
@@ -54,9 +56,9 @@ public class ListenerEnvironment {
                     if(View.class.isAssignableFrom(field.getType())){
                         int id = ((View)field.get(obj)).getId();
                         viewFields.add(new ViewField(obj, field, id));
-                    } else if(android.support.v4.app.Fragment.class.isAssignableFrom(field.getType())){
-                        String who = SupportFragmentUtils.getWhoFromFragment((android.support.v4.app.Fragment)field.get(obj));
-                        supportFragmentFields.add(new FragmentField(obj, field, who));
+                    } else if(Fragment.class.isAssignableFrom(field.getType())){
+                        String who = FragmentUtils.getWhoFromFragment((Fragment)field.get(obj));
+                        fragmentFields.add(new FragmentField(obj, field, who));
                     } else if(Activity.class.isAssignableFrom(field.getType())){
                         activityField = new ActivityField(obj, field);
                     }
@@ -87,8 +89,8 @@ public class ListenerEnvironment {
         }
         if(resultFragment.getActivity() instanceof FragmentActivity){
             FragmentActivity fragmentActivity = (FragmentActivity) resultFragment.getActivity();
-            for (FragmentField fragmentField : supportFragmentFields) {
-                android.support.v4.app.Fragment fragment = SupportFragmentUtils.findFragmentByWho(fragmentActivity.getSupportFragmentManager(), fragmentField.who);
+            for (FragmentField fragmentField : fragmentFields) {
+                Fragment fragment = FragmentUtils.findFragmentByWho(fragmentActivity.getSupportFragmentManager(), fragmentField.who);
                 Logger.debug("Update, Who: " + fragmentField.who + ", fragment=" + fragment);
                 fragmentField.update(fragment);
             }

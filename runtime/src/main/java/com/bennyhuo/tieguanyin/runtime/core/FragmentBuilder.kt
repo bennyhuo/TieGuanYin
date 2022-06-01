@@ -1,98 +1,66 @@
-package com.bennyhuo.tieguanyin.runtime.core;
+package com.bennyhuo.tieguanyin.runtime.core
 
-import android.app.Activity;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.SupportFragmentUtils;
-import android.support.v4.util.Pair;
-import android.transition.AutoTransition;
-
-import com.bennyhuo.tieguanyin.runtime.utils.Logger;
-
-import java.util.ArrayList;
+import android.app.Activity
+import android.os.Build
+import android.os.Bundle
+import android.transition.AutoTransition
+import androidx.core.util.Pair
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentUtils
+import com.bennyhuo.tieguanyin.runtime.utils.Logger
 
 /**
  * Created by benny on 2/7/18.
  */
+object FragmentBuilder {
+    private val injector = FragmentInjector()
 
-public class FragmentBuilder {
-    public static FragmentBuilder INSTANCE = new FragmentBuilder();
-
-    private FragmentManager.FragmentLifecycleCallbacks callbacks = new FragmentManager.FragmentLifecycleCallbacks() {
-        @Override
-        public void onFragmentCreated(FragmentManager fm, Fragment f, Bundle savedInstanceState) {
-            super.onFragmentCreated(fm, f, savedInstanceState);
-            performInject(f, savedInstanceState);
+    fun onActivityCreated(activity: Activity) {
+        if (activity is FragmentActivity) {
+            activity.supportFragmentManager.registerFragmentLifecycleCallbacks(injector, true)
         }
+    }
 
-        @Override
-        public void onFragmentSaveInstanceState(FragmentManager fm, Fragment f, Bundle outState) {
-            super.onFragmentSaveInstanceState(fm, f, outState);
-            performSaveState(f, outState);
+    fun onActivityDestroyed(activity: Activity) {
+        if (activity is FragmentActivity) {
+            activity.supportFragmentManager.unregisterFragmentLifecycleCallbacks(injector)
         }
-    };
+    }
 
-    private void performInject(Fragment fragment, Bundle savedInstanceState){
+    fun <T : Fragment> showFragment(
+            activity: FragmentActivity,
+            isReplace: Boolean,
+            containerId: Int,
+            tag: String?,
+            args: Bundle?,
+            fragmentCls: Class<T>,
+            sharedElements: ArrayList<Pair<String, String>>?
+    ): T? {
         try {
-            savedInstanceState = savedInstanceState == null ? fragment.getArguments() : savedInstanceState;
-            if(savedInstanceState == null) return;
-            BuilderClassFinder.findBuilderClass(fragment).getDeclaredMethod("inject", Fragment.class, Bundle.class).invoke(null, fragment, savedInstanceState);
-            Logger.debug("inject success: fragment=" + fragment + ", state=" + savedInstanceState);
-        } catch (Exception e) {
-            Logger.warn("inject failed: fragment=" + fragment + ", state=" + savedInstanceState + ", e=" + e);
-        }
-    }
-
-    private void performSaveState(Fragment fragment, Bundle outState){
-        try {
-            BuilderClassFinder.findBuilderClass(fragment).getDeclaredMethod("saveState", Fragment.class, Bundle.class).invoke(null, fragment, outState);
-            Logger.debug("save success: fragment=" + fragment + ", state=" + outState);
-        } catch (Exception e) {
-            Logger.warn("save failed: fragment=" + fragment + ", state=" + outState + ", e=" + e);
-        }
-    }
-
-    void onActivityCreated(Activity activity){
-        if(activity instanceof FragmentActivity){
-            ((FragmentActivity) activity).getSupportFragmentManager().registerFragmentLifecycleCallbacks(callbacks, true);
-        }
-    }
-
-    void onActivityDestroyed(Activity activity){
-        if(activity instanceof FragmentActivity){
-            ((FragmentActivity) activity).getSupportFragmentManager().unregisterFragmentLifecycleCallbacks(callbacks);
-        }
-    }
-
-    public static <T  extends Fragment> T showFragment(FragmentActivity activity, boolean isReplace, int containerId, String tag, Bundle args, Class<T> fragmentCls, ArrayList<Pair<String, String>> sharedElements) {
-        try {
-            Fragment fragment = fragmentCls.newInstance();
-            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
-                fragment.setSharedElementEnterTransition(new AutoTransition());
-            }
-            fragment.setArguments(args);
-            FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
-            if(isReplace){
-                transaction.replace(containerId, fragment, tag);
+            val fragment = fragmentCls.newInstance()
+            fragment.arguments = args
+            val transaction = activity.supportFragmentManager.beginTransaction()
+            if (isReplace) {
+                transaction.replace(containerId, fragment, tag)
             } else {
-                transaction.add(containerId, fragment, tag);
+                transaction.add(containerId, fragment, tag)
             }
-            if(sharedElements != null){
-                for (Pair<String, String> sharedElement : sharedElements) {
-                    if(sharedElement.first != null) {
-                        SupportFragmentUtils.addSharedElement(transaction, sharedElement.first, sharedElement.second);
+            if (!sharedElements.isNullOrEmpty()) {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+                    fragment.sharedElementEnterTransition = AutoTransition()
+                }
+                for (sharedElement in sharedElements) {
+                    if (sharedElement.first != null) {
+                        FragmentUtils.addSharedElement(transaction, sharedElement.first, sharedElement.second)
                     }
                 }
             }
-            transaction.commit();
-            return (T) fragment;
-        } catch (Exception e) {
-            Logger.error(e);
+            transaction.commit()
+            return fragment
+        } catch (e: Exception) {
+            Logger.error(e)
         }
-        return null;
+        return null
     }
 }

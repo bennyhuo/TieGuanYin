@@ -28,10 +28,10 @@
 }
 
 -keep @com.bennyhuo.tieguanyin.annotations.Generated public class ** {
-      public static void inject(android.support.v4.app.Fragment, android.os.Bundle);
-      public static void saveState(android.support.v4.app.Fragment, android.os.Bundle);
+    public static void inject(androidx.fragment.app.Fragment, android.os.Bundle);
+    public static void saveState(androidx.fragment.app.Fragment, android.os.Bundle);
 }
 
--keep public class android.support.v4.app.Fragment {
+-keep public class androidx.fragment.app.Fragment {
     java.lang.String mWho;
 }

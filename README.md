@@ -250,9 +250,7 @@ dependencies {
 }
 ```
 
-当前版本：kapt 2.0.1/ksp 2.1.0
-
-注意，kapt 和 ksp 选一个即可；如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。
+当前版本：kapt 2.0.1/ksp 2.1.0。其中，kapt 和 ksp 选一个即可；如果你不用 Kotlin，那么 kapt 替换成 annotationProcessor。需要注意的是，kapt 的版本我不准备维护了，因此请尽快迁移至 ksp 版本。
 
 最后在 `Application` 的 `onCreate` 当中调用：
 

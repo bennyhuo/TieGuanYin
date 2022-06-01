@@ -12,14 +12,14 @@ public class Logger {
     public static boolean isDebug = false;
 
     public static void debug(Object log){
-        if(isDebug) Log.d(TAG, String.valueOf(log));
+        if (isDebug) Log.d(TAG, String.valueOf(log));
     }
 
     public static void error(Object log){
-        if(isDebug) Log.e(TAG, String.valueOf(log));
+        if (isDebug) Log.e(TAG, String.valueOf(log));
     }
 
     public static void warn(Object log){
-        if(isDebug) Log.w(TAG, String.valueOf(log));
+        if (isDebug) Log.w(TAG, String.valueOf(log));
     }
 }
